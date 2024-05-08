@@ -1,0 +1,6 @@
+.navbar-brand img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Make the profile picture circular */
+    margin-right: 5px; /* Add some spacing between the picture and the text */
+}
