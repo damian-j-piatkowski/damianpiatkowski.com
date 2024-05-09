@@ -1,6 +1,23 @@
 .navbar-brand img {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%; /* Make the profile picture circular */
-    margin-right: 5px; /* Add some spacing between the picture and the text */
+    margin-right: 10px; /* Increase the spacing between the picture and the text */
+    margin-left: 10px; /* Add margin to the left to push the image away from the left edge */
+}
+
+.custom-green-bg {
+    background-color: #D0F0C0; /* Light green */
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px; /* Adjust the margin between navbar items */
+}
+
+.navbar-nav .nav-item:last-child {
+    margin-right: 10; /* Remove margin for the last navbar item */
+}
+
+.navbar-nav {
+    padding-right: 20px; /* Adjust the padding on the right side of navbar items */
 }
