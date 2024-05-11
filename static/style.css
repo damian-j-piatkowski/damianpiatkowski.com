@@ -1,3 +1,12 @@
+/* Define a custom class for Open Sans font */
+.open-sans {
+    font-family: "Open Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400; /* Default weight for Open Sans */
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+}
+
 .navbar-brand img {
     width: 50px;
     height: 50px;
@@ -20,4 +29,48 @@
 
 .navbar-nav {
     padding-right: 20px; /* Adjust the padding on the right side of navbar items */
+}
+
+/* Style for the home hero section */
+.home-hero {
+    background-image: url('/static/images/home_main.jpg'); /* Adjust the path as needed */
+    background-size: cover;
+    background-position: center center; /* Center the background image horizontally and vertically */
+    color: #fff;
+    padding: 100px 0; /* Adjust padding as needed */
+    height: 100vh; /* Make the section take up the full height of the viewport */
+    font-family: 'Montserrat', sans-serif; /* Use Montserrat font */
+}
+
+/* Style for the text within the home hero section */
+.hero-content {
+    max-width: 600px; /* Adjust max-width as needed */
+    margin: 0 auto;
+    text-align: center;
+    opacity: 0; /* Start with opacity 0 */
+    animation: fadeIn 2s forwards; /* Apply fadeIn animation */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0; /* Start opacity */
+        transform: translateY(20px); /* Optional: Start from slightly below */
+    }
+    to {
+        opacity: 1; /* End opacity */
+        transform: translateY(0); /* Optional: Return to original position */
+    }
+}
+
+/* Adjust the font size and line height for the hero-content */
+.hero-content h1 {
+    font-size: 2.5rem; /* Reduce the font size */
+    line-height: 1.2; /* Adjust the line height to bring the text closer */
+}
+
+.hero-content p {
+    font-size: 1.25rem; /* Reduce the font size */
+    line-height: 1.4; /* Adjust the line height */
+    max-width: 600px; /* Limit the maximum width of the paragraph */
+    margin: 0 auto; /* Center the paragraph horizontally */
 }
