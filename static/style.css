@@ -33,6 +33,7 @@
 
 /* Style for the home hero section */
 .home-hero {
+    position: relative; /* Add relative positioning */
     background-image: url('/static/images/home_main.jpg'); /* Adjust the path as needed */
     background-size: cover;
     background-position: center center; /* Center the background image horizontally and vertically */
@@ -44,11 +45,12 @@
 
 /* Style for the text within the home hero section */
 .hero-content {
+    position: relative; /* Add relative positioning */
     max-width: 600px; /* Adjust max-width as needed */
     margin: 0 auto;
     text-align: center;
     opacity: 0; /* Start with opacity 0 */
-    animation: fadeIn 2s forwards; /* Apply fadeIn animation */
+    animation: fadeIn 4s forwards; /* Increase duration to 4 seconds */
 }
 
 @keyframes fadeIn {
@@ -71,6 +73,134 @@
 .hero-content p {
     font-size: 1.25rem; /* Reduce the font size */
     line-height: 1.4; /* Adjust the line height */
-    max-width: 600px; /* Limit the maximum width of the paragraph */
+    max-width: 1000px; /* Increase the maximum width of the paragraph */
     margin: 0 auto; /* Center the paragraph horizontally */
+    overflow: hidden; /* Hide any overflow text */
+    text-align: center; /* Center-align the text */
+}
+
+/* Define a custom button color */
+.btn-custom-green {
+    background-color: #D0F0C0; /* Light green */
+    border-color: #D0F0C0; /* Light green */
+    color: #fff; /* White text */
+    margin-top: 20px; /* Add margin to push the button down */
+}
+
+.btn-custom-green:hover {
+    background-color: #a0d08c; /* Darker green on hover */
+    border-color: #a0d08c; /* Darker green on hover */
+}
+
+/* Add hovering effect to navbar items */
+.navbar-nav .nav-link {
+    transition: color 0.3s ease; /* Smooth transition for text color change */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #fff; /* Change text color to white on hover */
+}
+
+/* Style for the blog section */
+.blog-section {
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    color: white;
+    padding: 100px 0;
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh; /* Make the section take up the full height of the viewport */
+}
+
+/* Style for the text within the blog section */
+.blog-section .container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 4s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Adjust the font size and line height for the blog content */
+.blog-section h2 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.blog-section p {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+    text-align: center;
+}
+
+/* Custom styles for form elements */
+.form-label {
+    color: white; /* Label text color */
+}
+
+.form-control {
+    background-color: #555555; /* Input field background color */
+    color: white; /* Input field text color */
+    border-color: #555555; /* Input field border color */
+}
+
+.form-control:focus {
+    background-color: #777777; /* Input field background color on focus */
+    color: white; /* Input field text color on focus */
+    border-color: #777777; /* Input field border color on focus */
+}
+
+.btn-custom-green {
+    background-color: #D0F0C0; /* Button background color */
+    border-color: #D0F0C0; /* Button border color */
+    color: #fff; /* Button text color */
+}
+
+.btn-custom-green:hover {
+    background-color: #a0d08c; /* Button background color on hover */
+    border-color: #a0d08c; /* Button border color on hover */
+}
+
+.custom-gray-bg {
+    background-color: #f0f0f0; /* Gray background color */
+}
+
+.btn-gray {
+    background-color: #666; /* Button background color */
+    border-color: #666; /* Button border color */
+    color: #fff; /* Button text color */
+}
+
+.btn-gray:hover {
+    background-color: #555; /* Button background color on hover */
+    border-color: #555; /* Button border color on hover */
+}
+
+footer {
+    padding: 20px 0; /* Add padding to the top and bottom of the footer */
+}
+
+footer p {
+    font-size: 14px; /* Adjust the font size */
+    line-height: 1.5; /* Adjust the line height */
+}
+
+footer .container {
+    margin-top: 10px; /* Add margin to the top of the container */
+    margin-bottom: 10px; /* Add margin to the bottom of the container */
 }

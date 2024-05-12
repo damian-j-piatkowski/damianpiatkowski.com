@@ -1,17 +1,77 @@
 {% extends "base.html" %}
 {% block title %}Home Page{% endblock %}
 {% block content %}
-<section class="home-hero open-sans"> <!-- Apply the open-sans class to the section -->
+<section class="home-hero open-sans">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
                 <div class="hero-content">
-                    <h1 class="open-sans">Hi, I'm Damian</h1> <!-- Apply the open-sans class to the h1 element -->
-                    <p class="open-sans">I specialize in crafting robust backends that power seamless user experiences. From scalable architectures to efficient databases, I build the foundation your application can rely on.</p> <!-- Apply the open-sans class to the p element -->
+                    <h1 class="open-sans">Hi, I'm Damian</h1>
+                    <p class="open-sans">I specialize in crafting robust backends that power seamless user experiences</p>
+                    <a href="/resume" class="btn btn-custom-green">View Resume</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<section class="blog-section" style="background-image: url('/static/images/home_blog.jpg');">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h2>Check Out My Blog</h2>
+                <p>Explore articles on the latest trends and technologies in software development.</p>
+                <a href="/blog" class="btn btn-custom-green">View Blog</a> <!-- Changed "Read More" to "View Blog" -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section custom-gray-bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h2>Contact Me</h2>
+                <form action="/submit_contact" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gray">Submit</button> <!-- Changed button color to gray -->
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<footer style="background-color: black; color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <p>Damian Piatkowski</p>
+                <p>From scalable architectures to efficient databases, I build the foundation your application can rely on</p>
+            </div>
+        </div>
+    </div>
+    <br> <!-- Line break -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <p>&copy; 2024 damianpiatkowski.com. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
 {% endblock %}
 
