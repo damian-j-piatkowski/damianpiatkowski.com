@@ -80,14 +80,16 @@
 }
 
 /* Define a custom button color */
-.btn-custom-green {
+.btn-custom-green,
+.btn {
     background-color: #D0F0C0; /* Light green */
     border-color: #D0F0C0; /* Light green */
     color: #fff; /* White text */
     margin-top: 20px; /* Add margin to push the button down */
 }
 
-.btn-custom-green:hover {
+.btn-custom-green:hover,
+.btn:hover {
     background-color: #a0d08c; /* Darker green on hover */
     border-color: #a0d08c; /* Darker green on hover */
 }
@@ -122,17 +124,6 @@
     animation: fadeIn 4s forwards;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* Adjust the font size and line height for the blog content */
 .blog-section h2 {
     font-size: 2.5rem;
@@ -148,50 +139,42 @@
     text-align: center;
 }
 
-/* Custom styles for form elements */
-.form-label {
-    color: white; /* Label text color */
+.contact-section {
+    padding-top: 50px; /* Add padding to the top of the contact section */
+    padding-bottom: 50px; /* Add padding to create space between the form and the footer */
+    background-color: #ECEFF4; /* Set light gray-blue background color for the contact section */
 }
 
-.form-control {
-    background-color: #555555; /* Input field background color */
-    color: white; /* Input field text color */
-    border-color: #555555; /* Input field border color */
+.contact-section label.form-label {
+    color: black; /* Set label text color to black */
 }
 
-.form-control:focus {
-    background-color: #777777; /* Input field background color on focus */
-    color: white; /* Input field text color on focus */
-    border-color: #777777; /* Input field border color on focus */
+.contact-section .form-control {
+    background-color: #D0F0C0; /* Set input field background color */
+    color: black; /* Set input field text color */
+    border-color: #D0F0C0; /* Set input field border color */
 }
 
-.btn-custom-green {
-    background-color: #D0F0C0; /* Button background color */
-    border-color: #D0F0C0; /* Button border color */
-    color: #fff; /* Button text color */
+.contact-section .form-control:focus {
+    background-color: #a0d08c; /* Set input field background color on focus */
+    color: black; /* Set input field text color on focus */
+    border-color: #a0d08c; /* Set input field border color on focus */
 }
 
-.btn-custom-green:hover {
-    background-color: #a0d08c; /* Button background color on hover */
-    border-color: #a0d08c; /* Button border color on hover */
+.contact-section .btn {
+    background-color: #D0F0C0; /* Set button background color */
+    border-color: #D0F0C0; /* Set button border color */
+    color: #fff; /* Set button text color */
 }
 
-.custom-gray-bg {
-    background-color: #f0f0f0; /* Gray background color */
-}
-
-.btn-gray {
-    background-color: #666; /* Button background color */
-    border-color: #666; /* Button border color */
-    color: #fff; /* Button text color */
-}
-
-.btn-gray:hover {
-    background-color: #555; /* Button background color on hover */
-    border-color: #555; /* Button border color on hover */
+.contact-section .btn:hover {
+    background-color: #a0d08c; /* Set button background color on hover */
+    border-color: #a0d08c; /* Set button border color on hover */
 }
 
 footer {
+    background-color: #666666; /* Set a lighter gray background color for the footer */
+    color: white; /* Set text color to white for better contrast */
     padding: 20px 0; /* Add padding to the top and bottom of the footer */
 }
 

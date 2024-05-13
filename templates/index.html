@@ -21,7 +21,7 @@
             <div class="col-lg-12 text-center">
                 <h2>Check Out My Blog</h2>
                 <p>Explore articles on the latest trends and technologies in software development.</p>
-                <a href="/blog" class="btn btn-custom-green">View Blog</a> <!-- Changed "Read More" to "View Blog" -->
+                <a href="/blog" class="btn btn-custom-green">View Blog</a>
             </div>
         </div>
     </div>
@@ -45,33 +45,31 @@
                         <label for="message" class="form-label">Message</label>
                         <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-gray">Submit</button> <!-- Changed button color to gray -->
+                    <button type="submit" class="btn btn-custom-green">Submit</button>
                 </form>
             </div>
         </div>
     </div>
 </section>
 
-
-
-
-<footer style="background-color: black; color: white;">
+<footer class="custom-gray-bg">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
-                <p>Damian Piatkowski</p>
-                <p>From scalable architectures to efficient databases, I build the foundation your application can rely on</p>
+                <a href="https://github.com/damian-j-piatkowski" class="me-4 text-reset">
+                    <i class="bi bi-github fs-3"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/damian-piatkowski/" class="me-4 text-reset">
+                    <i class="bi bi-linkedin fs-3"></i>
+                </a>
             </div>
         </div>
-    </div>
-    <br> <!-- Line break -->
-    <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
-                <p>&copy; 2024 damianpiatkowski.com. All Rights Reserved.</p>
+                <p>&copy; 2024 Damian Piatkowski. All rights reserved.</p>
             </div>
         </div>
     </div>
 </footer>
-{% endblock %}
 
+{% endblock %}
