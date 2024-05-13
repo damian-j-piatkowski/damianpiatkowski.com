@@ -139,10 +139,20 @@
     text-align: center;
 }
 
+.contact-container {
+    max-width: 600px; /* Set maximum width for the contact container */
+    margin: 0 auto; /* Center the contact container horizontally */
+}
+
 .contact-section {
     padding-top: 50px; /* Add padding to the top of the contact section */
     padding-bottom: 50px; /* Add padding to create space between the form and the footer */
     background-color: #ECEFF4; /* Set light gray-blue background color for the contact section */
+}
+
+.contact-section .container {
+    max-width: 800px; /* Adjust the maximum width as needed */
+    margin: 0 auto; /* Center the container horizontally */
 }
 
 .contact-section label.form-label {
@@ -156,9 +166,9 @@
 }
 
 .contact-section .form-control:focus {
-    background-color: #a0d08c; /* Set input field background color on focus */
+    background-color: #D0F0C0; /* Keep input field background color same on focus */
     color: black; /* Set input field text color on focus */
-    border-color: #a0d08c; /* Set input field border color on focus */
+    border-color: #D0F0C0; /* Set input field border color on focus */
 }
 
 .contact-section .btn {
