@@ -1,3 +1,43 @@
+/* Core Skills section */
+.core-skills {
+    background-color: #ECEFF4; /* Light gray-blue background color */
+    padding: 50px 0; /* Padding for top and bottom */
+    font-family: 'Open Sans', sans-serif;
+}
+
+.core-skills h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.core-skills .subtitle {
+    font-size: 1.25rem;
+    color: #666666; /* Slightly darker gray for subtitle */
+    margin-bottom: 20px;
+}
+
+.skills-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px; /* Space between skill items */
+}
+
+.skill {
+    background-color: #D0F0C0; /* Light green background color */
+    color: #fff; /* White text color */
+    padding: 10px 20px; /* Padding for the skill items */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 1rem; /* Font size */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.skill:hover {
+    background-color: #a0d08c; /* Darker green on hover */
+}
+
+/* Existing styles */
+
 /* Define a custom class for Open Sans font */
 .open-sans {
     font-family: "Open Sans", sans-serif;
