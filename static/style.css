@@ -1,7 +1,7 @@
 /* Core Skills section */
 .core-skills {
-    background-color: #ECEFF4; /* Light gray-blue background color */
-    padding: 50px 0; /* Padding for top and bottom */
+    background-color: #ECEFF4;
+    padding: 50px 0;
     font-family: 'Open Sans', sans-serif;
 }
 
@@ -12,7 +12,7 @@
 
 .core-skills .subtitle {
     font-size: 1.25rem;
-    color: #666666; /* Slightly darker gray for subtitle */
+    color: #666666;
     margin-bottom: 20px;
 }
 
@@ -20,20 +20,20 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 15px; /* Space between skill items */
+    gap: 15px;
 }
 
 .skill {
-    background-color: #D0F0C0; /* Light green background color */
-    color: #fff; /* White text color */
-    padding: 10px 20px; /* Padding for the skill items */
-    border-radius: 5px; /* Rounded corners */
-    font-size: 1rem; /* Font size */
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    background-color: #D0F0C0;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
 }
 
 .skill:hover {
-    background-color: #a0d08c; /* Darker green on hover */
+    background-color: #a0d08c;
 }
 
 /* Existing styles */
@@ -149,9 +149,18 @@
     background-size: cover;
     background-position: center center;
     color: white;
-    padding: 100px 0;
+    padding: 70px 0;
     font-family: 'Montserrat', sans-serif;
-    height: 100vh; /* Make the section take up the full height of the viewport */
+    min-height: 60vh;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+    .blog-section {
+        background-size: auto 120%; /* Zoom in the background image */
+        background-position: center center; /* Center the background image */
+        padding: 50px 0; /* Adjust padding for smaller screens */
+    }
 }
 
 /* Style for the text within the blog section */
@@ -178,6 +187,7 @@
     overflow: hidden;
     text-align: center;
 }
+
 
 .contact-container {
     max-width: 600px; /* Set maximum width for the contact container */
