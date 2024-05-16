@@ -1,3 +1,108 @@
+/* Font */
+.open-sans {
+    font-family: "Open Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+}
+
+/* Buttons */
+.btn-custom-green,
+.btn {
+    background-color: #D0F0C0;
+    border-color: #D0F0C0;
+    color: #fff;
+    margin-top: 20px;
+}
+
+.btn-custom-green:hover,
+.btn:hover {
+    background-color: #a0d08c;
+    border-color: #a0d08c;
+}
+
+/* Navigation Bar*/
+.navbar-brand img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.custom-green-bg {
+    background-color: #D0F0C0;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.navbar-nav .nav-item:last-child {
+    margin-right: 10px; /* Fixed missing unit */
+}
+
+.navbar-nav {
+    padding-right: 20px;
+}
+
+/* Add hovering effect to navbar items */
+.navbar-nav .nav-link {
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #fff;
+}
+
+/* Hero Section */
+.home-hero {
+    position: relative;
+    background-image: url('/static/images/home_main.jpg');
+    background-size: cover;
+    background-position: center center;
+    color: #fff;
+    padding: 100px 0;
+    height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Style for the text within the home hero section */
+.hero-content {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 4s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
+    text-align: center;
+}
+
 /* Core Skills section */
 .core-skills {
     background-color: #ECEFF4;
@@ -36,114 +141,7 @@
     background-color: #a0d08c;
 }
 
-/* Existing styles */
-
-/* Define a custom class for Open Sans font */
-.open-sans {
-    font-family: "Open Sans", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400; /* Default weight for Open Sans */
-    font-style: normal;
-    font-variation-settings: "wdth" 100;
-}
-
-.navbar-brand img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%; /* Make the profile picture circular */
-    margin-right: 10px; /* Increase the spacing between the picture and the text */
-    margin-left: 10px; /* Add margin to the left to push the image away from the left edge */
-}
-
-.custom-green-bg {
-    background-color: #D0F0C0; /* Light green */
-}
-
-.navbar-nav .nav-item {
-    margin-right: 15px; /* Adjust the margin between navbar items */
-}
-
-.navbar-nav .nav-item:last-child {
-    margin-right: 10; /* Remove margin for the last navbar item */
-}
-
-.navbar-nav {
-    padding-right: 20px; /* Adjust the padding on the right side of navbar items */
-}
-
-/* Style for the home hero section */
-.home-hero {
-    position: relative; /* Add relative positioning */
-    background-image: url('/static/images/home_main.jpg'); /* Adjust the path as needed */
-    background-size: cover;
-    background-position: center center; /* Center the background image horizontally and vertically */
-    color: #fff;
-    padding: 100px 0; /* Adjust padding as needed */
-    height: 100vh; /* Make the section take up the full height of the viewport */
-    font-family: 'Montserrat', sans-serif; /* Use Montserrat font */
-}
-
-/* Style for the text within the home hero section */
-.hero-content {
-    position: relative; /* Add relative positioning */
-    max-width: 600px; /* Adjust max-width as needed */
-    margin: 0 auto;
-    text-align: center;
-    opacity: 0; /* Start with opacity 0 */
-    animation: fadeIn 4s forwards; /* Increase duration to 4 seconds */
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0; /* Start opacity */
-        transform: translateY(20px); /* Optional: Start from slightly below */
-    }
-    to {
-        opacity: 1; /* End opacity */
-        transform: translateY(0); /* Optional: Return to original position */
-    }
-}
-
-/* Adjust the font size and line height for the hero-content */
-.hero-content h1 {
-    font-size: 2.5rem; /* Reduce the font size */
-    line-height: 1.2; /* Adjust the line height to bring the text closer */
-}
-
-.hero-content p {
-    font-size: 1.25rem; /* Reduce the font size */
-    line-height: 1.4; /* Adjust the line height */
-    max-width: 1000px; /* Increase the maximum width of the paragraph */
-    margin: 0 auto; /* Center the paragraph horizontally */
-    overflow: hidden; /* Hide any overflow text */
-    text-align: center; /* Center-align the text */
-}
-
-/* Define a custom button color */
-.btn-custom-green,
-.btn {
-    background-color: #D0F0C0; /* Light green */
-    border-color: #D0F0C0; /* Light green */
-    color: #fff; /* White text */
-    margin-top: 20px; /* Add margin to push the button down */
-}
-
-.btn-custom-green:hover,
-.btn:hover {
-    background-color: #a0d08c; /* Darker green on hover */
-    border-color: #a0d08c; /* Darker green on hover */
-}
-
-/* Add hovering effect to navbar items */
-.navbar-nav .nav-link {
-    transition: color 0.3s ease; /* Smooth transition for text color change */
-}
-
-.navbar-nav .nav-link:hover {
-    color: #fff; /* Change text color to white on hover */
-}
-
-/* Style for the blog section */
+/* Blog section */
 .blog-section {
     position: relative;
     background-size: cover;
@@ -157,9 +155,9 @@
 /* Media query for smaller screens */
 @media (max-width: 768px) {
     .blog-section {
-        background-size: auto 120%; /* Zoom in the background image */
-        background-position: center center; /* Center the background image */
-        padding: 50px 0; /* Adjust padding for smaller screens */
+        background-size: auto 120%;
+        background-position: center center;
+        padding: 50px 0;
     }
 }
 
@@ -173,7 +171,6 @@
     animation: fadeIn 4s forwards;
 }
 
-/* Adjust the font size and line height for the blog content */
 .blog-section h2 {
     font-size: 2.5rem;
     line-height: 1.2;
@@ -188,62 +185,63 @@
     text-align: center;
 }
 
-
+/* Contact section */
 .contact-container {
-    max-width: 600px; /* Set maximum width for the contact container */
-    margin: 0 auto; /* Center the contact container horizontally */
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .contact-section {
-    padding-top: 50px; /* Add padding to the top of the contact section */
-    padding-bottom: 50px; /* Add padding to create space between the form and the footer */
-    background-color: #ECEFF4; /* Set light gray-blue background color for the contact section */
+    padding-top: 50px;
+    padding-bottom: 50px;
+    background-color: #ECEFF4;
 }
 
 .contact-section .container {
-    max-width: 800px; /* Adjust the maximum width as needed */
-    margin: 0 auto; /* Center the container horizontally */
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .contact-section label.form-label {
-    color: black; /* Set label text color to black */
+    color: black;
 }
 
 .contact-section .form-control {
-    background-color: #D0F0C0; /* Set input field background color */
-    color: black; /* Set input field text color */
-    border-color: #D0F0C0; /* Set input field border color */
+    background-color: #D0F0C0;
+    color: black;
+    border-color: #D0F0C0;
 }
 
 .contact-section .form-control:focus {
-    background-color: #D0F0C0; /* Keep input field background color same on focus */
-    color: black; /* Set input field text color on focus */
-    border-color: #D0F0C0; /* Set input field border color on focus */
+    background-color: #D0F0C0;
+    color: black;
+    border-color: #D0F0C0;
 }
 
 .contact-section .btn {
-    background-color: #D0F0C0; /* Set button background color */
-    border-color: #D0F0C0; /* Set button border color */
-    color: #fff; /* Set button text color */
+    background-color: #D0F0C0;
+    border-color: #D0F0C0;
+    color: #fff;
 }
 
 .contact-section .btn:hover {
-    background-color: #a0d08c; /* Set button background color on hover */
-    border-color: #a0d08c; /* Set button border color on hover */
+    background-color: #a0d08c;
+    border-color: #a0d08c;
 }
 
+/* Footer */
 footer {
-    background-color: #666666; /* Set a lighter gray background color for the footer */
-    color: white; /* Set text color to white for better contrast */
-    padding: 20px 0; /* Add padding to the top and bottom of the footer */
+    background-color: #666666;
+    color: white;
+    padding: 20px 0;
 }
 
 footer p {
-    font-size: 14px; /* Adjust the font size */
-    line-height: 1.5; /* Adjust the line height */
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 footer .container {
-    margin-top: 10px; /* Add margin to the top of the container */
-    margin-bottom: 10px; /* Add margin to the bottom of the container */
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
