@@ -195,6 +195,10 @@
     text-align: center;
 }
 
+.blog-section .text-overlay {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adjust shadow color and size as needed */
+}
+
 /* Contact section */
 .contact-container {
     max-width: 600px;
