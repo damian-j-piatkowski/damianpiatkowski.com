@@ -22,6 +22,11 @@
     border-color: #a0d08c;
 }
 
+/* Applied to text in photos */
+.text-overlay {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adjust shadow color and size as needed */
+}
+
 /* Navigation Bar */
 .navbar-brand img {
     width: 50px;
@@ -193,10 +198,6 @@
     margin: 0 auto;
     overflow: hidden;
     text-align: center;
-}
-
-.blog-section .text-overlay {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adjust shadow color and size as needed */
 }
 
 /* Contact section */

@@ -4,7 +4,7 @@ import os
 from flask import Flask
 
 from config import config
-from extensions import db
+from extensions import db, mail
 from home.routes import home_bp
 from logging_config import configure_logging
 
@@ -18,6 +18,9 @@ def create_app():
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)
+
+    # Initialize Flask-Mail
+    mail.init_app(flask_app)
 
     # Configure logging
     configure_logging(flask_app)

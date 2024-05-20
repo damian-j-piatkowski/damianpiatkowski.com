@@ -5,9 +5,11 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">
-                <div class="hero-content">
+                <div class="hero-content text-overlay">
                     <h1>Hi, I'm Damian</h1>
                     <p>I specialize in crafting robust backends that power seamless user experiences</p>
+                </div>
+                <div class="hero-content">
                     <a href="/resume" class="btn btn-custom-green">View Resume</a>
                 </div>
             </div>
@@ -50,7 +52,7 @@
         <div class="row">
             <div class="col-lg-8 offset-lg-2 text-center">
                 <h2>Contact Me</h2>
-                <form action="/submit_contact" method="post">
+                <form action="{{ url_for('home_bp.submit_contact') }}" method="post">
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name" required>
