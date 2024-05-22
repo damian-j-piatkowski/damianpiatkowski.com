@@ -13,8 +13,7 @@ def create_app():
     flask_app = Flask(__name__)
 
     # Determine configuration mode
-    env = os.environ.get('FLASK_ENV', 'development')
-    flask_app.config.from_object(config[env])
+    flask_app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)

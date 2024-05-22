@@ -3,6 +3,20 @@
 {% block content %}
 <section class="home-hero">
     <div class="container">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-container">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} flash-message">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <!-- End of Flash messages -->
+
         <div class="row">
             <div class="col-lg-12 text-center">
                 <div class="hero-content text-overlay">
@@ -91,4 +105,21 @@
         </div>
     </div>
 </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var flashMessage = document.querySelector('.flash-message');
+        if (flashMessage) {
+            setTimeout(function() {
+                flashMessage.classList.add('show');
+                setTimeout(function() {
+                    flashMessage.classList.remove('show');
+                    setTimeout(function() {
+                        flashMessage.remove();
+                    }, 2000); // Wait for the fade-out transition (2 seconds)
+                }, 2000); // Flash message fade-out starts after 2 seconds of fade-in
+            }, 0); // Start showing immediately
+        }
+    });
+</script>
 {% endblock %}

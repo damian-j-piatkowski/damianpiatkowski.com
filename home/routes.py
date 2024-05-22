@@ -16,7 +16,7 @@ def submit_contact():
 
     if not name or not email or not message:
         flash('All fields are required!', 'danger')
-        return redirect(url_for('home.index'))
+        return redirect(url_for('home_bp.index'))
 
     msg = Message(subject="Contact Form Submission",
                   sender=current_app.config['MAIL_USERNAME'],
@@ -26,5 +26,5 @@ def submit_contact():
     mail.send(msg)
 
     flash('Message sent successfully!', 'success')
-    return redirect(url_for('home.index'))
+    return redirect(url_for('home_bp.index'))
 
