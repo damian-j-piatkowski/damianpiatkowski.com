@@ -85,21 +85,7 @@
         </div>
     </div>
 </section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var flashMessage = document.querySelector('.flash-message');
-        if (flashMessage) {
-            setTimeout(function() {
-                flashMessage.classList.add('show');
-                setTimeout(function() {
-                    flashMessage.classList.remove('show');
-                    setTimeout(function() {
-                        flashMessage.remove();
-                    }, 2000); // Wait for the fade-out transition (2 seconds)
-                }, 2000); // Flash message fade-out starts after 2 seconds of fade-in
-            }, 0); // Start showing immediately
-        }
-    });
-</script>
 {% endblock %}
+
+<!-- Include the flashMessages.js script -->
+<script src="{{ url_for('static', filename='js/flashMessages.js') }}"></script>
