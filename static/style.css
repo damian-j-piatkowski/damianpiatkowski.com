@@ -1,3 +1,8 @@
+/* Variable for button text color */
+:root {
+    --button-text-color: #000; /* Define the default button text color */
+}
+
 /* Font */
 .open-sans {
     font-family: "Open Sans", sans-serif;
@@ -7,12 +12,12 @@
     font-variation-settings: "wdth" 100;
 }
 
-/* Buttons */
+/* General button styles */
 .btn-custom-green,
 .btn {
     background-color: #D0F0C0;
     border-color: #D0F0C0;
-    color: #fff;
+    color: var(--button-text-color); /* Use the new color variable */
     margin-top: 20px;
 }
 
@@ -20,6 +25,7 @@
 .btn:hover {
     background-color: #a0d08c;
     border-color: #a0d08c;
+    color: #fff; /* Change text color to white on hover */
 }
 
 /* Applied to text in photos */
@@ -143,17 +149,19 @@
     gap: 15px;
 }
 
+/* Core Skills section */
 .skill {
     background-color: #D0F0C0;
-    color: #fff;
+    color: var(--button-text-color); /* Ensure the correct color */
     padding: 10px 20px;
     border-radius: 5px;
     font-size: 1rem;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Added transition for color */
 }
 
 .skill:hover {
     background-color: #a0d08c;
+    color: #fff; /* Change text color to white on hover */
 }
 
 /* Blog section */
@@ -246,15 +254,18 @@
     background-color: #D0F0C0 !important; /* Maintain background color on focus */
 }
 
+.contact-section .btn-custom-green,
 .contact-section .btn {
     background-color: #D0F0C0;
     border-color: #D0F0C0;
-    color: #fff;
+    color: var(--button-text-color); /* Ensure the correct color */
 }
 
+.contact-section .btn-custom-green:hover,
 .contact-section .btn:hover {
     background-color: #a0d08c;
     border-color: #a0d08c;
+    color: #fff; /* Change text color to white on hover */
 }
 
 /* Footer */
@@ -292,6 +303,12 @@ footer .container {
     border-radius: 5px;
     opacity: 0;
     animation: flashFadeIn 4s forwards, flashFadeOut 2s forwards 6s; /* Start fading out after 6s */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Add transition for color */
+}
+
+.flash-container .flash-message:hover {
+    background-color: #a0d08c; /* Change background color on hover */
+    color: #fff; /* Change text color to white on hover */
 }
 
 @keyframes flashFadeIn {
@@ -314,13 +331,14 @@ footer .container {
 
 .flash-container .alert-success {
     background-color: #D0F0C0;
-    color: #fff; /* Set text color to white */
+    color: var(--button-text-color); /* Ensure the correct color */
 }
 
 .flash-container .alert-danger {
     background-color: #f8d7da;
     color: #fff;
 }
+
 
 
 
