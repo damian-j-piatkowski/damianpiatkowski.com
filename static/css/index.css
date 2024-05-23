@@ -1,82 +1,3 @@
-/* Variable for button text color */
-:root {
-    --button-text-color: #000; /* Define the default button text color */
-}
-
-/* Font */
-.open-sans {
-    font-family: "Open Sans", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    font-variation-settings: "wdth" 100;
-}
-
-/* General button styles */
-.btn-custom-green,
-.btn {
-    background-color: #D0F0C0;
-    border-color: #D0F0C0;
-    color: var(--button-text-color); /* Use the new color variable */
-    margin-top: 20px;
-}
-
-.btn-custom-green:hover,
-.btn:hover {
-    background-color: #a0d08c;
-    border-color: #a0d08c;
-    color: #fff; /* Change text color to white on hover */
-}
-
-/* Applied to text in photos */
-.text-overlay {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adjust shadow color and size as needed */
-}
-
-/* Navigation Bar */
-.navbar-brand img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-    margin-left: 10px;
-}
-
-.navbar-brand {
-    text-decoration: none;
-    color: inherit;
-    transition: color 0.3s ease;
-}
-
-.navbar-brand:hover {
-    color: #fff; /* Hover color consistent with other nav items */
-}
-
-.custom-green-bg {
-    background-color: #D0F0C0;
-}
-
-.navbar-nav .nav-item {
-    margin-right: 15px;
-}
-
-.navbar-nav .nav-item:last-child {
-    margin-right: 10px; /* Fixed missing unit */
-}
-
-.navbar-nav {
-    padding-right: 20px;
-}
-
-/* Add hovering effect to navbar items */
-.navbar-nav .nav-link {
-    transition: color 0.3s ease;
-}
-
-.navbar-nav .nav-link:hover {
-    color: #fff; /* Hover color */
-}
-
 /* Hero Section */
 .home-hero {
     position: relative;
@@ -268,23 +189,6 @@
     color: #fff; /* Change text color to white on hover */
 }
 
-/* Footer */
-footer {
-    background-color: #666666;
-    color: white;
-    padding: 20px 0;
-}
-
-footer p {
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-footer .container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
 /* Flash messages */
 .flash-container {
     position: absolute;
@@ -338,12 +242,3 @@ footer .container {
     background-color: #f8d7da;
     color: #fff;
 }
-
-
-
-
-
-
-
-
-
