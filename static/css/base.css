@@ -77,6 +77,48 @@
     color: #fff; /* Hover color */
 }
 
+/* Ensure navbar items are displayed as block-level elements in mobile view */
+@media (max-width: 992px) {
+    .navbar-nav {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* Align items to the right */
+    }
+
+    .navbar-collapse {
+        margin-top: 10px; /* Add some space above the first item */
+        padding-left: 10px; /* Add padding to the left to separate from the edge */
+        border-left: none;
+    }
+
+    .navbar-toggler {
+        padding-left: 10px; /* Add padding to the left to separate from the edge */
+        margin-right: 10px; /* Add margin to separate from the edge */
+    }
+
+    .navbar-nav .nav-item {
+        display: block;
+        width: 100%;
+        text-align: right; /* Align text to the right */
+        margin-right: 0;
+        margin-bottom: 10px; /* Add space between items */
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2); /* Add a thin line between items */
+        padding-bottom: 10px;
+        padding-right: 10px; /* Add padding to the right to separate from the edge */
+    }
+
+    .navbar-nav .nav-item:first-child {
+        padding-top: 10px; /* Add padding to the top of the first item to separate from the toggle icon */
+        border-top: 1px solid rgba(0, 0, 0, 0.2); /* Add border to the top of the first item */
+        margin-top: 10px; /* Adjust margin to match padding */
+    }
+
+    .navbar-nav .nav-item:last-child {
+        margin-bottom: 0; /* Remove margin-bottom from the last item */
+        border-bottom: none; /* Remove border from the last item */
+    }
+}
+
 /* Footer */
 footer {
     background-color: #666666;
