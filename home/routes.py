@@ -4,9 +4,11 @@ from extensions import mail
 
 home_bp = Blueprint('home_bp', __name__)
 
+
 @home_bp.route('/')
 def index():
     return render_template('index.html')
+
 
 @home_bp.route('/submit_contact', methods=['POST'])
 def submit_contact():
@@ -24,7 +26,5 @@ def submit_contact():
                   body=f"Name: {name}\nEmail: {email}\nMessage: {message}")
 
     mail.send(msg)
-
     flash('Message sent successfully!', 'success')
     return redirect(url_for('home_bp.index'))
-
