@@ -23,6 +23,10 @@ def runner(app):
 
 @pytest.fixture(scope="module")
 def driver():
-    driver = webdriver.Chrome()  # Ensure chromedriver is installed and in PATH
+    options = webdriver.ChromeOptions()
+    options.add_argument("--start-maximized")
+    driver = webdriver.Chrome(options=options)  # Ensure chromedriver is installed and in PATH
     yield driver
     driver.quit()
+
+
