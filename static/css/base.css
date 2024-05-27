@@ -135,3 +135,9 @@ footer .container {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+/* Privacy Notice Link */
+footer a.privacy-link {
+    color: white;
+    text-decoration: underline; /* Add underline for better visibility */
+}

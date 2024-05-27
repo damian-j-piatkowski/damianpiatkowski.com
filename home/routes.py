@@ -28,3 +28,7 @@ def submit_contact():
     mail.send(msg)
     flash('Message sent successfully!', 'success')
     return redirect(url_for('home_bp.index'))
+
+@home_bp.route('/privacy')
+def privacy():
+    return render_template('privacy.html')

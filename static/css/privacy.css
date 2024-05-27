@@ -1,0 +1,34 @@
+/* Privacy Notice Section */
+.privacy-section {
+    background-color: #ECEFF4;
+    padding: 50px 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.privacy-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.privacy-section .subtitle {
+    font-size: 1.25rem;
+    color: #666666;
+    margin-bottom: 20px;
+}
+
+.privacy-content {
+    text-align: left;
+}
+
+.privacy-content h3 {
+    font-size: 1.75rem;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.privacy-content p.privacy-text {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+

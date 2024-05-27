@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Notice{% endblock %}
+
+{% block links %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/privacy.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="privacy-section">
+    <div class="container text-center">
+        <h2>Privacy Notice</h2>
+        <p class="subtitle">We value your privacy and are committed to protecting your personal data. This privacy notice will inform you about how we handle your personal data when you visit our website.</p>
+        <div class="privacy-content">
+            <h3>Information We Collect</h3>
+            <p>We use Google Analytics to collect information about your use of our website. Google Analytics collects data such as your IP address, browser type, referring/exit pages, and operating system. This information is used to analyze trends, administer the site, and track user movements around the site.</p>
+
+            <h3>Contact Form Submissions</h3>
+            <p>We do not log or store any personal data such as email addresses, names, or message contents from the Contact section submissions. This data is solely used for responding to your inquiries and is not retained.</p>
+
+            <h3>Your Rights</h3>
+            <p>You have the right to access, correct, or delete any personal data we have collected about you. To exercise these rights, please contact us at the email address provided on our contact page.</p>
+
+            <h3>Changes to This Privacy Notice</h3>
+            <p>We may update this privacy notice from time to time. Any changes will be posted on this page, and we will notify you of significant changes through a prominent notice on our website.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
