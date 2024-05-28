@@ -48,3 +48,35 @@ def test_contact_form_submission(driver):
     )
 
     assert 'Message sent successfully!' in flash_message.text
+
+
+def test_navigate_to_privacy_notice(driver):
+    driver.get("http://localhost:5000")
+
+    # Wait for the footer and the privacy link to be visible
+    footer = WebDriverWait(driver, 10).until(
+        ec.visibility_of_element_located((By.TAG_NAME, 'footer'))
+    )
+    privacy_link = footer.find_element(By.LINK_TEXT, 'Privacy Notice')
+
+    # Ensure the privacy link is in view
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", privacy_link)
+
+    # Retry mechanism for clicking the privacy link
+    attempt = 0
+    while attempt < 3:
+        try:
+            privacy_link.click()
+            break
+        except ElementClickInterceptedException:
+            attempt += 1
+            driver.execute_script("window.scrollBy(0, -100);")  # Adjust scroll position
+            if attempt == 3:
+                raise
+
+    # Wait for the privacy notice heading to be visible
+    privacy_heading = WebDriverWait(driver, 10).until(
+        ec.visibility_of_element_located((By.CLASS_NAME, 'privacy-heading'))
+    )
+
+    assert 'Privacy Notice' in privacy_heading.text

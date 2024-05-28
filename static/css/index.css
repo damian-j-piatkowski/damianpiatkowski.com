@@ -135,6 +135,29 @@
     margin: 0 auto;
 }
 
+.contact-info-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.contact-info {
+    background-color: #ECEFF4;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%; /* Adjusted width to take up most of the available space */
+    max-width: 800px; /* Set a maximum width to prevent it from becoming too wide */
+    margin: 0 auto;
+}
+
+.contact-text {
+    color: #666666; /* Set color to #666666 */
+}
+
+.contact-info p {
+    margin-bottom: 0; /* Remove bottom margin for the paragraph */
+}
+
 .contact-section {
     padding-top: 50px;
     padding-bottom: 50px;
