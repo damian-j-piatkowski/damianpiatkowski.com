@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block links %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+{% block content %}
+<section class="home-hero">
+    <div class="container">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-container">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} flash-message">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <!-- End of Flash messages -->
+
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="hero-content text-overlay">
+                    <h1>Hi, I'm Damian</h1>
+                    <p>I specialize in crafting robust backends that power seamless user experiences</p>
+                </div>
+                <div class="hero-content">
+                    <a href="/resume" class="btn btn-custom-green">View Resume</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Skills Section -->
+<section class="core-skills">
+    <div class="container text-center">
+        <h2>Core Skills</h2>
+        <p class="subtitle">Building the backbone of dependable software</p>
+        <div class="skills-list">
+            <span class="skill">Python</span>
+            <span class="skill">Flask</span>
+            <span class="skill">APIs</span>
+            <span class="skill">Databases</span>
+            <span class="skill">Test Suites</span>
+            <span class="skill">Technical Documentation</span>
+        </div>
+    </div>
+</section>
+
+<section class="blog-section" style="background-image: url('/static/images/home_blog.jpg');">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="text-overlay">
+                    <h2>Check Out My Blog</h2>
+                    <p>Explore articles on the latest trends and technologies in software development.</p>
+                </div>
+                <a href="/blog" class="btn btn-custom-green">View Blog</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section custom-gray-bg">
+    <div class="container contact-container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 text-center">
+                <h2>Contact Me</h2>
+                <div class="contact-info-wrapper">
+                    <div class="contact-info">
+                        <p class="contact-text">Feel free to reach out to me directly at <a href="mailto:damian.j.piatkowski@gmail.com">damian.j.piatkowski@gmail.com</a>, or simply fill out the form below, and I'll be sure to get back to you promptly.</p>
+                    </div>
+                </div>
+                <form action="{{ url_for('home_bp.submit_contact') }}" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-custom-green" id="submit_button">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+<!-- Include the flashMessages.js script -->
+<script src="{{ url_for('static', filename='js/flashMessages.js') }}"></script>
