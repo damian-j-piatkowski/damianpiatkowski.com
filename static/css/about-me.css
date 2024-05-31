@@ -1,61 +1,80 @@
 /* static/css/about-me.css */
-
-/* About Section */
 .about-section {
     position: relative;
-    background-image: url('/static/images/about_me.jpg');
-    background-size: cover;
-    background-position: center center;
-    color: #fff;
-    padding: 100px 0;
-    height: 100vh;
-    font-family: 'Montserrat', sans-serif;
-}
-
-/* Style for the text within the about section */
-.about-content {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
-    opacity: 0;
-    animation: fadeIn 4s forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.about-content p {
-    font-size: 1.25rem;
-    line-height: 1.4;
-    max-width: 1000px;
-    margin: 0 auto;
     overflow: hidden;
-    text-align: center;
+    padding: 0; /* Remove any padding */
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+.about-section .container {
+    padding: 0; /* Remove container padding */
+}
+
+.about-section picture {
+    display: block;
+    width: 100%;
+    margin: 0; /* Remove any margin */
+}
+
+.about-section img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.about-content {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 0 auto; /* Center content on mobile */
+}
+
+@media (min-width: 992px) {
     .about-section {
-        padding: 50px 0;
-        background-size: auto 120%;
+        height: 100vh;
+        display: flex;
+        align-items: center; /* Center content vertically */
+        justify-content: center; /* Center content horizontally */
     }
 
-    .about-content p {
-        font-size: 1rem;
+    .about-section .container {
+        display: flex;
+        align-items: center; /* Center content vertically */
+        justify-content: space-between; /* Space between image and text */
+        height: 100%;
+        max-width: 90%; /* Reduce max-width to remove side whitespace */
+    }
+
+    .about-section picture {
+        flex: 1 1 50%; /* Allow the picture to take up 50% of the container */
+        height: 100%;
+    }
+
+    .about-section img {
+        height: 100%; /* Make the image fill its container */
+        width: auto;
+    }
+
+    .about-content {
+        flex: 1 1 50%; /* Allow the content to take up 50% of the container */
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        margin: 0; /* Remove margin */
+        max-width: 100%; /* Ensure it doesn't exceed the container width */
+        padding: 20px 30px; /* Add some padding */
     }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 991px) {
     .about-content {
-        padding: 10px;
+        width: 90%; /* Reduce width to minimize white space on the sides */
+        margin-top: 20px; /* Add space above the content */
+        margin-left: auto; /* Center content on mobile */
+        margin-right: auto; /* Center content on mobile */
     }
+}
+
+.footer {
+    margin-top: 0; /* Remove any additional margin at the top */
 }

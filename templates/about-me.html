@@ -10,9 +10,29 @@
 {% block content %}
 <section id="about" class="about-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <div class="about-image"></div>
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <picture>
+                    <!-- Desktop images with 16:9 ratio -->
+                    <source media="(min-width: 2560px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_2560w.jpg') }}">
+                    <source media="(min-width: 1920px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
+
+                    <!-- Tablet images with 4:5 ratio -->
+                    <source media="(min-width: 1200px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_1200w.jpg') }}">
+                    <source media="(min-width: 960px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
+                    <source media="(min-width: 828px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_828w.jpg') }}">
+
+                    <!-- Mobile images with 4:5 ratio -->
+                    <source media="(min-width: 750px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_750w.jpg') }}">
+                    <source media="(min-width: 640px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
+                    <source media="(min-width: 480px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_480w.jpg') }}">
+                    <source media="(min-width: 320px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
+
+                    <!-- Fallback image -->
+                    <img src="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}" class="img-fluid" alt="About Me">
+                </picture>
+            </div>
+            <div class="col-lg-6">
                 <div class="about-content">
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.</p>
                     <p>Curabitur sit amet mauris vitae tortor elementum ultrices. Integer dictum purus at odio venenatis, eu viverra libero ultricies.</p>
