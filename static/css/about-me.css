@@ -2,79 +2,110 @@
 .about-section {
     position: relative;
     overflow: hidden;
-    padding: 0; /* Remove any padding */
+    min-height: 100vh; /* Ensure section takes at least full viewport height */
 }
 
-.about-section .container {
-    padding: 0; /* Remove container padding */
+.about-section .container-fluid {
+    padding: 0;
+    height: 100%;
 }
 
-.about-section picture {
-    display: block;
+.about-section .row.no-gutters {
+    margin: 0;
     width: 100%;
-    margin: 0; /* Remove any margin */
+    height: 100%;
+    display: flex;
+    flex-direction: column; /* Ensure stacking by default */
 }
 
+.about-section picture,
 .about-section img {
     width: 100%;
-    height: auto;
+    height: auto; /* Maintain aspect ratio */
     object-fit: cover;
+    display: block;
+}
+
+.about-content-overlay {
+    position: static; /* Change to static for better stacking */
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent background for readability */
 }
 
 .about-content {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 8px;
-    margin: 0 auto; /* Center content on mobile */
+    color: #fff;
+    text-align: center; /* Center text for better readability */
+    max-width: 600px;
+    padding: 10%; /* Add padding for mobile readability */
 }
 
-@media (min-width: 992px) {
-    .about-section {
-        height: 100vh;
-        display: flex;
-        align-items: center; /* Center content vertically */
-        justify-content: center; /* Center content horizontally */
-    }
-
-    .about-section .container {
-        display: flex;
-        align-items: center; /* Center content vertically */
-        justify-content: space-between; /* Space between image and text */
-        height: 100%;
-        max-width: 90%; /* Reduce max-width to remove side whitespace */
-    }
-
-    .about-section picture {
-        flex: 1 1 50%; /* Allow the picture to take up 50% of the container */
-        height: 100%;
-    }
-
-    .about-section img {
-        height: 100%; /* Make the image fill its container */
-        width: auto;
-    }
-
+/* Adjusting the positioning and layout for large screens */
+@media (min-width: 1200px) {
     .about-content {
-        flex: 1 1 50%; /* Allow the content to take up 50% of the container */
-        position: relative;
+        text-align: right; /* Align text to the right for large screens */
+        padding: 0; /* Remove padding for large screens */
+        background: transparent; /* Remove background for large screens */
+        padding-right: 2rem; /* Optional: add some padding to the right if needed */
+    }
+
+    .about-content-overlay {
+        position: absolute; /* Overlay text on image for large screens */
         top: 0;
         left: 0;
-        transform: none;
-        margin: 0; /* Remove margin */
-        max-width: 100%; /* Ensure it doesn't exceed the container width */
-        padding: 20px 30px; /* Add some padding */
+        height: 100%;
+        justify-content: flex-end; /* Align content to the right */
+        background: none; /* Remove background for large screens */
+    }
+
+    .about-section .row.no-gutters {
+        flex-direction: row; /* Revert to row direction for large screens */
     }
 }
 
-@media (max-width: 991px) {
+/* Adjusting the positioning and layout for tablets */
+@media (min-width: 960px) and (max-width: 1199px) {
     .about-content {
-        width: 90%; /* Reduce width to minimize white space on the sides */
-        margin-top: 20px; /* Add space above the content */
-        margin-left: auto; /* Center content on mobile */
-        margin-right: auto; /* Center content on mobile */
+        text-align: right; /* Align text to the right for tablets */
+        padding: 0; /* Remove padding for tablets */
+        background: transparent; /* Remove background for tablets */
+        padding-right: 2rem; /* Optional: add some padding to the right if needed */
+    }
+
+    .about-content-overlay {
+        position: absolute; /* Overlay text on image for tablets */
+        top: 0;
+        left: 0;
+        height: 100%;
+        justify-content: flex-end; /* Align content to the right */
+        background: none; /* Remove background for tablets */
+    }
+
+    .about-section .row.no-gutters {
+        flex-direction: row; /* Revert to row direction for tablets */
     }
 }
 
-.footer {
-    margin-top: 0; /* Remove any additional margin at the top */
+/* Mobile view: stacking behavior */
+@media (max-width: 959px) {
+    .about-section .row {
+        flex-direction: column;
+    }
+    .about-section .col-lg-12 {
+        width: 100%;
+    }
+    .about-content-overlay {
+        position: relative;
+        height: auto;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.7); /* Darker background for mobile readability */
+    }
+    .about-content {
+        width: 100%;
+        text-align: center;
+        padding: 10%;
+    }
 }
