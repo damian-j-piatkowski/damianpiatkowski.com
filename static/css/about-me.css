@@ -27,8 +27,9 @@
 }
 
 .about-content-overlay {
-    position: static; /* Change to static for better stacking */
+    position: absolute; /* Change to absolute for consistent overlay behavior */
     width: 100%;
+    height: 100%;
     padding: 2rem;
     display: flex;
     align-items: center;
@@ -67,7 +68,7 @@
 }
 
 /* Adjusting the positioning and layout for tablets */
-@media (min-width: 960px) and (max-width: 1199px) {
+@media (min-width: 768px) and (max-width: 1199px) {
     .about-content {
         text-align: right; /* Align text to the right for tablets */
         padding: 0; /* Remove padding for tablets */
@@ -90,7 +91,7 @@
 }
 
 /* Mobile view: stacking behavior */
-@media (max-width: 959px) {
+@media (max-width: 767px) {
     .about-section .row {
         flex-direction: column;
     }

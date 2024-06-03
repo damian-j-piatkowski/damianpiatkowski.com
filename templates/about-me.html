@@ -14,31 +14,25 @@
             <div class="col-lg-12 p-0 position-relative">
                 <picture class="w-100 h-100">
                     <!-- Desktop images with 16:9 ratio -->
-                    <source media="(min-width: 2560px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_2560w.jpg') }}">
-                    <source media="(min-width: 1920px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
+                    <source media="(min-width: 1200px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_2560w.jpg') }}">
+                    <source media="(min-width: 992px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
 
-                    <!-- Nest Hub and similar with 16:9 ratio -->
-                    <source media="(min-width: 1280px) and (max-width: 1919px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1280w.jpg') }}">
-                    <source media="(min-width: 1024px) and (max-width: 1279px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1024w.jpg') }}">
-
-                    <!-- Tablets and smaller desktops with 4:5 ratio -->
-                    <source media="(min-width: 960px) and (max-width: 1023px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
-                    <source media="(min-width: 828px) and (max-width: 959px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_828w.jpg') }}">
-                    <source media="(min-width: 750px) and (max-width: 827px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_750w.jpg') }}">
+                    <!-- Tablet images with 4:5 ratio -->
+                    <source media="(min-width: 768px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_1200w.jpg') }}">
+                    <source media="(min-width: 480px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
 
                     <!-- Mobile images with 4:5 ratio -->
-                    <source media="(min-width: 640px) and (max-width: 749px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
-                    <source media="(min-width: 480px) and (max-width: 639px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_480w.jpg') }}">
-                    <source media="(min-width: 320px) and (max-width: 479px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
+                    <source media="(min-width: 320px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
+                    <source media="(min-width: 0px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
 
                     <!-- Fallback image -->
-                    <img src="{{ url_for('static', filename='images/about_me/about_me_16x9_1024w.jpg') }}" class="img-fluid w-100 h-100" alt="About Me">
+                    <img src="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}" class="img-fluid w-100 h-100" alt="About Me">
                 </picture>
                 <div class="about-content-overlay">
                     <div class="about-content">
                         <p>Hello! I'm a passionate back-end developer with a love for crafting efficient and scalable server-side applications. Based and born in Łódź, Poland, I also lived for four unforgettable years in Hanoi, Vietnam.</p>
-                        <p>When I'm not coding, you can find me immersed in the world of gaming, with "Breath of the Wild" and "Hades" being my all-time favorite adventures. My favorite piece of music is the theme from Octopath Traveler, composed by Yasunori Nishiki.</p>
-                        <p>I also enjoy getting lost in both fiction and non-fiction books, with favorites including the "Final Empire" trilogy and non-fiction gems like "King Leopold's Ghost" and "The Sixth Extinction." As a big football enthusiast and minimalist at heart, I find joy in simplicity and the thrill of a good match. Feel free to get in touch to discuss projects or just share your favorite game!</p>
+                        <p>When I'm not coding, you can find me immersed in the world of gaming, with "Breath of the Wild" and "Hades" being my all-time favorite adventures. I also enjoy getting lost in both fiction and non-fiction books, with favorites including "The Final Empire" trilogy and non-fiction gems like "King Leopold's Ghost" and "The Sixth Extinction".</p>
+                        <p> As a big football enthusiast and minimalist at heart, I find joy in simplicity and the thrill of a good match. Feel free to get in touch to discuss projects or just share your favorite game!</p>
                     </div>
                 </div>
             </div>
