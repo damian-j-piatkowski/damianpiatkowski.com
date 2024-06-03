@@ -101,11 +101,12 @@
         position: relative;
         height: auto;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.7); /* Darker background for mobile readability */
+        background: #ECEFF4; /* Background color matching the contact section */
     }
     .about-content {
         width: 100%;
         text-align: center;
         padding: 10%;
+        color: #666666; /* Change text color for mobile displays */
     }
 }
