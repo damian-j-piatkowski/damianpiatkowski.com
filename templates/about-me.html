@@ -15,15 +15,15 @@
                 <picture class="w-100 h-100">
                     <!-- Desktop images with 16:9 ratio -->
                     <source media="(min-width: 1200px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_2560w.jpg') }}">
-                    <source media="(min-width: 992px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
+                    <source media="(min-width: 992px) and (orientation: landscape)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
 
                     <!-- Tablet images with 4:5 ratio -->
-                    <source media="(min-width: 768px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_1200w.jpg') }}">
-                    <source media="(min-width: 480px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
+                    <source media="(min-width: 1024px) and (max-width: 1199px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_1200w.jpg') }}">
+                    <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
 
                     <!-- Mobile images with 4:5 ratio -->
-                    <source media="(min-width: 320px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
-                    <source media="(min-width: 0px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
+                    <source media="(min-width: 320px) and (max-width: 767px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
+                    <source media="(max-width: 319px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
 
                     <!-- Fallback image -->
                     <img src="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}" class="img-fluid w-100 h-100" alt="About Me">

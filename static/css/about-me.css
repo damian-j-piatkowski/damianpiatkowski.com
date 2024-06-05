@@ -8,6 +8,8 @@
 .about-section .container-fluid {
     padding: 0;
     height: 100%;
+    display: flex;
+    flex-direction: column; /* Ensure it takes full height */
 }
 
 .about-section .row.no-gutters {
@@ -15,6 +17,7 @@
     width: 100%;
     height: 100%;
     display: flex;
+    flex: 1; /* Allow the row to grow and take available space */
     flex-direction: column; /* Ensure stacking by default */
 }
 
@@ -27,21 +30,28 @@
 }
 
 .about-content-overlay {
-    position: absolute;
+    position: relative;
     width: 100%;
     height: 100%;
     padding: 2rem;
     display: flex;
+    flex: 1; /* Allow the overlay to grow and take available space */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.7); /* Semi-transparent background for readability */
+    background: #ECEFF4; /* Default background color */
+    color: #666666; /* Default text color */
 }
 
 .about-content {
-    color: #fff;
+    color: inherit; /* Inherit color from overlay */
     text-align: center;
     max-width: 600px;
     padding: 10%;
+    flex: 1; /* Allow the content to grow and take available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* Adjusting the positioning and layout for large screens */
@@ -59,7 +69,9 @@
         left: 0;
         height: 100%;
         justify-content: flex-end;
+        align-items: flex-end; /* Align content to the right */
         background: none;
+        color: #fff; /* White text for better readability on images */
     }
 
     .about-section .row.no-gutters {
@@ -81,6 +93,7 @@
         height: auto;
         justify-content: center;
         background: #ECEFF4; /* Ensure consistent background color */
+        color: #666666; /* Ensure consistent text color */
     }
 
     .about-section .row.no-gutters {
@@ -94,32 +107,52 @@
     }
 }
 
-/* Tablet landscape view */
-@media (min-width: 992px) and (max-width: 1199px) and (orientation: landscape) {
-    .about-content {
-        text-align: right;
-        padding: 0;
-        background: transparent;
-        padding-right: 2rem;
-        color: #fff; /* Ensure text color remains white */
-    }
-
-    .about-content-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        justify-content: flex-end;
-        background: none; /* Ensure no background for overlay in landscape */
+/* Specific adjustments for Nest Hub Max (1280x800) */
+@media (min-width: 1280px) and (max-width: 1350px) and (orientation: landscape) {
+    .about-section {
+        min-height: 100vh;
     }
 
     .about-section .row.no-gutters {
-        flex-direction: row;
+        height: 100%;
+        flex-direction: column;
     }
 
     .about-section picture,
     .about-section img {
-        object-fit: cover;
+        object-fit: cover; /* Ensure the image covers the entire section */
+        height: 100%; /* Make the image take full height of the section */
+        width: 100%; /* Make the image take full width of the section */
+    }
+
+    .about-content-overlay {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ECEFF4; /* Ensure consistent background color */
+        color: #666666; /* Ensure consistent text color */
+        box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
+    }
+
+    .about-content {
+        text-align: center;
+        padding: 2rem;
+        max-width: 600px;
+        margin: auto; /* Center the content */
+        color: inherit; /* Ensure text color matches overlay */
+    }
+}
+
+/* Tablet landscape view with 4x5 aspect ratio for iPad Pro */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .about-section picture,
+    .about-section img {
+        object-fit: contain;
+        height: 50vh;
     }
 }
 
@@ -138,12 +171,13 @@
         height: auto;
         justify-content: center;
         background: #ECEFF4; /* Background color matching the contact section */
+        color: #666666; /* Change text color for mobile displays */
     }
 
     .about-content {
         width: 100%;
         text-align: center;
         padding: 10%;
-        color: #666666; /* Change text color for mobile displays */
+        color: inherit; /* Inherit text color from overlay */
     }
 }
