@@ -1,4 +1,4 @@
-/* static/css/about-me.css */
+/* Common styles */
 .about-section {
     position: relative;
     overflow: hidden;
@@ -21,13 +21,13 @@
 .about-section picture,
 .about-section img {
     width: 100%;
-    height: auto; /* Maintain aspect ratio */
+    height: 100%;
     object-fit: cover;
     display: block;
 }
 
 .about-content-overlay {
-    position: absolute; /* Change to absolute for consistent overlay behavior */
+    position: absolute;
     width: 100%;
     height: 100%;
     padding: 2rem;
@@ -39,54 +39,87 @@
 
 .about-content {
     color: #fff;
-    text-align: center; /* Center text for better readability */
+    text-align: center;
     max-width: 600px;
-    padding: 10%; /* Add padding for mobile readability */
+    padding: 10%;
 }
 
 /* Adjusting the positioning and layout for large screens */
 @media (min-width: 1200px) {
     .about-content {
-        text-align: right; /* Align text to the right for large screens */
-        padding: 0; /* Remove padding for large screens */
-        background: transparent; /* Remove background for large screens */
-        padding-right: 2rem; /* Optional: add some padding to the right if needed */
+        text-align: right;
+        padding: 0;
+        background: transparent;
+        padding-right: 2rem;
     }
 
     .about-content-overlay {
-        position: absolute; /* Overlay text on image for large screens */
+        position: absolute;
         top: 0;
         left: 0;
         height: 100%;
-        justify-content: flex-end; /* Align content to the right */
-        background: none; /* Remove background for large screens */
+        justify-content: flex-end;
+        background: none;
     }
 
     .about-section .row.no-gutters {
-        flex-direction: row; /* Revert to row direction for large screens */
+        flex-direction: row;
     }
 }
 
 /* Adjusting the positioning and layout for tablets */
 @media (min-width: 768px) and (max-width: 1199px) {
     .about-content {
-        text-align: right; /* Align text to the right for tablets */
-        padding: 0; /* Remove padding for tablets */
-        background: transparent; /* Remove background for tablets */
-        padding-right: 2rem; /* Optional: add some padding to the right if needed */
+        text-align: center;
+        padding: 10%;
+        background: #ECEFF4;
+        color: #666666;
     }
 
     .about-content-overlay {
-        position: absolute; /* Overlay text on image for tablets */
-        top: 0;
-        left: 0;
-        height: 100%;
-        justify-content: flex-end; /* Align content to the right */
-        background: none; /* Remove background for tablets */
+        position: relative;
+        height: auto;
+        justify-content: center;
+        background: #ECEFF4; /* Ensure consistent background color */
     }
 
     .about-section .row.no-gutters {
-        flex-direction: row; /* Revert to row direction for tablets */
+        flex-direction: column;
+    }
+
+    .about-section picture,
+    .about-section img {
+        object-fit: contain; /* Ensure images are contained within the viewport */
+        height: 50vh; /* Limit the height of the image to half the viewport height */
+    }
+}
+
+/* Tablet landscape view */
+@media (min-width: 992px) and (max-width: 1199px) and (orientation: landscape) {
+    .about-content {
+        text-align: right;
+        padding: 0;
+        background: transparent;
+        padding-right: 2rem;
+        color: #fff; /* Ensure text color remains white */
+    }
+
+    .about-content-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        justify-content: flex-end;
+        background: none; /* Ensure no background for overlay in landscape */
+    }
+
+    .about-section .row.no-gutters {
+        flex-direction: row;
+    }
+
+    .about-section picture,
+    .about-section img {
+        object-fit: cover;
     }
 }
 
@@ -95,15 +128,18 @@
     .about-section .row {
         flex-direction: column;
     }
+
     .about-section .col-lg-12 {
         width: 100%;
     }
+
     .about-content-overlay {
         position: relative;
         height: auto;
         justify-content: center;
         background: #ECEFF4; /* Background color matching the contact section */
     }
+
     .about-content {
         width: 100%;
         text-align: center;
