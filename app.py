@@ -3,6 +3,7 @@ import os
 
 from flask import Flask
 
+from about_me.routes import about_me_bp
 from config import config
 from extensions import db, mail
 from home.routes import home_bp
@@ -26,6 +27,7 @@ def create_app():
 
     # Register blueprints
     flask_app.register_blueprint(home_bp)
+    flask_app.register_blueprint(about_me_bp)
 
     app_logger = logging.getLogger(__name__)
     app_logger.info("App created successfully.")
