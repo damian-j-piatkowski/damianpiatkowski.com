@@ -8,18 +8,23 @@
 
 {% block content %}
 <section class="resume-section">
-    <div class="resume-container">
+    <div class="container">
         <div class="resume-header">
-            <h3>Damian Piatkowski</h3>
-            <p>Mobile: +48 796 216 095 | Email: piatkowski.damian@outlook.com</p>
-            <p>Address: Wodna 23/72, 90-024 Lodz</p>
-            <p>For more info on my private projects please visit: <a href="https://github.com/DamianPiatkowski" target="_blank">GitHub</a></p>
+            <div class="photo-and-info">
+                <img src="{{ url_for('static', filename='images/resume.jpg') }}" alt="Profile Photo" class="resume-photo">
+                <div class="header-info">
+                    <h3>Damian Piatkowski</h3>
+                    <p>Email: damian.j.piatkowski@gmail.com</p>
+                    <p>Address: Wodna 23/72, 90-024 Lodz</p>
+                    <p>For more info on my private projects please visit: <a href="https://github.com/DamianPiatkowski" target="_blank">GitHub</a></p>
+                </div>
+            </div>
         </div>
 
         <div class="resume-section-content">
             <h3>PROFILE</h3>
             <ul>
-                <li>Accredited RPA developer delivering robust and effective automation solutions for banking processes based on valuable Python programming knowledge.</li>
+                <li>Technical Architect and Python Developer, specializing in developing robust Flask web applications and reusable pip libraries for the team.</li>
                 <li>Possessing high level interpersonal skills, experienced in working in international environments, recommended as a professional and reliable person.</li>
             </ul>
         </div>

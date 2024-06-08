@@ -1,3 +1,10 @@
+/* Reset box-sizing for consistent box model */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 /* General Styles */
 .open-sans {
     font-family: "Open Sans", sans-serif;
@@ -14,28 +21,48 @@
     font-family: 'Open Sans', sans-serif;
 }
 
-.resume-container {
+.container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #FFF;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
 
 .resume-header {
-    text-align: center;
-    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    background-color: #D0F0C0;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.photo-and-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.resume-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.header-info {
+    text-align: left;
+    flex: 1;
 }
 
 .resume-header h3 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 2rem;
+    margin-bottom: 5px;
 }
 
 .resume-header p {
-    font-size: 1.25rem;
-    color: #666666;
+    font-size: 1rem;
+    color: #333;
     margin-bottom: 5px;
 }
 
@@ -50,10 +77,13 @@
 
 .resume-section-content {
     margin-bottom: 30px;
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 10px;
 }
 
 .resume-section-content h3 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     margin-bottom: 15px;
     color: #333;
     border-bottom: 2px solid #007bff;
@@ -61,7 +91,7 @@
 }
 
 .resume-section-content h4 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     margin-top: 20px;
     color: #333;
 }
@@ -80,7 +110,7 @@
 
 /* Ensure there's enough space for the footer */
 .resume-section {
-    padding-bottom: 100px; /* Adjust as needed */
+    padding-bottom: 150px;
 }
 
 /* Footer adjustments */
@@ -93,18 +123,49 @@ footer.custom-gray-bg {
     z-index: 10;
 }
 
-footer.custom-gray-bg p {
+footer.custom-gray-bg p,
+footer.custom-gray-bg a,
+footer.custom-gray-bg i {
     font-size: 14px !important;
     line-height: 1.5 !important;
+    margin: 0 !important;
+    color: white !important;
 }
 
 footer.custom-gray-bg .container {
-    margin-top: 10px !important;
-    margin-bottom: 10px !important;
+    max-width: 800px !important;
+    padding: 0 20px !important;
+    margin: 0 auto !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important; /* Ensure no box-shadow */
+    background: none !important; /* Ensure no background color */
 }
 
-/* Privacy Notice Link */
+footer.custom-gray-bg .row {
+    margin: 0 !important;
+}
+
+footer.custom-gray-bg .col-lg-12 {
+    padding: 10px 0 !important;
+    border: none !important; /* Ensure no borders */
+}
+
 footer.custom-gray-bg a.privacy-link {
-    color: white !important;
-    text-decoration: underline !important; /* Add underline for better visibility */
+    text-decoration: underline !important;
+}
+
+footer.custom-gray-bg a:hover {
+    text-decoration: underline !important;
+}
+
+footer.custom-gray-bg a,
+footer.custom-gray-bg i {
+    box-shadow: none !important; /* Ensure no box shadow on links and icons */
+}
+
+/* Ensure no specific styles override the base icon spacing */
+footer.custom-gray-bg .social-icons i {
+    margin: 0 10px !important; /* Adjust the spacing as needed */
+    font-size: 24px !important;
 }
