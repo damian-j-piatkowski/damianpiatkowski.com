@@ -6,19 +6,13 @@
 }
 
 /* General Styles */
-.open-sans {
+body {
     font-family: "Open Sans", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    font-variation-settings: "wdth" 100;
 }
 
-/* Resume Section */
 .resume-section {
     background-color: #ECEFF4;
     padding: 50px 0;
-    font-family: 'Open Sans', sans-serif;
 }
 
 .container {
@@ -55,7 +49,7 @@
     flex: 1;
 }
 
-.resume-header h3 {
+.resume-header h1 {
     font-size: 2rem;
     margin-bottom: 5px;
 }
@@ -82,7 +76,7 @@
     border-radius: 10px;
 }
 
-.resume-section-content h3 {
+.resume-section-content h2 {
     font-size: 1.5rem;
     margin-bottom: 15px;
     color: #333;
@@ -90,7 +84,7 @@
     padding-bottom: 5px;
 }
 
-.resume-section-content h4 {
+.resume-section-content h3 {
     font-size: 1.25rem;
     margin-top: 20px;
     color: #333;
@@ -99,7 +93,7 @@
 .resume-section-content ul {
     list-style-type: disc;
     padding-left: 20px;
-    color: #666666;
+    color: #666;
 }
 
 .resume-section-content li {
@@ -115,12 +109,10 @@
 
 /* Footer adjustments */
 footer.custom-gray-bg {
-    background-color: #666666 !important;
+    background-color: #666 !important;
     color: white !important;
     padding: 20px 0 !important;
     text-align: center !important;
-    position: relative;
-    z-index: 10;
 }
 
 footer.custom-gray-bg p,
@@ -138,8 +130,8 @@ footer.custom-gray-bg .container {
     margin: 0 auto !important;
     border: none !important;
     outline: none !important;
-    box-shadow: none !important; /* Ensure no box-shadow */
-    background: none !important; /* Ensure no background color */
+    box-shadow: none !important;
+    background: none !important;
 }
 
 footer.custom-gray-bg .row {
@@ -148,7 +140,7 @@ footer.custom-gray-bg .row {
 
 footer.custom-gray-bg .col-lg-12 {
     padding: 10px 0 !important;
-    border: none !important; /* Ensure no borders */
+    border: none !important;
 }
 
 footer.custom-gray-bg a.privacy-link {
@@ -161,11 +153,28 @@ footer.custom-gray-bg a:hover {
 
 footer.custom-gray-bg a,
 footer.custom-gray-bg i {
-    box-shadow: none !important; /* Ensure no box shadow on links and icons */
+    box-shadow: none !important;
 }
 
-/* Ensure no specific styles override the base icon spacing */
 footer.custom-gray-bg .social-icons i {
-    margin: 0 10px !important; /* Adjust the spacing as needed */
+    margin: 0 10px !important;
     font-size: 24px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .resume-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .resume-photo {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .resume-section-content {
+        padding: 15px;
+    }
 }
