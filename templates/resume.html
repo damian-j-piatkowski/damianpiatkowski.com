@@ -7,109 +7,139 @@
 {% endblock %}
 
 {% block content %}
-<section class="resume-section">
-    <div class="container">
-        <header class="resume-header">
-            <div class="photo-and-info">
-                <img src="{{ url_for('static', filename='images/resume.jpg') }}" alt="Profile Photo" class="resume-photo">
-                <div class="header-info">
-                    <h1>Damian Piatkowski</h1>
-                    <p>Email: <a href="mailto:damian.j.piatkowski@gmail.com">damian.j.piatkowski@gmail.com</a></p>
-                    <p>Address: Wodna 23/72, 90-024 Lodz</p>
-                    <p>For more info on my private projects please visit: <a href="https://github.com/DamianPiatkowski" target="_blank">GitHub</a></p>
-                </div>
+<section class="download-and-resume">
+    <div class="download-section">
+        <div class="container text-center funky-container">
+            <div class="funky-content">
+                <p>Download a PDF version of my resume:</p>
+                <a href="{{ url_for('static', filename='files/Damian_Piatkowski_Resume.pdf') }}" class="btn btn-custom-green" download>Download PDF</a>
             </div>
-        </header>
+        </div>
+    </div>
 
-        <section class="resume-section-content">
-            <h2>PROFILE</h2>
-            <ul>
-                <li>Technical Architect and Python Developer, specializing in developing robust Flask web applications and reusable pip libraries for the team.</li>
-                <li>Possessing high level interpersonal skills, experienced in working in international environments, recommended as a professional and reliable person.</li>
-            </ul>
-        </section>
+    <div class="resume-section">
+        <div class="container">
+            <header class="resume-header">
+                <div class="photo-and-info">
+                    <img src="{{ url_for('static', filename='images/resume.jpg') }}" alt="Profile Photo" class="resume-photo">
+                    <div class="header-info">
+                        <h1>Damian Piatkowski</h1>
+                        <p>Email: <a href="mailto:damian.j.piatkowski@gmail.com">damian.j.piatkowski@gmail.com</a></p>
+                        <p>Phone: <a href="tel:+48796216095">+48 796 216 095</a></p>
+                    </div>
+                </div>
+                <div class="profile-description">
+                    <p>An experienced Back-end Python Developer specializing in architecting efficient backend systems. Enthusiastic about Test-Driven Development and exploring optimal design patterns.</p>
+                    <p>Since sharing is caring, he documents lessons from his programming career and books he reads at <a href="http://damianpiatkowski.com/blog" target="_blank">damianpiatkowski.com/blog</a>.</p>
+                    <p>Possessing high-level interpersonal skills, experienced in working in international environments, and recommended as a professional and reliable person.</p>
+                </div>
+            </header>
 
-        <section class="resume-section-content">
-            <h2>EXPERIENCE</h2>
-            <article>
-                <h3>RPA Developer - Nordea, Poland (Oct 2018 – Now)</h3>
+            <section class="resume-section-content">
+                <h2>EXPERIENCE</h2>
+                <article>
+                    <h3>Back-end Python Developer & Technical Architect - IQVIA, November 2022 - Present</h3>
+                    <ul>
+                        <li>Led the design and implementation of backend systems for a complex web application using Flask.</li>
+                        <li>Developed and maintained reusable Python libraries for backend functionality.</li>
+                        <li>Provided technical guidance and code reviews to ensure adherence to best practices and coding standards.</li>
+                        <li>Collaborated with business stakeholders to estimate project efforts and costs.</li>
+                        <li>Continued hands-on development while advising on architectural decisions.</li>
+                        <li>Devised and conducted coding trainings to improve team skills and knowledge.</li>
+                        <li>Authored comprehensive coding guides to standardize best practices across the team.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>Back-end Python Developer - IQVIA, April 2021 - November 2022</h3>
+                    <ul>
+                        <li>Automated various backend processes using Python, enhancing efficiency and productivity.</li>
+                        <li>Developed API wrappers and reusable libraries for backend development.</li>
+                        <li>Participated in system design and contributed to maintaining high coding standards through code reviews.</li>
+                        <li>Supported discovery calls with business teams to align technical solutions with business needs.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>RPA Developer - Nordea, Poland (Oct 2018 – Now)</h3>
+                    <ul>
+                        <li>Collaborated closely with RPA Analyst and business stakeholders to analyze and understand requirements.</li>
+                        <li>Proposed and planned development work according to needs.</li>
+                        <li>Developed efficient, well-structured, and scalable automation solutions within BluePrism.</li>
+                        <li>Displayed end-to-end ownership for solutions and focused on business added-value.</li>
+                        <li>Tested solutions in cooperation with process expert to secure a stable launch in production.</li>
+                        <li>Created technical documentation for automated processes to instruct business operation and ensure controllability of robots' functionalities.</li>
+                        <li>Took part in interviews alongside a team leader as a technical expert.</li>
+                        <li>Reviewed business cases with SMEs to identify potential improvements from RPA perspective.</li>
+                        <li>Maintained existing robots and implemented changes to meet business' changing demands.</li>
+                        <li>Participated in projects producing 50-100 FTE's back to business.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>Process Officer - Nordea, Poland (Apr 2017 – Sep 2018)</h3>
+                    <ul>
+                        <li>Controlled, updated, and authorized data into banking systems and applications.</li>
+                        <li>Coordinated processes knowledge handover from Swedish counterparts through training in Stockholm and re-shared acquired process to the team after coming back to Poland.</li>
+                        <li>Proposed and implemented changes to increase the efficiency of supported processes.</li>
+                        <li>Provided English language training to co-workers.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>English Teacher - DreamSky, Vietnam (Sep 2013 – Jan 2017)</h3>
+                    <ul>
+                        <li>Delivered English classes in both public and private schools in Hanoi, Vietnam.</li>
+                        <li>Managed classrooms of 10 up to 50 students.</li>
+                        <li>Continuously improved teaching methods based on feedback.</li>
+                        <li>Prepared miscellaneous materials in the shape of exercises, tests, interactive presentations.</li>
+                        <li>Conducted placement tests evaluating students’ language level.</li>
+                        <li>Stayed culturally sensitive in the workplace.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="resume-section-content">
+                <h2>EDUCATION</h2>
                 <ul>
-                    <li>Collaborated closely with RPA Analyst and business stakeholders to analyze and understand requirements.</li>
-                    <li>Proposed and planned development work according to needs.</li>
-                    <li>Developed efficient, well-structured, and scalable automation solutions within BluePrism.</li>
-                    <li>Displayed end-to-end ownership for solutions and focused on business added-value.</li>
-                    <li>Tested solutions in cooperation with process expert to secure a stable launch in production.</li>
-                    <li>Created technical documentation for automated processes to instruct business operation and ensure controllability of robots' functionalities.</li>
-                    <li>Took part in interviews alongside a team leader as a technical expert.</li>
-                    <li>Reviewed business cases with SMEs to identify potential improvements from RPA perspective.</li>
-                    <li>Maintained existing robots and implemented changes to meet business' changing demands.</li>
-                    <li>Participated in projects producing 50-100 FTE's back to business.</li>
+                    <li>IELTS - Overall band score 8.5/9 | Aug 2015</li>
+                    <li>Cambridge Language Assessment</li>
+                    <li>Introduction to Computer Science and Programming using Python | Apr 2018 - MIT, edX</li>
+                    <li>BP Certified Developer | Apr 2019</li>
+                    <li>BP Certified Professional Developer | Oct 2020</li>
+                    <li>Master's Degree in Sociology | Oct 2011 – Jun 2013 - University of Lodz, Poland</li>
+                    <li>Bachelor's Degree in Sociology | Oct 2008 - Jun 2011 - University of Lodz, Poland</li>
                 </ul>
-            </article>
+            </section>
 
-            <article>
-                <h3>Process Officer - Nordea, Poland (Apr 2017 – Sep 2018)</h3>
+            <section class="resume-section-content">
+                <h2>LANGUAGES</h2>
                 <ul>
-                    <li>Controlled, updated, and authorized data into banking systems and applications.</li>
-                    <li>Coordinated processes knowledge handover from Swedish counterparts through training in Stockholm and re-shared acquired process to the team after coming back to Poland.</li>
-                    <li>Proposed and implemented changes to increase the efficiency of supported processes.</li>
-                    <li>Provided English language training to co-workers.</li>
+                    <li>Polish – native speaker</li>
+                    <li>English - fluent</li>
+                    <li>Vietnamese – intermediate</li>
                 </ul>
-            </article>
+            </section>
 
-            <article>
-                <h3>English Teacher - DreamSky, Vietnam (Sep 2013 – Jan 2017)</h3>
+            <section class="resume-section-content">
+                <h2>SKILLS</h2>
                 <ul>
-                    <li>Delivered English classes in both public and private schools in Hanoi, Vietnam.</li>
-                    <li>Managed classrooms of 10 up to 50 students.</li>
-                    <li>Continuously improved teaching methods based on feedback.</li>
-                    <li>Prepared miscellaneous materials in the shape of exercises, tests, interactive presentations.</li>
-                    <li>Conducted placement tests evaluating students’ language level.</li>
-                    <li>Stayed culturally sensitive in the workplace.</li>
+                    <li>Advanced user - Blue Prism, HTML, CSS</li>
+                    <li>Efficient user - SQL, Python, JavaScript, Linux</li>
+                    <li>Analytical thinking | Creating project documentation</li>
+                    <li>Stakeholders relationship management</li>
                 </ul>
-            </article>
-        </section>
+            </section>
 
-        <section class="resume-section-content">
-            <h2>EDUCATION</h2>
-            <ul>
-                <li>IELTS - Overall band score 8.5/9 | Aug 2015</li>
-                <li>Cambridge Language Assessment</li>
-                <li>Introduction to Computer Science and Programming using Python | Apr 2018 - MIT, edX</li>
-                <li>BP Certified Developer | Apr 2019</li>
-                <li>BP Certified Professional Developer | Oct 2020</li>
-                <li>Master's Degree in Sociology | Oct 2011 – Jun 2013 - University of Lodz, Poland</li>
-                <li>Bachelor's Degree in Sociology | Oct 2008 - Jun 2011 - University of Lodz, Poland</li>
-            </ul>
-        </section>
-
-        <section class="resume-section-content">
-            <h2>LANGUAGES</h2>
-            <ul>
-                <li>Polish – native speaker</li>
-                <li>English - fluent</li>
-                <li>Vietnamese – intermediate</li>
-            </ul>
-        </section>
-
-        <section class="resume-section-content">
-            <h2>SKILLS</h2>
-            <ul>
-                <li>Advanced user - Blue Prism, HTML, CSS</li>
-                <li>Efficient user - SQL, Python, JavaScript, Linux</li>
-                <li>Analytical thinking | Creating project documentation</li>
-                <li>Stakeholders relationship management</li>
-            </ul>
-        </section>
-
-        <section class="resume-section-content">
-            <h2>VALUES</h2>
-            <ul>
-                <li>Detail-oriented | Observant</li>
-                <li>Customer-oriented | Team player</li>
-                <li>Responsible | Reliable</li>
-            </ul>
-        </section>
+            <section class="resume-section-content">
+                <h2>VALUES</h2>
+                <ul>
+                    <li>Detail-oriented | Observant</li>
+                    <li>Customer-oriented | Team player</li>
+                    <li>Responsible | Reliable</li>
+                </ul>
+            </section>
+        </div>
     </div>
 </section>
 {% endblock %}
