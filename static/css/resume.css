@@ -108,52 +108,81 @@
 
 .photo-and-info {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
 }
 
-.resume-photo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 20px;
+.contact-info {
+    flex: 1;
+    text-align: left;
+    padding-right: 20px; /* Add padding to separate from the photo */
+    display: flex;
+    flex-wrap: wrap; /* Allow icons to wrap if needed */
+    gap: 10px; /* Add some space between icons */
 }
 
-.header-info {
-    text-align: center;
+.contact-info a {
+    font-size: 1.5rem; /* Adjust icon size */
 }
 
-.resume-header h1 {
-    font-size: 2rem;
-    margin-bottom: 5px;
-}
-
-.resume-header p {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.resume-header a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.resume-header a:hover {
+.contact-info a:hover {
     text-decoration: underline;
 }
 
+.header-info {
+    text-align: right; /* Align text to the right */
+}
+
+.header-info h1 {
+    margin-bottom: 10px; /* Add padding between the name and the rest */
+}
+
+.header-info .resume-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-top: 10px; /* Space between the name and the photo */
+}
+
 .profile-description {
+    clear: both;
     text-align: center;
     color: #333;
-    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px; /* Add some margin to separate from the contact info */
 }
 
 .profile-description p {
     font-size: 1rem;
     line-height: 1.5;
     margin-bottom: 15px;
+}
+
+/* Responsive design for mobile views */
+@media (max-width: 768px) {
+    .photo-and-info {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-info {
+        text-align: center;
+    }
+
+    .contact-info {
+        justify-content: center;
+        text-align: center;
+        padding-right: 0; /* Remove right padding */
+    }
+
+    .resume-header {
+        padding: 10px; /* Adjust padding for mobile view */
+    }
+
+    .profile-description {
+        margin-top: 10px; /* Adjust margin for mobile view */
+    }
 }
 
 /* Resume Section Content */
