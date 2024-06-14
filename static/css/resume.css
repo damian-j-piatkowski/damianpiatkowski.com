@@ -124,10 +124,12 @@
 
 .contact-info a {
     font-size: 1.5rem; /* Adjust icon size */
+    color: #333333;
 }
 
 .contact-info a:hover {
     text-decoration: underline;
+    color: darkgray; /* Optional: change color on hover */
 }
 
 .header-info {
@@ -173,7 +175,16 @@
     .contact-info {
         justify-content: center;
         text-align: center;
-        padding-right: 0; /* Remove right padding */
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
+
+    .contact-info a {
+        margin-right: 10px; /* Add margin between each contact icon */
+    }
+
+    .contact-info a:last-child {
+        margin-right: 0; /* Remove margin from the last element */
     }
 
     .resume-header {
