@@ -258,6 +258,52 @@
     padding-bottom: 150px;
 }
 
+/* Education and Languages Section */
+.education-and-languages-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.education-subsection, .languages-subsection {
+    flex: 1;
+    min-width: 300px; /* Ensure minimum width for each subsection */
+    margin-right: 20px; /* Add some space between subsections */
+}
+
+.education-subsection ul, .languages-subsection ul {
+    list-style-type: none;
+    padding-left: 0; /* Remove default padding */
+    color: #666666;
+}
+
+.education-subsection li, .languages-subsection li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.education-subsection h2, .languages-subsection h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+/* Adjustments for mobile views */
+@media (max-width: 768px) {
+    .education-and-languages-container {
+        flex-direction: column;
+    }
+
+    .education-subsection, .languages-subsection {
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 20px; /* Add space below each subsection */
+    }
+}
+
 /* Skills Section */
 .skills-container {
     display: flex;
