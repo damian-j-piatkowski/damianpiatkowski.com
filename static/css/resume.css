@@ -99,8 +99,8 @@
 /* Resume Header */
 .resume-header {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     background-color: #D0F0C0;
     padding: 20px;
     border-radius: 10px;
@@ -108,15 +108,31 @@
 
 .photo-and-info {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: flex-start;
-    width: 100%;
+    margin-right: 40px; /* More space between photo and description */
+}
+
+.header-info {
+    text-align: left; /* Align text to the left */
+    margin-bottom: 10px;
+}
+
+.header-info h1 {
+    font-size: 1.5rem; /* Smaller font size */
+    margin-bottom: 10px; /* Add padding between the name and the rest */
+}
+
+.header-info .resume-photo {
+    width: 80px; /* Smaller size */
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px; /* Space between the photo and the icons */
 }
 
 .contact-info {
-    flex: 1;
     text-align: left;
-    padding-right: 20px; /* Add padding to separate from the photo */
+    padding-top: 10px; /* Add some space above icons */
     display: flex;
     flex-wrap: wrap; /* Allow icons to wrap if needed */
     gap: 10px; /* Add some space between icons */
@@ -132,40 +148,32 @@
     color: darkgray; /* Optional: change color on hover */
 }
 
-.header-info {
-    text-align: right; /* Align text to the right */
-}
-
-.header-info h1 {
-    margin-bottom: 10px; /* Add padding between the name and the rest */
-}
-
-.header-info .resume-photo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-top: 10px; /* Space between the name and the photo */
-}
-
 .profile-description {
-    clear: both;
-    text-align: center;
+    flex: 1; /* Ensure description takes the remaining space */
+    text-align: left;
     color: #333;
-    margin-top: 20px;
-    margin-bottom: 20px; /* Add some margin to separate from the contact info */
+    margin-top: 0; /* Remove top margin */
+    margin-bottom: 0; /* Remove bottom margin */
+    margin-left: 40px; /* Ensure space from the photo section */
 }
 
 .profile-description p {
     font-size: 1rem;
     line-height: 1.5;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 /* Responsive design for mobile views */
 @media (max-width: 768px) {
-    .photo-and-info {
+    .resume-header {
         flex-direction: column;
         align-items: center;
+    }
+
+    .photo-and-info {
+        align-items: center;
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 10px; /* Add some space below for mobile view */
     }
 
     .header-info {
@@ -187,12 +195,27 @@
         margin-right: 0; /* Remove margin from the last element */
     }
 
+    .profile-description {
+        text-align: center;
+        margin-left: 0; /* Reset margin for mobile view */
+    }
+}
+
+/* Layout adjustments for large screens */
+@media (min-width: 769px) {
     .resume-header {
-        padding: 10px; /* Adjust padding for mobile view */
+        flex-direction: row;
+    }
+
+    .photo-and-info {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-right: 40px; /* More space between photo and description */
     }
 
     .profile-description {
-        margin-top: 10px; /* Adjust margin for mobile view */
+        text-align: left;
+        margin-left: 40px; /* Ensure space from the photo section */
     }
 }
 
@@ -233,6 +256,58 @@
 /* Ensure there's enough space for the footer */
 .resume-section {
     padding-bottom: 150px;
+}
+
+/* Skills Section */
+.skills-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.skills-subsection {
+    flex: 1;
+    min-width: 200px; /* Ensure minimum width for each subsection */
+    margin-right: 20px; /* Add some space between subsections */
+}
+
+.skills-subsection h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #007bff; /* Color for subsection headers */
+}
+
+.skills-subsection ul {
+    list-style-type: none;
+    padding-left: 0; /* Remove default padding */
+    color: #666666;
+}
+
+.skills-subsection li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.skills-subsection ul li::before {
+    content: '•'; /* Add bullet points */
+    color: #007bff; /* Color for bullet points */
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* Adjustments for mobile views */
+@media (max-width: 768px) {
+    .skills-container {
+        flex-direction: column;
+    }
+
+    .skills-subsection {
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 20px; /* Add space below each subsection */
+    }
 }
 
 /* Footer adjustments */

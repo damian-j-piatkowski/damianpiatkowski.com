@@ -21,16 +21,16 @@
         <div class="container">
             <header class="resume-header">
                 <div class="photo-and-info">
-                    <div class="contact-info">
-                        <a href="mailto:damian.j.piatkowski@gmail.com"><i class="fas fa-envelope"></i></a>
-                        <a href="tel:+48796216095"><i class="fas fa-phone"></i></a>
-                        <a href="https://github.com/damian-j-piatkowski" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
-                        <a href="http://damianpiatkowski.com" target="_blank" rel="noopener noreferrer"><i class="fas fa-globe"></i></a>
-                        <a href="https://www.linkedin.com/in/damian-piatkowski/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
-                    </div>
                     <div class="header-info">
                         <h1>Damian Piatkowski</h1>
                         <img src="{{ url_for('static', filename='images/resume.jpg') }}" alt="Profile Photo" class="resume-photo">
+                        <div class="contact-info">
+                            <a href="mailto:damian.j.piatkowski@gmail.com"><i class="fas fa-envelope"></i></a>
+                            <a href="tel:+48796216095"><i class="fas fa-phone"></i></a>
+                            <a href="https://github.com/damian-j-piatkowski" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                            <a href="http://damianpiatkowski.com" target="_blank" rel="noopener noreferrer"><i class="fas fa-globe"></i></a>
+                            <a href="https://www.linkedin.com/in/damian-piatkowski/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+                        </div>
                     </div>
                 </div>
                 <div class="profile-description">
@@ -126,21 +126,31 @@
 
             <section class="resume-section-content">
                 <h2>SKILLS</h2>
-                <ul>
-                    <li>Advanced user - Blue Prism, HTML, CSS</li>
-                    <li>Efficient user - SQL, Python, JavaScript, Linux</li>
-                    <li>Analytical thinking | Creating project documentation</li>
-                    <li>Stakeholders relationship management</li>
-                </ul>
-            </section>
-
-            <section class="resume-section-content">
-                <h2>VALUES</h2>
-                <ul>
-                    <li>Detail-oriented | Observant</li>
-                    <li>Customer-oriented | Team player</li>
-                    <li>Responsible | Reliable</li>
-                </ul>
+                <div class="skills-container">
+                    <div class="skills-subsection">
+                        <h3>Technical Skills</h3>
+                        <ul>
+                            <li>HTML</li>
+                            <li>CSS</li>
+                            <li>Flask</li>
+                            <li>SQL</li>
+                            <li>Python</li>
+                            <li>JavaScript</li>
+                            <li>Linux</li>
+                            <li>Creating project documentation</li>
+                        </ul>
+                    </div>
+                    <div class="skills-subsection">
+                        <h3>Soft Skills</h3>
+                        <ul>
+                            <li>Effective communication with business stakeholders</li>
+                            <li>Mentoring and training team members</li>
+                            <li>Problem-solving and critical thinking</li>
+                            <li>Team collaboration and leadership</li>
+                            <li>Adaptability and flexibility</li>
+                        </ul>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
