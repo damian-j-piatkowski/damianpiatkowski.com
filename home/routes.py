@@ -1,4 +1,5 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash, current_app
+from flask import (Blueprint, request, render_template, redirect, url_for,
+                   flash, current_app)
 from flask_mail import Message
 from extensions import mail
 
@@ -28,6 +29,7 @@ def submit_contact():
     mail.send(msg)
     flash('Message sent successfully!', 'success')
     return redirect(url_for('home_bp.index'))
+
 
 @home_bp.route('/privacy')
 def privacy():

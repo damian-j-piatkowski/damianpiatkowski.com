@@ -1,4 +1,6 @@
 import logging
+import os
+import time
 
 from selenium.common import ElementClickInterceptedException, TimeoutException, ElementNotInteractableException
 from selenium.webdriver.common.by import By
@@ -6,6 +8,42 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tests.conftest import capture_screenshot
+
+def retry_click(driver, by_locator, max_attempts=3, scroll_value=-300):
+    """
+    Retries clicking an element up to a specified maximum number of attempts, scrolling the window as needed.
+
+    Args:
+        driver: WebDriver instance from Selenium.
+        by_locator: Tuple (By, str) representing the locator strategy and value (e.g., By.ID, 'view_resume_button').
+        max_attempts (int, optional): Maximum number of attempts to click the element (default is 3).
+        scroll_value (int, optional): Amount to scroll the window by when retrying clicks
+                                     (positive for scrolling down, negative for scrolling up; default is -300).
+
+    Raises:
+        AssertionError: If the element is not clickable after the maximum number of attempts.
+
+    Notes:
+        - This function waits for the element identified by `by_locator` to be clickable using WebDriverWait.
+        - If an ElementClickInterceptedException is raised during a click attempt, it scrolls the window by `scroll_value`.
+        - If a TimeoutException occurs while waiting for the element to be clickable, a screenshot is captured and
+          the test fails with an assertion error.
+    """
+    for attempt in range(max_attempts):
+        try:
+            element = WebDriverWait(driver, 20).until(
+                ec.element_to_be_clickable(by_locator)
+            )
+            element.click()
+            return
+        except ElementClickInterceptedException:
+            driver.execute_script(f"window.scrollBy(0, {scroll_value});")
+        except TimeoutException:
+            capture_screenshot(driver, 'retry_click_timeout')
+            assert False, "Test failed due to timeout"
+    capture_screenshot(driver, 'retry_click_error')
+    raise AssertionError("Test failed due to element click intercepted after retries")
+
 
 
 def test_contact_form_submission(driver):
@@ -140,9 +178,7 @@ def test_navigate_to_about_me(driver):
                 assert False, "Test failed due to timeout"
 
         # Wait for the 'About Me' section to be visible
-        about_section = WebDriverWait(driver, 20).until(
-            ec.visibility_of_element_located((By.ID, 'about'))
-        )
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, 'about')))
 
         # Check for the presence of some expected text in the About Me section
         about_content = driver.find_element(By.CLASS_NAME, 'about-content')
@@ -193,8 +229,8 @@ def test_navigate_back_to_index(driver):
                 capture_screenshot(driver, 'home_link_timeout')
                 assert False, "Test failed due to timeout"
 
-        # Wait for the 'Contact Me' section to be visible (as an indication of being on the index page)
-        contact_section = WebDriverWait(driver, 20).until(
+        # Wait for the 'Contact Me' section to be visible
+        WebDriverWait(driver, 20).until(
             ec.visibility_of_element_located((By.CLASS_NAME, 'contact-section'))
         )
 
@@ -205,3 +241,58 @@ def test_navigate_back_to_index(driver):
         capture_screenshot(driver, 'test_navigate_back_to_index_exception')
         logging.error(f"Exception occurred: {e}")
         raise e
+
+
+def test_navigate_to_resume(driver):
+    driver.get("http://localhost:5000")
+
+    try:
+        # Wait for the resume link to be visible
+        resume_button_locator = (By.ID, 'view_resume_button')
+        WebDriverWait(driver, 20).until(
+            ec.visibility_of_element_located(resume_button_locator)
+        )
+
+        # Retry clicking the resume button
+        retry_click(driver, resume_button_locator, scroll_value=-300)
+
+        # Wait for the resume section heading to be visible
+        resume_heading = WebDriverWait(driver, 20).until(
+            ec.visibility_of_element_located((By.CLASS_NAME, 'resume-header'))
+        )
+        assert 'Damian Piatkowski' in resume_heading.text
+    except Exception as e:
+        capture_screenshot(driver, 'test_navigate_to_resume_exception')
+        logging.error(f"Exception occurred: {e}")
+        raise
+
+
+def test_download_resume_pdf(driver, clean_download_dir):
+    resume_file = clean_download_dir
+    driver.get("http://localhost:5000/resume")
+
+    try:
+        # Define locator and scroll value for retry_click
+        download_button_locator = (By.ID, 'download_pdf_button')
+
+        # Use retry_click for clicking the download button
+        retry_click(driver, download_button_locator, scroll_value=-300)
+
+        # Wait for the file to be downloaded
+        timeout = 30  # seconds
+        start_time = time.time()
+        while not os.path.exists(resume_file):
+            if time.time() - start_time > timeout:
+                capture_screenshot(
+                    driver, 'test_download_resume_pdf_timeout')
+                assert False, "PDF was not downloaded within the timeout period"
+            time.sleep(1)
+
+        # Verify the file size is greater than 0
+        assert os.path.getsize(resume_file) > 0, "Downloaded file is empty"
+
+    except Exception as e:
+        capture_screenshot(driver, 'test_download_resume_pdf_exception')
+        logging.error(f"Exception occurred: {e}")
+        raise e
+
