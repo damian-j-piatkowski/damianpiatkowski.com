@@ -2,6 +2,7 @@ import os
 
 import pytest
 from selenium import webdriver
+from pathlib import Path
 import logging
 
 from app import create_app
@@ -24,6 +25,21 @@ def runner(app):
     return app.test_cli_runner()
 
 
+@pytest.fixture
+def clean_download_dir():
+    resume_file = Path.home() / "Downloads" / "resume.pdf"
+
+    # Setup: Ensure the download directory is clean before the test
+    if os.path.exists(resume_file):
+        os.remove(resume_file)
+
+    yield resume_file
+
+    # Teardown: Remove the file after the test completes
+    if os.path.exists(resume_file):
+        os.remove(resume_file)
+
+
 @pytest.fixture(scope="module", params=[
     {'width': 375, 'height': 667},  # Mobile
     {'width': 768, 'height': 1024},  # Tablet
@@ -38,12 +54,19 @@ def runner(app):
 ])
 def driver(request):
     options = webdriver.ChromeOptions()
+    prefs = {
+        "download.default_directory": os.getenv('DOWNLOAD_DIRECTORY'),
+        "download.prompt_for_download": False,
+        "download.directory_upgrade": True,
+        "safebrowsing.enabled": True
+    }
+    options.add_experimental_option("prefs", prefs)
     options.add_argument('--headless')  # Ensure tests can run without a UI
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     if 'user_agent' in request.param:
         options.add_argument(f"user-agent={request.param['user_agent']}")
-    driver = webdriver.Chrome(options=options)  # Ensure chromedriver is installed and in PATH
+    driver = webdriver.Chrome(options=options)
     driver.set_window_size(request.param['width'], request.param['height'])
     yield driver
     driver.quit()
@@ -54,5 +77,6 @@ def capture_screenshot(driver, name):
     os.makedirs(screenshots_dir, exist_ok=True)
     screenshot_path = os.path.join(screenshots_dir, f'{name}.png')
     driver.save_screenshot(screenshot_path)
-    assert os.path.exists(screenshot_path), f"Screenshot was not saved: {screenshot_path}"
+    assert os.path.exists(screenshot_path), \
+        f"Screenshot was not saved: {screenshot_path}"
     logging.info(f"Screenshot saved: {screenshot_path}")

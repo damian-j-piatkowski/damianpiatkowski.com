@@ -141,3 +141,9 @@ footer a.privacy-link {
     color: white;
     text-decoration: underline; /* Add underline for better visibility */
 }
+
+/* General icon spacing for the footer */
+footer .social-icons i {
+    margin: 0 10px;
+    font-size: 24px;
+}
