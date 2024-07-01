@@ -3,18 +3,17 @@ import os
 
 from flask import Flask
 
-from about_me.routes import about_me_bp
+from app.about_me.routes import about_me_bp
+from app.extensions import db, mail
+from app.home.routes import home_bp
+from app.logging_config import configure_logging
+from app.orm import start_mappers
+from app.resume.routes import resume_bp
 from config import config
-from extensions import db, mail
-from home.routes import home_bp
-from logging_config import configure_logging
-from resume.routes import resume_bp
 
 
 def create_app():
     flask_app = Flask(__name__)
-
-    # Determine configuration mode
     flask_app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 
     # Initialize Flask-SQLAlchemy
@@ -26,6 +25,9 @@ def create_app():
     # Configure logging
     configure_logging(flask_app)
 
+    # Initialize ORM mappers
+    start_mappers()
+
     # Register blueprints
     flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(about_me_bp)
@@ -35,8 +37,3 @@ def create_app():
     app_logger.info("App created successfully.")
 
     return flask_app
-
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run()

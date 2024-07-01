@@ -1,4 +1,4 @@
-from extensions import mail
+from app.extensions import mail
 
 def test_email_sending(client):
     with mail.record_messages() as outbox:

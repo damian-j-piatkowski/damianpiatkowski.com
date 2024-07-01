@@ -1,4 +1,4 @@
-from extensions import mail
+from app.extensions import mail
 
 
 def test_submit_contact_valid_input(client, mocker):

@@ -1,7 +1,7 @@
 from flask import (Blueprint, request, render_template, redirect, url_for,
                    flash, current_app)
 from flask_mail import Message
-from extensions import mail
+from app.extensions import mail
 
 home_bp = Blueprint('home_bp', __name__)
 
