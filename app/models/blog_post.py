@@ -1,15 +1,6 @@
-from sqlalchemy import (Table, MetaData, Column, Integer, String, Text,
-                        DateTime, func)
+from sqlalchemy import (Table, MetaData, Column, Integer, String, Text)
 
 metadata = MetaData()
-
-logs = Table(
-    'logs', metadata,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('level', String(50)),
-    Column('message', Text),
-    Column('timestamp', DateTime, default=func.now())
-)
 
 blog_posts = Table(
     'blog_posts', metadata,

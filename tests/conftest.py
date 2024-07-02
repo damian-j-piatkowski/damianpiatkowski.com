@@ -8,10 +8,9 @@ import logging
 from app import create_app
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def app():
     app = create_app()
-    app.config['TESTING'] = True  # Ensure the app is in testing mode
     return app
 
 

@@ -3,13 +3,13 @@ import os
 
 from flask import Flask
 
-from app.about_me.routes import about_me_bp
+from app.routes.about_me import about_me_bp
 from app.extensions import db, mail
-from app.home.routes import home_bp
-from app.logging_config import configure_logging
+from app.routes.home import home_bp
 from app.orm import start_mappers
-from app.resume.routes import resume_bp
-from config import config
+from app.routes.resume import resume_bp
+from app.routes.blog import blog_bp
+from config import config, configure_logging
 
 
 def create_app():
@@ -26,11 +26,12 @@ def create_app():
     configure_logging(flask_app)
 
     # Initialize ORM mappers
-    start_mappers()
+    start_mappers(flask_app)
 
     # Register blueprints
-    flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(about_me_bp)
+    flask_app.register_blueprint(blog_bp)
+    flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(resume_bp)
 
     app_logger = logging.getLogger(__name__)
