@@ -1,34 +1,33 @@
 import os
 import logging
+from dataclasses import dataclass
 from logging.handlers import RotatingFileHandler
 from app.domain.log import Log
 from app.extensions import db
 
 
+@dataclass
 class Config:
-    SECRET_KEY = os.environ.get('PORTFOLIO_WEBSITE_FLASK_SECRET')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # Mail configuration
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USE_SSL = False
+    SECRET_KEY: str = os.getenv('PORTFOLIO_WEBSITE_FLASK_SECRET')
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+    SQLALCHEMY_DATABASE_URI: str = ''
+    MAIL_SERVER: str = 'smtp.gmail.com'
+    MAIL_PORT: int = 587
+    MAIL_USE_TLS: bool = True
+    MAIL_USE_SSL: bool = False
     # email username
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    # Email application-specific password (Gmail's SMTP server)
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_RECIPIENT = os.environ.get('MAIL_RECIPIENT')
-
-    # Logging configuration
-    LOG_FILE = 'app.log'
-    LOG_LEVEL = logging.DEBUG
-    LOG_TO_DB = False
+    MAIL_USERNAME: str = os.getenv('MAIL_USERNAME')
+    # Email application-specific password (Gmail's SMTP)
+    MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD')
+    MAIL_RECIPIENT: str = os.getenv('MAIL_RECIPIENT')
+    LOG_FILE: str = 'app.log'
+    LOG_LEVEL: int = logging.DEBUG
+    LOG_TO_DB: bool = False
 
 
-class DevelopmentConfig(Config):
+class TestConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 
 class ProductionConfig(Config):
@@ -38,9 +37,9 @@ class ProductionConfig(Config):
 
 
 config = {
-    'development': DevelopmentConfig,
+    'development': TestConfig,
     'production': ProductionConfig,
-    'default': DevelopmentConfig
+    'default': TestConfig
 }
 
 

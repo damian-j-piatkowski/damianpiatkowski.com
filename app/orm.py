@@ -1,3 +1,4 @@
+from app.extensions import db
 from sqlalchemy.orm import registry
 from app.domain.log import Log
 from app.domain.blog_post import BlogPost

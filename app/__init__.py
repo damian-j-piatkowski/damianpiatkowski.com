@@ -3,12 +3,12 @@ import os
 
 from flask import Flask
 
-from app.routes.about_me import about_me_bp
 from app.extensions import db, mail
-from app.routes.home import home_bp
 from app.orm import start_mappers
-from app.routes.resume import resume_bp
+from app.routes.about_me import about_me_bp
 from app.routes.blog import blog_bp
+from app.routes.home import home_bp
+from app.routes.resume import resume_bp
 from config import config, configure_logging
 
 

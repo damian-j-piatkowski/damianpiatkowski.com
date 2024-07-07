@@ -1,17 +1,24 @@
+import logging
 import os
+from pathlib import Path
 
 import pytest
 from selenium import webdriver
-from pathlib import Path
-import logging
 
-from app import create_app
+from app import create_app, db
+from sqlalchemy.orm import sessionmaker, scoped_session
+from app.models.blog_post import metadata as blog_post_metadata
+from app.models.log import metadata as log_metadata
+
+all_metadata = [blog_post_metadata, log_metadata]
 
 
 @pytest.fixture(scope='session')
 def app():
+    """Session-wide test Flask application."""
     app = create_app()
-    return app
+    with app.app_context():
+        yield app
 
 
 @pytest.fixture
@@ -22,6 +29,39 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
+
+@pytest.fixture(scope='module')
+def _db(app):
+    """Session-wide test database."""
+    with app.app_context():
+        # Create all tables
+        for metadata in all_metadata:
+            metadata.create_all(bind=db.engine)
+        yield db
+        # Drop all tables
+        for metadata in all_metadata:
+            metadata.drop_all(bind=db.engine)
+
+
+@pytest.fixture(scope='function')
+def session(_db):
+    """Creates a new database session for a test."""
+    connection = _db.engine.connect()
+    transaction = connection.begin()
+
+    # Create a configured "Session" class
+    session_factory = sessionmaker(bind=connection)
+    # Create a scoped session
+    test_session = scoped_session(session_factory)
+
+    _db.session = test_session
+
+    yield test_session
+
+    transaction.rollback()
+    connection.close()
+    test_session.remove()
 
 
 @pytest.fixture
