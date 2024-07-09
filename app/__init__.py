@@ -4,6 +4,7 @@ import os
 from flask import Flask
 
 from app.extensions import db, mail
+from flask_migrate import Migrate
 from app.orm import start_mappers
 from app.routes.about_me import about_me_bp
 from app.routes.blog import blog_bp
@@ -18,6 +19,9 @@ def create_app():
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)
+
+    # Initialize Flask-Migrate
+    Migrate(flask_app, db)
 
     # Initialize Flask-Mail
     mail.init_app(flask_app)
