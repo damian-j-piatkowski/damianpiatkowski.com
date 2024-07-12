@@ -1,6 +1,34 @@
 @echo off
 setlocal
 
+:: ===========================================
+:: Batch Script for Resizing Images to Various Resolutions
+::
+:: Usage:
+::   resize_images.bat input_directory
+::
+:: Parameters:
+::   input_directory - The directory containing the original images.
+::
+:: Description:
+::   This script resizes images to predefined resolutions for 4:5 and
+::   16:9 aspect ratios. The resized images are saved in the same
+::   directory as the original images with appropriate suffixes.
+::
+:: Output Resolutions:
+::   Aspect Ratio 4:5:
+::     - 320x400 px
+::     - 640x800 px
+::     - 960x1200 px
+::     - 1200x1500 px
+::   Aspect Ratio 16:9:
+::     - 1920x1080 px
+::     - 2560x1440 px
+::
+:: Example:
+::   resize_images.bat C:\path\to\images
+:: ===========================================
+
 :: Check if the input directory is provided
 if "%~1"=="" (
     echo Usage: resize_images.bat input_directory

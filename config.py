@@ -8,21 +8,42 @@ from app.extensions import db
 
 @dataclass
 class Config:
-    SECRET_KEY: str = os.getenv('PORTFOLIO_WEBSITE_FLASK_SECRET')
-    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    SQLALCHEMY_DATABASE_URI: str = ''
-    MAIL_SERVER: str = 'smtp.gmail.com'
-    MAIL_PORT: int = 587
-    MAIL_USE_TLS: bool = True
-    MAIL_USE_SSL: bool = False
-    # email username
-    MAIL_USERNAME: str = os.getenv('MAIL_USERNAME')
-    # Email application-specific password (Gmail's SMTP)
-    MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD')
-    MAIL_RECIPIENT: str = os.getenv('MAIL_RECIPIENT')
+    # Environment variables
+    BASE_THUMBNAIL_PATH: str = os.getenv('BASE_THUMBNAIL_PATH', '')
+    DATABASE_URL: str = os.getenv('DATABASE_URL', '')
+    DOWNLOAD_DIRECTORY: str = os.getenv('DOWNLOAD_DIRECTORY', '')
+    FLASK_ENV: str = os.getenv('FLASK_ENV', '')
+    MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD', '')
+    MAIL_RECIPIENT: str = os.getenv('MAIL_RECIPIENT', '')
+    MAIL_USERNAME: str = os.getenv('MAIL_USERNAME', '')
+    SECRET_KEY: str = os.getenv('PORTFOLIO_WEBSITE_FLASK_SECRET', '')
+
+    # Other variables
+    DEBUG: bool = False
     LOG_FILE: str = 'app.log'
     LOG_LEVEL: int = logging.DEBUG
     LOG_TO_DB: bool = False
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = 'smtp.gmail.com'
+    MAIL_USE_SSL: bool = False
+    MAIL_USE_TLS: bool = True
+    SQLALCHEMY_DATABASE_URI: str = ''
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+
+    @staticmethod
+    def validate():
+        required_vars = [
+            'BASE_THUMBNAIL_PATH', 'DATABASE_URL', 'DOWNLOAD_DIRECTORY',
+            'FLASK_ENV', 'MAIL_PASSWORD', 'MAIL_RECIPIENT',
+            'MAIL_USERNAME', 'SECRET_KEY'
+        ]
+        missing_vars = [var for var in required_vars if
+                        not getattr(Config, var)]
+        if missing_vars:
+            raise EnvironmentError(
+                f"Missing required environment variables: "
+                f"{', '.join(missing_vars)}"
+            )
 
 
 class TestConfig(Config):
@@ -41,6 +62,9 @@ config = {
     'production': ProductionConfig,
     'default': TestConfig
 }
+
+# Validate environment variables at startup
+Config.validate()
 
 
 def configure_logging(app):
