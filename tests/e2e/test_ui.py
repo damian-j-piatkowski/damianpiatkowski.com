@@ -101,7 +101,7 @@ def test_navigate_to_privacy_notice(driver):
 
     try:
         # Scroll down to bring the footer and privacy link into view
-        driver.execute_script("window.scrollBy(0, 1300);")
+        driver.execute_script("window.scrollBy(0, 1500);")
 
         # Wait for the privacy link to be visible and clickable
         privacy_link = WebDriverWait(driver, 20).until(

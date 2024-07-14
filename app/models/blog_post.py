@@ -9,5 +9,6 @@ blog_posts = Table(
     Column('content', Text, nullable=False),
     Column('image_small', String(255)),
     Column('image_medium', String(255)),
-    Column('image_large', String(255))
+    Column('image_large', String(255)),
+    Column('url', String(255), nullable=False, unique=True)
 )

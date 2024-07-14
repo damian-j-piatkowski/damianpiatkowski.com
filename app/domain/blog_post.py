@@ -7,6 +7,7 @@ class BlogPost:
         image_small: URL or path to the small-sized image.
         image_medium: URL or path to the medium-sized image.
         image_large: URL or path to the large-sized image.
+        url: The desired URL slug for the blog post.
     """
 
     def __init__(
@@ -15,7 +16,8 @@ class BlogPost:
             content: str,
             image_small: str,
             image_medium: str,
-            image_large: str
+            image_large: str,
+            url: str
     ) -> None:
         """
         Constructs all the necessary attributes for the BlogPost object.
@@ -26,9 +28,11 @@ class BlogPost:
             image_small: URL or path to the small-sized image.
             image_medium: URL or path to the medium-sized image.
             image_large: URL or path to the large-sized image.
+            url: The desired URL slug for the blog post.
         """
         self.title = title
         self.content = content
         self.image_small = image_small
         self.image_medium = image_medium
         self.image_large = image_large
+        self.url = url

@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 from app.domain.log import Log
 from app.extensions import db
 
-
 @dataclass
 class Config:
     # Environment variables
@@ -27,7 +26,7 @@ class Config:
     MAIL_SERVER: str = 'smtp.gmail.com'
     MAIL_USE_SSL: bool = False
     MAIL_USE_TLS: bool = True
-    SQLALCHEMY_DATABASE_URI: str = ''
+    SQLALCHEMY_DATABASE_URI: str = os.getenv('DATABASE_URL', '')
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
     @staticmethod
@@ -53,7 +52,7 @@ class TestConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@localhost/db_name'
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://username:password@localhost/db_name')
     LOG_LEVEL = logging.INFO
 
 
@@ -65,7 +64,6 @@ config = {
 
 # Validate environment variables at startup
 Config.validate()
-
 
 def configure_logging(app):
     log_file = app.config.get('LOG_FILE', 'app.log')

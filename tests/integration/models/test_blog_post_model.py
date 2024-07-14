@@ -7,7 +7,8 @@ def test_create_blog_post(session):
         content='This is a test post content',
         image_small='path/to/small/image.jpg',
         image_medium='path/to/medium/image.jpg',
-        image_large='path/to/large/image.jpg'
+        image_large='path/to/large/image.jpg',
+        url='test-post'  # Include the URL
     )
     session.add(post)
     session.commit()
@@ -20,6 +21,8 @@ def test_create_blog_post(session):
     assert fetched_post.image_small == 'path/to/small/image.jpg'
     assert fetched_post.image_medium == 'path/to/medium/image.jpg'
     assert fetched_post.image_large == 'path/to/large/image.jpg'
+    assert fetched_post.url == 'test-post'  # Verify the URL
+
 
 def test_update_blog_post(session):
     post = BlogPost(
@@ -27,7 +30,8 @@ def test_update_blog_post(session):
         content='Original content',
         image_small='path/to/small/image.jpg',
         image_medium='path/to/medium/image.jpg',
-        image_large='path/to/large/image.jpg'
+        image_large='path/to/large/image.jpg',
+        url='original-title'  # Include the URL
     )
     session.add(post)
     session.commit()
@@ -35,13 +39,16 @@ def test_update_blog_post(session):
     # Update the blog post
     post.title = 'Updated Title'
     post.content = 'Updated content'
+    post.url = 'updated-title'  # Update the URL
     session.commit()
 
     # Fetch the updated blog post
-    fetched_post = session.query(BlogPost).filter_by(title='Updated Title').first()
+    fetched_post = session.query(BlogPost).filter_by(
+        title='Updated Title').first()
     assert fetched_post is not None
     assert fetched_post.title == 'Updated Title'
     assert fetched_post.content == 'Updated content'
+    assert fetched_post.url == 'updated-title'  # Verify the updated URL
 
 
 def test_delete_blog_post(session):
@@ -50,7 +57,8 @@ def test_delete_blog_post(session):
         content='Content of the post to be deleted',
         image_small='path/to/small/image.jpg',
         image_medium='path/to/medium/image.jpg',
-        image_large='path/to/large/image.jpg'
+        image_large='path/to/large/image.jpg',
+        url='post-to-be-deleted'  # Include the URL
     )
     session.add(post)
     session.commit()
@@ -60,7 +68,8 @@ def test_delete_blog_post(session):
     session.commit()
 
     # Verify the blog post has been deleted
-    fetched_post = session.query(BlogPost).filter_by(title='Post to be deleted').first()
+    fetched_post = session.query(BlogPost).filter_by(
+        title='Post to be deleted').first()
     assert fetched_post is None
 
 
@@ -70,14 +79,16 @@ def test_fetch_multiple_blog_posts(session):
         content='Content of post 1',
         image_small='path/to/small/image1.jpg',
         image_medium='path/to/medium/image1.jpg',
-        image_large='path/to/large/image1.jpg'
+        image_large='path/to/large/image1.jpg',
+        url='post-1'  # Include the URL
     )
     post2 = BlogPost(
         title='Post 2',
         content='Content of post 2',
         image_small='path/to/small/image2.jpg',
         image_medium='path/to/medium/image2.jpg',
-        image_large='path/to/large/image2.jpg'
+        image_large='path/to/large/image2.jpg',
+        url='post-2'  # Include the URL
     )
     session.add(post1)
     session.add(post2)
@@ -88,3 +99,5 @@ def test_fetch_multiple_blog_posts(session):
     assert len(fetched_posts) == 2
     assert fetched_posts[0].title == 'Post 1'
     assert fetched_posts[1].title == 'Post 2'
+    assert fetched_posts[0].url == 'post-1'  # Verify the URLs
+    assert fetched_posts[1].url == 'post-2'
