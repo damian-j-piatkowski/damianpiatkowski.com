@@ -69,21 +69,21 @@ echo Desktop Resolution: %resolutions_desktop%
 :: Process the input file
 echo Processing file: %input_file_path%
 
-magick "%input_file_path%" -resize %resolutions_mobile% -quality 85 "%output_dir%\%folder_name%_mobile.jpg"
+magick "%input_file_path%" -resize %resolutions_mobile% -quality 85 "%output_dir%\mobile.jpg"
 if errorlevel 1 (
     echo Error processing file: %input_file_path% for mobile resolution
 ) else (
     echo Processed %input_file_path% for mobile resolution successfully
 )
 
-magick "%input_file_path%" -resize %resolutions_tablet% -quality 85 "%output_dir%\%folder_name%_tablet.jpg"
+magick "%input_file_path%" -resize %resolutions_tablet% -quality 85 "%output_dir%\tablet.jpg"
 if errorlevel 1 (
     echo Error processing file: %input_file_path% for tablet resolution
 ) else (
     echo Processed %input_file_path% for tablet resolution successfully
 )
 
-magick "%input_file_path%" -resize %resolutions_desktop% -quality 85 "%output_dir%\%folder_name%_desktop.jpg"
+magick "%input_file_path%" -resize %resolutions_desktop% -quality 85 "%output_dir%\desktop.jpg"
 if errorlevel 1 (
     echo Error processing file: %input_file_path% for desktop resolution
 ) else (
