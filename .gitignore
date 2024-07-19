@@ -36,6 +36,17 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Flask specific
+instance/
+*.db
+
+# Docker specific
+*.log
+docker-compose.override.yml
+docker-compose.override.yaml
+docker-compose.debug.yml
+docker-compose.debug.yaml
+
 # Unit test / coverage reports
 htmlcov/
 .tox/

@@ -1,9 +1,11 @@
-import os
 import logging
+import os
 from dataclasses import dataclass
 from logging.handlers import RotatingFileHandler
+
 from app.domain.log import Log
 from app.extensions import db
+
 
 @dataclass
 class Config:
@@ -26,7 +28,8 @@ class Config:
     MAIL_SERVER: str = 'smtp.gmail.com'
     MAIL_USE_SSL: bool = False
     MAIL_USE_TLS: bool = True
-    SQLALCHEMY_DATABASE_URI: str = os.getenv('DATABASE_URL', '')
+    SQLALCHEMY_DATABASE_URI: str = os.getenv('DATABASE_URL',
+                                             'sqlite:///:memory:')
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
     @staticmethod
@@ -45,25 +48,40 @@ class Config:
             )
 
 
-class TestConfig(Config):
+class DevelopmentConfig(Config):
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://user:${MYSQL_PASSWORD}@db:3306/test_db'
+    )
+
+
+class TestingConfig(Config):
+    DEBUG = True
+    TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://username:password@localhost/db_name')
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://user:${MYSQL_PASSWORD}@db:3306/prod_db'
+    )
     LOG_LEVEL = logging.INFO
 
 
 config = {
-    'development': TestConfig,
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
     'production': ProductionConfig,
-    'default': TestConfig
+    'default': DevelopmentConfig
 }
 
 # Validate environment variables at startup
 Config.validate()
+
 
 def configure_logging(app):
     log_file = app.config.get('LOG_FILE', 'app.log')
