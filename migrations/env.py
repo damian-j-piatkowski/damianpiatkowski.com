@@ -1,13 +1,16 @@
 import logging
 from logging.config import fileConfig
 
+from alembic import context as alembic_context
 from flask import current_app
-
-from alembic import context
+from sqlalchemy import MetaData
+from app.models.blog_post import blog_posts
+from app.models.log import logs
+from config import config as app_config  # Import the config dictionary
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
-config = context.config
+config = alembic_context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -32,17 +35,27 @@ def get_engine_url():
         return str(get_engine().url).replace('%', '%%')
 
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-config.set_main_option('sqlalchemy.url', get_engine_url())
-target_db = current_app.extensions['migrate'].db
+# Combine all the metadata objects
+target_metadata = MetaData()
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Add the table objects directly to the metadata
+for table in [blog_posts, logs]:
+    table.tometadata(target_metadata)
+
+# Debugging print statement to verify tables in metadata
+print("Tables in target_metadata:", target_metadata.tables.keys())
+logger.info("Tables in target_metadata: %s", target_metadata.tables.keys())
+
+# Determine the appropriate config class based on the environment
+flask_env = current_app.config.get('FLASK_ENV', 'default')
+ConfigClass = app_config.get(flask_env, app_config['default'])
+
+# Instantiate the config class to access the database URL
+config_instance = ConfigClass()
+db_url = config_instance.SQLALCHEMY_DATABASE_URI
+config.set_main_option('sqlalchemy.url', db_url)
+
+target_db = current_app.extensions['migrate'].db
 
 
 def get_metadata():
@@ -56,34 +69,32 @@ def run_migrations_offline():
 
     This configures the context with just a URL
     and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
+    here as well. By skipping the Engine creation
     we don't even need a DBAPI to be available.
 
-    Calls to context.execute() here emit the given string to the
+    Calls to alembic_context.execute() here emit the given string to the
     script output.
-
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(
+    alembic_context.configure(
         url=url, target_metadata=get_metadata(), literal_binds=True
     )
 
-    with context.begin_transaction():
-        context.run_migrations()
+    with alembic_context.begin_transaction():
+        alembic_context.run_migrations()
 
 
 def run_migrations_online():
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    and associate a connection with the alembic_context.
     """
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
-    def process_revision_directives(context, revision, directives):
+    def process_revision_directives(_context, _revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
@@ -97,17 +108,17 @@ def run_migrations_online():
     connectable = get_engine()
 
     with connectable.connect() as connection:
-        context.configure(
+        alembic_context.configure(
             connection=connection,
             target_metadata=get_metadata(),
             **conf_args
         )
 
-        with context.begin_transaction():
-            context.run_migrations()
+        with alembic_context.begin_transaction():
+            alembic_context.run_migrations()
 
 
-if context.is_offline_mode():
+if alembic_context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()

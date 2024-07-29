@@ -13,12 +13,12 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Node.js dependencies
-RUN npm install
-
-# Build and minify CSS files using Gulp
-RUN npm install -g gulp-cli
-RUN gulp minifyBaseCss && gulp minifyIndexCss
+## Install Node.js dependencies
+#RUN npm install
+#
+## Build and minify CSS files using Gulp
+#RUN npm install -g gulp-cli
+#RUN gulp minifyBaseCss && gulp minifyIndexCss
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000

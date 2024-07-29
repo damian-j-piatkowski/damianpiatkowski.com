@@ -2,9 +2,11 @@ import logging
 import os
 
 from flask import Flask
-
-from app.extensions import db, mail
 from flask_migrate import Migrate
+
+from app.domain.blog_post import BlogPost
+from app.domain.log import Log
+from app.extensions import db, mail
 from app.orm import start_mappers
 from app.routes.about_me import about_me_bp
 from app.routes.blog import blog_bp
@@ -20,6 +22,9 @@ def create_app():
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)
 
+    # Initialize ORM mappers
+    start_mappers(flask_app)
+
     # Initialize Flask-Migrate
     Migrate(flask_app, db)
 
@@ -29,9 +34,6 @@ def create_app():
     # Configure logging
     configure_logging(flask_app)
 
-    # Initialize ORM mappers
-    start_mappers(flask_app)
-
     # Register blueprints
     flask_app.register_blueprint(about_me_bp)
     flask_app.register_blueprint(blog_bp)
@@ -39,6 +41,9 @@ def create_app():
     flask_app.register_blueprint(resume_bp)
 
     app_logger = logging.getLogger(__name__)
+    app_logger.info(
+        f"Database URI: {flask_app.config['SQLALCHEMY_DATABASE_URI']}")
+    app_logger.info(f"FLASK_ENV: {flask_app.config['FLASK_ENV']}")
     app_logger.info("App created successfully.")
 
     return flask_app

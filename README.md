@@ -7,7 +7,6 @@ Source code for the portfolio website hosted at [damianpiatkowski.com](https://d
 The following environment variables need to be set for the Flask project to run correctly:
 
 - `BASE_THUMBNAIL_PATH`: Path where blog post thumbnails will be stored.
-- `DATABASE_URL`: Database connection URL. For example, `mysql+pymysql://user:password@db:3306/db_name`.
 - `SECRET_KEY`: Secret key for Flask session management.
 - `FLASK_ENV`: The environment in which the Flask app is running (e.g., development, production). Determines the configuration to load and can affect debugging and logging.
 - `PORTFOLIO_WEBSITE_FLASK_SECRET`: Additional secret key for extra security measures within the application.
@@ -17,6 +16,8 @@ The following environment variables need to be set for the Flask project to run 
 - `DOWNLOAD_DIRECTORY`: The directory where downloaded files will be stored.
 - `MYSQL_PASSWORD`: The password for the MySQL user.
 - `MYSQL_ROOT_PASSWORD`: The password for the MySQL root user.
+- `MYSQL_DATABASE`: The name of the MySQL database.
+- `MYSQL_HOST`: The host address of the MySQL server (e.g., db or localhost).
 
 Ensure that these environment variables are set in your environment before running the application.
 
@@ -60,7 +61,8 @@ Ensure you have Docker Desktop installed on your machine. Docker Desktop include
 
 ### Subsequent Runs
 
-- To start the services again without rebuilding the images:
+- To start the services again without rebuilding the images
+   (add a -d flag to start the Docker containers in detached mode):
 
 **For Development**:
 
@@ -77,5 +79,20 @@ Ensure you have Docker Desktop installed on your machine. Docker Desktop include
     ```sh
     docker-compose down
 
+### Check Container Logs
+
+Inspect the logs of your database container to ensure it started up correctly:
+
+    ```sh
+    docker-compose logs db
+
+Look for any errors or warnings that might indicate issues with the database startup.
+
+### Access the Web Container
+
+To run commands inside the web container, you need to use `docker-compose exec`:
+
+    ```sh
+    docker-compose exec web bash
 
 
