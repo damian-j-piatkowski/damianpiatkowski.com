@@ -4,8 +4,10 @@ from logging.config import fileConfig
 from alembic import context as alembic_context
 from flask import current_app
 from sqlalchemy import MetaData
+
 from app.models.blog_post import blog_posts
 from app.models.log import logs
+from app.orm import start_mappers
 from config import config as app_config  # Import the config dictionary
 
 # this is the Alembic Config object, which provides
@@ -16,6 +18,14 @@ config = alembic_context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
+
+
+def process_revision_directives(_context, _revision, directives):
+    if getattr(config.cmd_opts, 'autogenerate', False):
+        script = directives[0]
+        if script.upgrade_ops.is_empty():
+            directives[:] = []
+            logger.info('No changes in schema detected, migration skipped.')
 
 
 def get_engine():
@@ -57,6 +67,13 @@ config.set_main_option('sqlalchemy.url', db_url)
 
 target_db = current_app.extensions['migrate'].db
 
+# Initialize conf_args, use an empty dict as a fallback if not found
+conf_args = getattr(current_app.extensions['migrate'], 'configure_args', {})
+
+# Set the process_revision_directives if not already set
+if conf_args.get("process_revision_directives") is None:
+    conf_args["process_revision_directives"] = process_revision_directives
+
 
 def get_metadata():
     if hasattr(target_db, 'metadatas'):
@@ -85,32 +102,13 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the alembic_context.
-    """
-
-    # this callback is used to prevent an auto-migration from being generated
-    # when there are no changes to the schema
-    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
-    def process_revision_directives(_context, _revision, directives):
-        if getattr(config.cmd_opts, 'autogenerate', False):
-            script = directives[0]
-            if script.upgrade_ops.is_empty():
-                directives[:] = []
-                logger.info('No changes in schema detected.')
-
-    conf_args = current_app.extensions['migrate'].configure_args
-    if conf_args.get("process_revision_directives") is None:
-        conf_args["process_revision_directives"] = process_revision_directives
+    start_mappers(current_app)  # Ensure mappers are initialized
 
     connectable = get_engine()
-
     with connectable.connect() as connection:
         alembic_context.configure(
             connection=connection,
-            target_metadata=get_metadata(),
+            target_metadata=target_metadata,  # Ensure this is fully populated
             **conf_args
         )
 
