@@ -41,6 +41,7 @@ instance/
 *.db
 
 # Docker specific
+*backup*
 *.log*
 docker-compose.override.yml
 docker-compose.override.yaml

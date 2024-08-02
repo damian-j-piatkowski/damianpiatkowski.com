@@ -6,6 +6,9 @@ from logging.handlers import RotatingFileHandler
 from app.domain.log import Log
 from app.extensions import db
 
+import re
+
+
 @dataclass
 class Config:
     # Environment variables
@@ -50,25 +53,33 @@ class Config:
             'MAIL_USERNAME', 'SECRET_KEY', 'MYSQL_USER', 'MYSQL_PASSWORD',
             'MYSQL_DATABASE', 'MYSQL_HOST'
         ]
-        missing_vars = [var for var in required_vars if not getattr(Config, var)]
+        missing_vars = [var for var in required_vars if
+                        not getattr(Config, var)]
         if missing_vars:
             raise EnvironmentError(
                 f"Missing required environment variables: "
                 f"{', '.join(missing_vars)}"
             )
 
+
 class DevelopmentConfig(Config):
     DEBUG = True
+    LOG_TO_DB = True
+
 
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    LOG_TO_DB = False
+
 
 class ProductionConfig(Config):
     DEBUG = False
     LOG_LEVEL = logging.INFO
+    LOG_TO_DB = True
+
 
 config = {
     'development': DevelopmentConfig,
@@ -83,14 +94,16 @@ Config.SQLALCHEMY_DATABASE_URI = Config.get_database_url()
 # Validate environment variables at startup
 Config.validate()
 
+
 def configure_logging(app):
     log_file = app.config.get('LOG_FILE', 'app.log')
     log_level = app.config.get('LOG_LEVEL', logging.DEBUG)
-    log_to_db = app.config.get('LOG_TO_DB', False)
+    log_to_db = app.config['LOG_TO_DB']
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-    file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=10)
+    file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024,
+                                       backupCount=10)
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
 
@@ -98,24 +111,38 @@ def configure_logging(app):
     console_handler.setLevel(log_level)
     console_handler.setFormatter(formatter)
 
-    if log_to_db:
-        class SQLAlchemyHandler(logging.Handler):
-            def emit(self, record):
-                log_entry = Log(level=record.levelname, message=record.getMessage())
-                db.session.add(log_entry)
-                db.session.commit()
-
-        db_handler = SQLAlchemyHandler()
-        db_handler.setLevel(log_level)
-        db_handler.setFormatter(formatter)
-    else:
-        db_handler = None
-
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
-    if db_handler:
+
+    if log_to_db:
+        class SQLAlchemyHandler(logging.Handler):
+            ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
+
+            def emit(self, record):
+                message = record.getMessage()
+
+                # Filter out specific messages
+                if "Running on" in message or "Press CTRL+C to quit" in message:
+                    return  # Skip these messages
+
+                # Remove ANSI escape codes from the message
+                message = self.ansi_escape.sub('', message)
+
+                # Create the log entry object
+                log_entry = Log(
+                    level=record.levelname, message=message
+                )
+
+                # Use the application context to access the database
+                with app.app_context():
+                    db.session.add(log_entry)
+                    db.session.commit()
+
+        db_handler = SQLAlchemyHandler()
+        db_handler.setLevel(logging.DEBUG)
+        db_handler.setFormatter(formatter)
         root_logger.addHandler(db_handler)
 
     root_logger.propagate = True
