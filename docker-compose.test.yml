@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -8,19 +6,30 @@ services:
       - "5001:5001"
     volumes:
       - .:/app
+      - log_data:/logs
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=testing
       - FLASK_RUN_PORT=5001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/about_me"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   test:
     build: .
     command: sh -c "flask db upgrade && pytest"
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     environment:
       - FLASK_APP=run.py
       - FLASK_ENV=testing
       - FLASK_RUN_PORT=5001
     volumes:
       - .:/app
+      - log_data:/logs
+
+volumes:
+  log_data:

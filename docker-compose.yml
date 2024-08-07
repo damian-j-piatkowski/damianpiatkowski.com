@@ -4,11 +4,13 @@ services:
     command: sh -c "utilities/wait-for-it.sh db:3306 -- flask db upgrade && flask run --host=0.0.0.0 --port=${FLASK_RUN_PORT}"
     ports:
       - "5000:5000"
+      - "5678:5678"  # Debugger
     volumes:
       - .:/app
+      - log_data:/logs  # Log files are stored in the Docker volume
     environment:
       - FLASK_APP=run.py
-      - FLASK_ENV=development
+      - FLASK_ENV=${FLASK_ENV}
       - FLASK_RUN_PORT=5000
       - BASE_THUMBNAIL_PATH=${BASE_THUMBNAIL_PATH}
       - DOWNLOAD_DIRECTORY=${DOWNLOAD_DIRECTORY}
@@ -33,8 +35,10 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./backup:/backups
+      - mysql_data:/var/lib/mysql  # MySQL data storage
+      - mysql_backup:/backups  # Backup storage
 
 volumes:
-  mysql_data:
+  mysql_data:  # Persistent storage for MySQL data
+  mysql_backup:  # Persistent storage for MySQL backups
+  log_data:  # Persistent storage for logs
