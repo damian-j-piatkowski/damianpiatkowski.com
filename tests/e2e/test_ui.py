@@ -47,7 +47,7 @@ def retry_click(driver, by_locator, max_attempts=3, scroll_value=-300):
 
 
 def test_contact_form_submission(driver):
-    driver.get("http://localhost:5000")
+    driver.get("http://web:5001")
 
     try:
         # Wait for the name input to be visible
@@ -97,7 +97,7 @@ def test_contact_form_submission(driver):
 
 
 def test_navigate_to_privacy_notice(driver):
-    driver.get("http://localhost:5000")
+    driver.get("http://web:5001")
 
     try:
         # Scroll down to bring the footer and privacy link into view
@@ -140,7 +140,7 @@ def test_navigate_to_privacy_notice(driver):
 
 
 def test_navigate_to_about_me(driver):
-    driver.get("http://localhost:5000")
+    driver.get("http://web:5001")
 
     try:
         # Check if the hamburger menu is present (for mobile view) and clickable
@@ -192,7 +192,7 @@ def test_navigate_to_about_me(driver):
 
 
 def test_navigate_back_to_index(driver):
-    driver.get("http://localhost:5000/about-me")
+    driver.get("http://web:5001/about-me")
 
     try:
         # Check if the hamburger menu is present (for mobile view) and clickable
@@ -244,7 +244,7 @@ def test_navigate_back_to_index(driver):
 
 
 def test_navigate_to_resume(driver):
-    driver.get("http://localhost:5000")
+    driver.get("http://web:5001")
 
     try:
         # Wait for the resume link to be visible
@@ -269,7 +269,7 @@ def test_navigate_to_resume(driver):
 
 def test_download_resume_pdf(driver, clean_download_dir):
     resume_file = clean_download_dir
-    driver.get("http://localhost:5000/resume")
+    driver.get("http://web:5001/resume")
 
     try:
         # Define locator and scroll value for retry_click

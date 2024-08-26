@@ -94,21 +94,27 @@ def clean_download_dir():
 def driver(request):
     options = webdriver.ChromeOptions()
     prefs = {
-        "download.default_directory": os.getenv('DOWNLOAD_DIRECTORY'),
+        "download.default_directory": os.getenv('DOWNLOAD_DIRECTORY', '/tmp'),
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
-        "safebrowsing.enabled": True
+        "safebrowsing.enabled": True,
     }
     options.add_experimental_option("prefs", prefs)
     options.add_argument('--headless')  # Ensure tests can run without a UI
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     if 'user_agent' in request.param:
         options.add_argument(f"user-agent={request.param['user_agent']}")
-    driver = webdriver.Chrome(options=options)
-    driver.set_window_size(request.param['width'], request.param['height'])
-    yield driver
-    driver.quit()
+    driver = None  # Initialize driver variable
+    try:
+        driver = webdriver.Chrome(options=options)
+        driver.set_window_size(request.param['width'], request.param['height'])
+        yield driver
+    finally:
+        if driver is not None:
+            driver.quit()
 
 
 def capture_screenshot(driver, name):

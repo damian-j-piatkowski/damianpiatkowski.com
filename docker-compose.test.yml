@@ -1,35 +1,58 @@
 services:
   web:
-    build: .
-    command: sh -c "flask db upgrade && flask run --host=0.0.0.0 --port=5001"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "mkdir -p /logs/testing && flask run --host=0.0.0.0 --port=5001"
     ports:
       - "5001:5001"
     volumes:
       - .:/app
       - log_data:/logs
     environment:
-      - FLASK_APP=run.py
-      - FLASK_ENV=testing
-      - FLASK_RUN_PORT=5001
+      FLASK_APP: run.py
+      FLASK_ENV: testing
+      FLASK_RUN_PORT: 5001
+      BASE_THUMBNAIL_PATH: ${BASE_THUMBNAIL_PATH}
+      DOWNLOAD_DIRECTORY: ${DOWNLOAD_DIRECTORY}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_RECIPIENT: ${MAIL_RECIPIENT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      SECRET_KEY: ${SECRET_KEY}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: ${MYSQL_HOST}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/about_me"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  test:
-    build: .
-    command: sh -c "flask db upgrade && pytest"
-    depends_on:
-      web:
-        condition: service_healthy
-    environment:
-      - FLASK_APP=run.py
-      - FLASK_ENV=testing
-      - FLASK_RUN_PORT=5001
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.selenium  # Use the test-specific Dockerfile
     volumes:
-      - .:/app
+      - .:/app/src
       - log_data:/logs
+    shm_size: 2g
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: testing
+      FLASK_RUN_PORT: 5001
+      BASE_THUMBNAIL_PATH: ${BASE_THUMBNAIL_PATH}
+      DOWNLOAD_DIRECTORY: ${DOWNLOAD_DIRECTORY}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_RECIPIENT: ${MAIL_RECIPIENT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      SECRET_KEY: ${SECRET_KEY}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: ${MYSQL_HOST}
+    depends_on:
+      - web
 
 volumes:
   log_data:

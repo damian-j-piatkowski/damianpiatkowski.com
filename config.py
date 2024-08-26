@@ -154,7 +154,8 @@ def configure_logging(app):
                         db.session.add(log_entry)
                         db.session.commit()
                 except SQLAlchemyError as sqle:
-                    db.session.rollback()
+                    with app.app_context():
+                        db.session.rollback()
                     fallback_logger.error(f"SQLAlchemyError occurred: {sqle}")
                 except Exception as e:
                     fallback_logger.error(

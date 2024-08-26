@@ -40,11 +40,12 @@ def create_app():
     flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(resume_bp)
 
-    app_logger = logging.getLogger(__name__)
-    app_logger.info(
-        f"Database URI: {flask_app.config['SQLALCHEMY_DATABASE_URI']}")
-    app_logger.info(f"FLASK_ENV: {flask_app.config['FLASK_ENV']}")
-    app_logger.info(f"Log file path: {flask_app.config['LOG_FILE']}")
-    app_logger.info("App created successfully.")
+    with flask_app.app_context():
+        app_logger = logging.getLogger(__name__)
+        app_logger.info(
+            f"Database URI: {flask_app.config['SQLALCHEMY_DATABASE_URI']}")
+        app_logger.info(f"FLASK_ENV: {flask_app.config['FLASK_ENV']}")
+        app_logger.info(f"Log file path: {flask_app.config['LOG_FILE']}")
+        app_logger.info("App created successfully.")
 
     return flask_app
