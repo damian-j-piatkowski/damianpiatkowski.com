@@ -29,6 +29,12 @@ RUN python3 -m venv /app/venv && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Create the screenshots, Downloads, and logs directories with the right permissions
+RUN mkdir -p /app/screenshots /home/seluser/Downloads /logs/testing && \
+    chown -R seluser:seluser /app/screenshots /home/seluser/Downloads /logs && \
+    chmod -R 755 /app/screenshots /home/seluser/Downloads && \
+    chmod -R 775 /logs
+
 # Add necessary environment variables
 ENV DISPLAY=:99
 ENV CHROME_BIN=/usr/bin/google-chrome
@@ -41,5 +47,5 @@ USER seluser
 # This mimics the entrypoint.sh behavior: activate virtual environment and execute pytest
 ENTRYPOINT ["/bin/sh", "-c", ". /app/venv/bin/activate && exec \"$@\"", "--"]
 
-# Default command to run pytest
-CMD ["pytest", "--maxfail=1", "--disable-warnings", "-v"]
+# Default command to run pytest, with the correct root directory for pytest discovery
+CMD ["pytest", "--disable-warnings", "-v", "src/tests"]

@@ -47,36 +47,51 @@ def _db(app):
 @pytest.fixture(scope='function')
 def session(_db):
     """Creates a new database session for a test."""
+    # Establish a connection and begin a transaction
     connection = _db.engine.connect()
     transaction = connection.begin()
 
-    # Create a configured "Session" class
+    # Create a session factory bound to the current connection
     session_factory = sessionmaker(bind=connection)
-    # Create a scoped session
+    # Use scoped_session to manage the session's state
     test_session = scoped_session(session_factory)
 
+    # Assign the test session to the _db's session attribute
     _db.session = test_session
 
-    yield test_session
-
-    transaction.rollback()
-    connection.close()
-    test_session.remove()
+    try:
+        # Provide the session to the test
+        yield test_session
+    except Exception as e:
+        # Catch exceptions to ensure cleanup
+        print(f"Error during test session: {e}")
+        raise
+    finally:
+        # Ensure rollback and cleanup are executed regardless of test outcome
+        try:
+            transaction.rollback()
+        except Exception as rollback_error:
+            print(f"Error during rollback: {rollback_error}")
+        finally:
+            # Close the connection and remove the session
+            connection.close()
+            test_session.remove()
 
 
 @pytest.fixture
 def clean_download_dir():
-    resume_file = Path.home() / "Downloads" / "resume.pdf"
+    download_directory = os.getenv("DOWNLOAD_DIRECTORY")
+    resume_file = Path(download_directory) / "resume.pdf"
 
     # Setup: Ensure the download directory is clean before the test
-    if os.path.exists(resume_file):
-        os.remove(resume_file)
+    if resume_file.exists():
+        resume_file.unlink()
 
     yield resume_file
 
     # Teardown: Remove the file after the test completes
-    if os.path.exists(resume_file):
-        os.remove(resume_file)
+    if resume_file.exists():
+        resume_file.unlink()
 
 
 @pytest.fixture(scope="module", params=[
@@ -98,6 +113,8 @@ def driver(request):
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
         "safebrowsing.enabled": True,
+        "profile.default_content_settings.popups": 0,
+        "safebrowsing.disable_download_protection": True
     }
     options.add_experimental_option("prefs", prefs)
     options.add_argument('--headless')  # Ensure tests can run without a UI
@@ -118,10 +135,18 @@ def driver(request):
 
 
 def capture_screenshot(driver, name):
-    screenshots_dir = 'screenshots'
-    os.makedirs(screenshots_dir, exist_ok=True)
-    screenshot_path = os.path.join(screenshots_dir, f'{name}.png')
-    driver.save_screenshot(screenshot_path)
-    assert os.path.exists(screenshot_path), \
-        f"Screenshot was not saved: {screenshot_path}"
-    logging.info(f"Screenshot saved: {screenshot_path}")
+    try:
+        screenshots_dir = 'screenshots'
+        os.makedirs(screenshots_dir, exist_ok=True)
+        screenshot_path = os.path.join(screenshots_dir, f'{name}.png')
+
+        if driver.save_screenshot(screenshot_path):
+            logging.info(
+                f"Screenshot saved successfully at: {os.path.abspath(screenshot_path)}")
+        else:
+            raise IOError(f"Failed to capture screenshot: {screenshot_path}")
+
+    except Exception as e:
+        logging.error(f"Error capturing screenshot: {e}")
+        raise
+

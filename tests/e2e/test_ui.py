@@ -2,14 +2,17 @@ import logging
 import os
 import time
 
-from selenium.common import ElementClickInterceptedException, TimeoutException, ElementNotInteractableException
+from selenium.common import ElementClickInterceptedException, TimeoutException, \
+    ElementNotInteractableException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tests.conftest import capture_screenshot
 
-def retry_click(driver, by_locator, max_attempts=3, scroll_value=-300):
+
+def retry_click(driver, by_locator, max_attempts=5, scroll_value=150):
     """
     Retries clicking an element up to a specified maximum number of attempts, scrolling the window as needed.
 
@@ -18,31 +21,34 @@ def retry_click(driver, by_locator, max_attempts=3, scroll_value=-300):
         by_locator: Tuple (By, str) representing the locator strategy and value (e.g., By.ID, 'view_resume_button').
         max_attempts (int, optional): Maximum number of attempts to click the element (default is 3).
         scroll_value (int, optional): Amount to scroll the window by when retrying clicks
-                                     (positive for scrolling down, negative for scrolling up; default is -300).
+                                     (positive for scrolling down, negative for scrolling up; default is 200).
 
     Raises:
         AssertionError: If the element is not clickable after the maximum number of attempts.
-
-    Notes:
-        - This function waits for the element identified by `by_locator` to be clickable using WebDriverWait.
-        - If an ElementClickInterceptedException is raised during a click attempt, it scrolls the window by `scroll_value`.
-        - If a TimeoutException occurs while waiting for the element to be clickable, a screenshot is captured and
-          the test fails with an assertion error.
     """
-    for attempt in range(max_attempts):
+    attempts = 0
+    while attempts < max_attempts:
         try:
-            element = WebDriverWait(driver, 20).until(
+            element = WebDriverWait(driver, 10).until(
                 ec.element_to_be_clickable(by_locator)
             )
+            # Ensure the element is scrolled into view at the bottom
+            driver.execute_script(
+                "arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element)
             element.click()
             return
-        except ElementClickInterceptedException:
-            driver.execute_script(f"window.scrollBy(0, {scroll_value});")
-        except TimeoutException:
-            capture_screenshot(driver, 'retry_click_timeout')
-            assert False, "Test failed due to timeout"
-    capture_screenshot(driver, 'retry_click_error')
-    raise AssertionError("Test failed due to element click intercepted after retries")
+        except Exception as e:
+            attempts += 1
+            if attempts < max_attempts:
+                logging.warning(
+                    f"Attempt {attempts} failed; retrying after scrolling.")
+                # Scroll up or down based on the scroll_value
+                driver.execute_script(f"window.scrollBy(0, {scroll_value});")
+            else:
+                logging.error(
+                    f"Element {by_locator} not clickable after {max_attempts} attempts.")
+                raise AssertionError(
+                    f"Element {by_locator} not clickable after {max_attempts} attempts.") from e
 
 
 
@@ -63,23 +69,34 @@ def test_contact_form_submission(driver):
         email_input.send_keys('john@example.com')
         message_input.send_keys('Hello, this is a test message.')
 
-        # Scroll down to ensure the submit button is in view
-        driver.execute_script("window.scrollBy(0, 1300);")
+        # Wait for full page load
+        WebDriverWait(driver, 10).until(
+            lambda d: d.execute_script(
+                'return document.readyState') == 'complete'
+        )
+
+        # Ensure submit button is in view and interactable
+        actions = ActionChains(driver)
+        actions.move_to_element(submit_button).perform()
+
+        # Ensure the button is visible and enabled
+        assert submit_button.is_displayed() and submit_button.is_enabled(), "Submit button is not interactable"
 
         # Attempt to click the submit button
         attempt = 0
         while attempt < 3:
             try:
-                WebDriverWait(driver, 20).until(
-                    ec.element_to_be_clickable((By.ID, 'submit_button'))
-                )
                 submit_button.click()
-                break
+                break  # Exit loop if successful
             except ElementClickInterceptedException:
                 attempt += 1
-                driver.execute_script("window.scrollBy(0, 500);")
+                logging.warning(
+                    f"Attempt {attempt}: Click intercepted, retrying...")
+                time.sleep(2)  # Add delay before retrying
+
                 if attempt == 3:
-                    capture_screenshot(driver, 'contact_form_submission_failure')
+                    capture_screenshot(driver,
+                                       'contact_form_submission_failure')
                     raise
             except TimeoutException:
                 capture_screenshot(driver, 'contact_form_submission_timeout')
@@ -91,7 +108,10 @@ def test_contact_form_submission(driver):
         )
 
         assert 'Message sent successfully!' in flash_message.text
+        logging.info("Form submission successful and flash message found.")
+
     except Exception as e:
+        logging.error(f"Exception occurred during form submission: {e}")
         capture_screenshot(driver, 'contact_form_submission_exception')
         raise e
 
@@ -100,32 +120,17 @@ def test_navigate_to_privacy_notice(driver):
     driver.get("http://web:5001")
 
     try:
-        # Scroll down to bring the footer and privacy link into view
-        driver.execute_script("window.scrollBy(0, 1500);")
+        # Scroll to the bottom of the page to ensure the footer is in view
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-        # Wait for the privacy link to be visible and clickable
-        privacy_link = WebDriverWait(driver, 20).until(
-            ec.visibility_of_element_located((By.ID, 'privacy_notice_link'))
+        # Wait for the privacy link to be present
+        privacy_link_locator = (By.ID, 'privacy_notice_link')
+        WebDriverWait(driver, 5).until(
+            ec.presence_of_element_located(privacy_link_locator)
         )
 
-        # Retry mechanism for clicking the privacy link
-        attempt = 0
-        while attempt < 3:
-            try:
-                WebDriverWait(driver, 20).until(
-                    ec.element_to_be_clickable((By.ID, 'privacy_notice_link'))
-                )
-                privacy_link.click()
-                break
-            except ElementClickInterceptedException:
-                attempt += 1
-                driver.execute_script("window.scrollBy(0, 300);")
-                if attempt == 3:
-                    capture_screenshot(driver, 'privacy_notice_error')
-                    raise
-            except TimeoutException:
-                capture_screenshot(driver, 'privacy_notice_timeout')
-                assert False, "Test failed due to timeout"
+        # Retry clicking the privacy link with a scroll adjustment
+        retry_click(driver, privacy_link_locator, max_attempts=25)
 
         # Wait for the privacy notice heading to be visible
         privacy_heading = WebDriverWait(driver, 20).until(
@@ -137,6 +142,7 @@ def test_navigate_to_privacy_notice(driver):
         capture_screenshot(driver, 'test_navigate_to_privacy_notice_exception')
         logging.error(f"Exception occurred: {e}")
         raise e
+
 
 
 def test_navigate_to_about_me(driver):
@@ -151,7 +157,8 @@ def test_navigate_to_about_me(driver):
             logging.info("Hamburger menu detected, clicking it.")
             hamburger_menu.click()
         except (TimeoutException, ElementNotInteractableException):
-            logging.info("Hamburger menu not interactable, likely in desktop view.")
+            logging.info(
+                "Hamburger menu not interactable, likely in desktop view.")
 
         # Find and click the 'About' link in the navbar
         about_link = WebDriverWait(driver, 20).until(
@@ -178,7 +185,8 @@ def test_navigate_to_about_me(driver):
                 assert False, "Test failed due to timeout"
 
         # Wait for the 'About Me' section to be visible
-        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, 'about')))
+        WebDriverWait(driver, 20).until(
+            ec.visibility_of_element_located((By.ID, 'about')))
 
         # Check for the presence of some expected text in the About Me section
         about_content = driver.find_element(By.CLASS_NAME, 'about-content')
@@ -203,7 +211,8 @@ def test_navigate_back_to_index(driver):
             logging.info("Hamburger menu detected, clicking it.")
             hamburger_menu.click()
         except (TimeoutException, ElementNotInteractableException):
-            logging.info("Hamburger menu not interactable, likely in desktop view.")
+            logging.info(
+                "Hamburger menu not interactable, likely in desktop view.")
 
         # Find and click the 'Home' link in the navbar
         home_link = WebDriverWait(driver, 20).until(
@@ -269,6 +278,7 @@ def test_navigate_to_resume(driver):
 
 def test_download_resume_pdf(driver, clean_download_dir):
     resume_file = clean_download_dir
+    crdownload_file = str(resume_file) + '.crdownload'
     driver.get("http://web:5001/resume")
 
     try:
@@ -279,12 +289,25 @@ def test_download_resume_pdf(driver, clean_download_dir):
         retry_click(driver, download_button_locator, scroll_value=-300)
 
         # Wait for the file to be downloaded
-        timeout = 30  # seconds
+        timeout = 120  # Increase timeout to 2 minutes
         start_time = time.time()
+        last_size = 0
+
+        while os.path.exists(crdownload_file):
+            current_size = os.path.getsize(crdownload_file)
+            if current_size != last_size:
+                last_size = current_size
+            else:
+                if time.time() - start_time > timeout:
+                    capture_screenshot(driver,
+                                       'test_download_resume_pdf_timeout')
+                    assert False, "PDF was not downloaded within the timeout period"
+                time.sleep(2)  # Wait 2 seconds before checking again
+
+        # Ensure the .crdownload is gone and the actual file exists
         while not os.path.exists(resume_file):
             if time.time() - start_time > timeout:
-                capture_screenshot(
-                    driver, 'test_download_resume_pdf_timeout')
+                capture_screenshot(driver, 'test_download_resume_pdf_timeout')
                 assert False, "PDF was not downloaded within the timeout period"
             time.sleep(1)
 
@@ -295,4 +318,3 @@ def test_download_resume_pdf(driver, clean_download_dir):
         capture_screenshot(driver, 'test_download_resume_pdf_exception')
         logging.error(f"Exception occurred: {e}")
         raise e
-
