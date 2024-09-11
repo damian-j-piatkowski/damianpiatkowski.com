@@ -1,12 +1,11 @@
-import logging
 import os
 from pathlib import Path
 
 import pytest
 from selenium import webdriver
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 from app import create_app, db
-from sqlalchemy.orm import sessionmaker, scoped_session
 from app.models.blog_post import metadata as blog_post_metadata
 from app.models.log import metadata as log_metadata
 
@@ -82,16 +81,19 @@ def session(_db):
 def clean_download_dir():
     download_directory = os.getenv("DOWNLOAD_DIRECTORY")
     resume_file = Path(download_directory) / "resume.pdf"
+    crdownload_file = Path(download_directory) / "resume.pdf.crdownload"
 
-    # Setup: Ensure the download directory is clean before the test
-    if resume_file.exists():
-        resume_file.unlink()
+    # Setup: Ensure both the .pdf and .crdownload files are cleaned before
+    for file in [resume_file, crdownload_file]:
+        if file.exists():
+            file.unlink()
 
     yield resume_file
 
-    # Teardown: Remove the file after the test completes
-    if resume_file.exists():
-        resume_file.unlink()
+    # Teardown: Ensure both files are cleaned up after the test
+    for file in [resume_file, crdownload_file]:
+        if file.exists():
+            file.unlink()
 
 
 @pytest.fixture(scope="module", params=[
@@ -132,21 +134,3 @@ def driver(request):
     finally:
         if driver is not None:
             driver.quit()
-
-
-def capture_screenshot(driver, name):
-    try:
-        screenshots_dir = 'screenshots'
-        os.makedirs(screenshots_dir, exist_ok=True)
-        screenshot_path = os.path.join(screenshots_dir, f'{name}.png')
-
-        if driver.save_screenshot(screenshot_path):
-            logging.info(
-                f"Screenshot saved successfully at: {os.path.abspath(screenshot_path)}")
-        else:
-            raise IOError(f"Failed to capture screenshot: {screenshot_path}")
-
-    except Exception as e:
-        logging.error(f"Error capturing screenshot: {e}")
-        raise
-
