@@ -1,6 +1,7 @@
 from flask import (Blueprint, request, render_template, redirect, url_for,
                    flash, current_app)
 from flask_mail import Message
+
 from app.extensions import mail
 
 home_bp = Blueprint('home_bp', __name__)
@@ -26,8 +27,13 @@ def submit_contact():
                   recipients=[current_app.config['MAIL_RECIPIENT']],
                   body=f"Name: {name}\nEmail: {email}\nMessage: {message}")
 
-    mail.send(msg)
-    flash('Message sent successfully!', 'success')
+    try:
+        mail.send(msg)
+        flash('Message sent successfully!', 'success')
+    except Exception:
+        # Log the error or handle it as needed
+        flash('An error occurred while sending your message.', 'danger')
+
     return redirect(url_for('home_bp.index'))
 
 
