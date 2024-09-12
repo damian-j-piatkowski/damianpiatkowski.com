@@ -72,7 +72,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory DB for tests
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_TO_DB = False
     LOG_FILE = '/logs/testing/app.log'

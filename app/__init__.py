@@ -15,9 +15,11 @@ from app.routes.resume import resume_bp
 from config import config, configure_logging
 
 
-def create_app():
+def create_app(config_name=None):
     flask_app = Flask(__name__)
-    flask_app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
+    # Use the provided config_name, or default to the one from environment variables
+    config_to_use = config_name or os.getenv('FLASK_ENV', 'default')
+    flask_app.config.from_object(config[config_to_use])
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)
