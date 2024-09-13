@@ -2,12 +2,15 @@
 
 Functions:
     capture_screenshot: Captures a screenshot of the browser window.
+    expand_navbar_if_collapsed: Expands the navbar if the toggler button is
+                                visible (collapsed).
     get_base_url: Retrieves the base URL from environment variables.
     retry_click: Attempts to click a web element multiple times with optional
                  scrolling to bring the element into view if the click fails.
 
 Example usage:
     capture_screenshot(driver, 'error_page')
+    expand_navbar_if_collapsed(driver)
     base_url = get_base_url()
     retry_click(driver, ('id', 'submit_button'))
 """
@@ -29,8 +32,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 def capture_screenshot(driver: WebDriver, name: str) -> None:
-    """
-    Capture a screenshot of the current browser window and save it to a file.
+    """Capture a screenshot of the current browser window and save it to a file.
 
     Args:
         driver (selenium.webdriver.Chrome): The WebDriver instance used to
@@ -60,10 +62,34 @@ def capture_screenshot(driver: WebDriver, name: str) -> None:
         logging.error(f"Error capturing screenshot: {e}")
         raise
 
+def expand_navbar_if_collapsed(driver: WebDriver) -> None:
+    """Expands the navbar if the toggler button is visible (collapsed).
+
+    This function will check if the navbar toggler button (typically visible on
+    smaller screens) is displayed. If it is, the function clicks the button
+    to expand the navbar.
+
+    Args:
+        driver (WebDriver): The Selenium WebDriver instance controlling the
+            browser.
+    """
+    try:
+        toggler_button_locator = (By.CLASS_NAME, 'navbar-toggler')
+        toggler_button = driver.find_element(*toggler_button_locator)
+
+        if toggler_button.is_displayed():
+            toggler_button.click()
+            logging.info("Navbar expanded by clicking the toggler button.")
+        else:
+            logging.info("Navbar is already expanded.")
+    except Exception as e:
+        logging.error(f"Error expanding the navbar: {e}")
+        raise e
+
+
 
 def get_base_url() -> str:
-    """
-    Retrieves the base URL for the application.
+    """Retrieves the base URL for the application.
 
     This function fetches the `BASE_URL` from the environment variables.
     If `BASE_URL` is not set, it defaults to 'http://localhost:5000'.
@@ -81,9 +107,7 @@ def retry_click(
         max_attempts: int = 5,
         scroll_value: int = 200
 ) -> None:
-    """
-    Attempts to click a web element multiple times, with optional scrolling
-    to bring the element into view if the click fails.
+    """Attempts to click a web element multiple times, with optional scrolling.
 
     This function will retry the click action up to `max_attempts` times if
     the element is not clickable due to intercepting or interactability issues.

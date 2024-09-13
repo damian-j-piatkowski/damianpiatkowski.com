@@ -52,7 +52,7 @@ def driver(request: pytest.FixtureRequest) -> Optional[WebDriver]:
         "safebrowsing.disable_download_protection": True
     }
     options.add_experimental_option("prefs", prefs)
-    options.add_argument('--headless')  # Ensure tests can run without a UI
+    options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--no-sandbox')
