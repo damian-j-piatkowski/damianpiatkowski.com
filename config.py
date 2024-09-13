@@ -75,8 +75,8 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory DB for tests
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_TO_DB = False
-    LOG_FILE = '/logs/testing/app.log'
-    FALLBACK_LOG_PATH = '/logs/testing/fallback.log'
+    LOG_FILE = None  # No log file in testing
+    FALLBACK_LOG_PATH = None  # No fallback log in testing
 
 
 class ProductionConfig(Config):
@@ -107,12 +107,6 @@ def configure_logging(app):
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-    # Set up the main file handler
-    file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024,
-                                       backupCount=10)
-    file_handler.setLevel(log_level)
-    file_handler.setFormatter(formatter)
-
     # Set up the console handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(log_level)
@@ -122,19 +116,25 @@ def configure_logging(app):
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.handlers.clear()  # Clear existing handlers
-    root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-    # Fallback logger setup
-    fallback_logger = logging.getLogger('fallback')
-    fallback_logger.setLevel(logging.ERROR)  # Log only critical errors
-    fallback_file_handler = RotatingFileHandler(fallback_log_path,
-                                                maxBytes=1024 * 1024,
-                                                backupCount=5)
-    fallback_file_handler.setFormatter(formatter)
-    fallback_logger.handlers.clear()  # Clear existing handlers
-    fallback_logger.addHandler(fallback_file_handler)
-    root_logger.info("Fallback logger set up.")
+    if log_file:  # Only add file handler if a log file is configured
+        file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024,
+                                           backupCount=10)
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+
+    if fallback_log_path:  # Only set up fallback logger if path is provided
+        fallback_logger = logging.getLogger('fallback')
+        fallback_logger.setLevel(logging.ERROR)  # Log only critical errors
+        fallback_file_handler = RotatingFileHandler(fallback_log_path,
+                                                    maxBytes=1024 * 1024,
+                                                    backupCount=5)
+        fallback_file_handler.setFormatter(formatter)
+        fallback_logger.handlers.clear()  # Clear existing handlers
+        fallback_logger.addHandler(fallback_file_handler)
+        root_logger.info("Fallback logger set up.")
 
     if log_to_db:
         class SQLAlchemyHandler(logging.Handler):

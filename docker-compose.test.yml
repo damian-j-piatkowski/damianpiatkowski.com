@@ -3,12 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "mkdir -p /logs/testing && flask run --host=0.0.0.0 --port=5001"
+    command: sh -c "flask run --host=0.0.0.0 --port=5001"
     ports:
       - "5001:5001"
     volumes:
       - .:/app
-      - log_data:/logs
     environment:
       FLASK_APP: run.py
       FLASK_ENV: testing
@@ -35,7 +34,6 @@ services:
       dockerfile: Dockerfile.selenium  # Use the test-specific Dockerfile
     volumes:
       - .:/app/src  # Mount the code to /app/src
-      - log_data:/logs
     shm_size: 4g
     environment:
       BASE_URL: http://web:5001
@@ -54,6 +52,5 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
     depends_on:
       - web
+    command: sh -c "pytest -rw -v src/tests/integration"
 
-volumes:
-  log_data:
