@@ -52,5 +52,6 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
     depends_on:
       - web
-    command: sh -c "pytest -rw -v src/tests/integration"
+    command: sh -c "pytest -rw -v src/tests/integration src/tests/unit"
+
 

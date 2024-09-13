@@ -1,12 +1,12 @@
 """Utility pytest fixtures for setting up and managing test environments.
 
-This module includes fixtures that clean up the download directory before
-and after tests. It ensures the specified files (like PDFs) are removed before
-the test starts and after the test ends.
+This module includes fixtures that are used across various tests, such as
+cleaning up the download directory or providing standard test data structures.
 
 Fixtures:
     - clean_download_dir: Cleans up specific files (e.g., PDFs) in the download
         directory before and after tests.
+    - valid_log_data: Provides valid log data for schema validation tests.
 """
 
 import os
@@ -42,3 +42,16 @@ def clean_download_dir() -> Path:
     for file in [resume_file, crdownload_file]:
         if file.exists():
             file.unlink()
+
+
+@pytest.fixture(scope='function')
+def valid_log_data():
+    """Fixture providing valid log data.
+
+    This fixture returns a dictionary containing log data with
+    typical values used for testing the log schema validation.
+    """
+    return {
+        "level": "INFO",
+        "message": "This is a log message."
+    }

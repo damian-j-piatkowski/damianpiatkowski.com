@@ -72,7 +72,7 @@ Ensure you have Docker Desktop installed on your machine. Docker Desktop include
 **For Testing**:
 
     ```sh
-    docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+    docker-compose -f docker-compose.test.yml build --no-cache; docker-compose -f docker-compose.test.yml up -d; docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from test-runner
 
 **Stopping the Services**
 
