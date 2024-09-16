@@ -1,11 +1,15 @@
 """Utility pytest fixtures for setting up and managing test environments.
 
 This module includes fixtures that are used across various tests, such as
-cleaning up the download directory or providing standard test data structures.
+cleaning up the download directory, providing standard test data structures,
+and handling form submissions for testing.
 
 Fixtures:
     - clean_download_dir: Cleans up specific files (e.g., PDFs) in the download
         directory before and after tests.
+    - incomplete_form_data: Provides incomplete form data for testing
+        validation.
+    - valid_form_data: Provides valid form data for contact form submission.
     - valid_log_data: Provides valid log data for schema validation tests.
 """
 
@@ -42,6 +46,34 @@ def clean_download_dir() -> Path:
     for file in [resume_file, crdownload_file]:
         if file.exists():
             file.unlink()
+
+
+@pytest.fixture(scope='function')
+def incomplete_form_data():
+    """Fixture providing incomplete form data for contact form tests.
+
+    This fixture returns a dictionary with missing or incomplete data to be used
+    in tests that check form validation and error handling.
+    """
+    return {
+        'name': '',
+        'email': 'john@example.com',
+        'message': 'This is a test message.'
+    }
+
+
+@pytest.fixture(scope='function')
+def valid_form_data():
+    """Fixture providing valid form data for contact form submission tests.
+
+    This fixture returns a dictionary with complete and valid form data, which
+    can be used in tests to simulate successful form submissions.
+    """
+    return {
+        'name': 'John Doe',
+        'email': 'john@example.com',
+        'message': 'This is a test message.'
+    }
 
 
 @pytest.fixture(scope='function')

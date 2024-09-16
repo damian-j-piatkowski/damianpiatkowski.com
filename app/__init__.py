@@ -8,16 +8,16 @@ from app.domain.blog_post import BlogPost
 from app.domain.log import Log
 from app.extensions import db, mail
 from app.orm import start_mappers
-from app.routes.about_me import about_me_bp
-from app.routes.blog import blog_bp
-from app.routes.home import home_bp
-from app.routes.resume import resume_bp
+from app.routes.web.about_me import about_me_bp
+from app.routes.web.blog import blog_bp
+from app.routes.web.home import home_bp
+from app.routes.web.resume import resume_bp
 from config import config, configure_logging
 
 
 def create_app(config_name=None):
     flask_app = Flask(__name__)
-    # Use the provided config_name, or default to the one from environment variables
+    # Use the provided config_name, or default to the one from env variables
     config_to_use = config_name or os.getenv('FLASK_ENV', 'default')
     flask_app.config.from_object(config[config_to_use])
 
