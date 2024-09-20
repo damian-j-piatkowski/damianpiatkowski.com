@@ -10,8 +10,7 @@ from app.services.email_service import send_contact_email
 
 
 def handle_contact_form_submission(form_data: dict) -> tuple[bool, str, str]:
-    """
-    Handle the submission of contact form data.
+    """Handles the submission of contact form data.
 
     This function validates the form data and attempts to send an email using
     the provided information. If the email is sent successfully, it returns

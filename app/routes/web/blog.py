@@ -1,54 +1,29 @@
-from flask import Blueprint, jsonify, request
-from marshmallow import ValidationError
-from app.api_schemas.blog_post_schema import BlogPostSchema
-from app.domain.blog_post import BlogPost
+from flask import Blueprint
+
+blog_bp = Blueprint('blog', __name__)
+
+from flask import Blueprint
+from app.controllers.blog_controller import create_post, get_all_posts, \
+    compare_articles
 
 blog_bp = Blueprint('blog', __name__)
 
 
+# Route for creating a blog post
 @blog_bp.route('/api/blog_post', methods=['POST'])
 def create_blog_post():
-    data = request.get_json()
-    schema = BlogPostSchema()
-
-    try:
-        validated_data = schema.load(data)
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-
-    blog_post = BlogPost(
-        title=validated_data['title'],
-        content=validated_data['content'],
-        image_small=validated_data['image_small'],
-        image_medium=validated_data['image_medium'],
-        image_large=validated_data['image_large']
-    )
-
-    # Save the blog post to the database (using your ORM)
-    # ...
-
-    return jsonify(schema.dump(blog_post)), 201
+    return create_post()
 
 
+# Route for fetching all blog posts
 @blog_bp.route('/api/blog_posts', methods=['GET'])
 def get_blog_posts():
-    # Retrieve blog posts from the database (using your ORM)
-    blog_posts = [
-        BlogPost(
-            title="Sample Post 1",
-            content="Content for post 1",
-            image_small="/path/to/small1.jpg",
-            image_medium="/path/to/medium1.jpg",
-            image_large="/path/to/large1.jpg"
-        ),
-        BlogPost(
-            title="Sample Post 2",
-            content="Content for post 2",
-            image_small="/path/to/small2.jpg",
-            image_medium="/path/to/medium2.jpg",
-            image_large="/path/to/large2.jpg"
-        ),
-    ]
+    return get_all_posts()
 
-    schema = BlogPostSchema(many=True)
-    return jsonify(schema.dump(blog_posts)), 200
+
+# Route for comparing articles between Google Drive and DB
+@blog_bp.route('/compare/articles', methods=['GET'])
+def compare_blog_posts():
+    return compare_articles()
+
+# todo render views
