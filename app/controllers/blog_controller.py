@@ -5,6 +5,13 @@ from app.services.google_drive_service import list_files_in_drive
 from app.services.article_sync_service import find_missing_articles
 from app.api_schemas.blog_post_schema import BlogPostSchema
 
+from flask import jsonify
+from app.services.blog_service import fetch_all_blog_posts
+from app.api_schemas.blog_post_schema import BlogPostSchema
+
+
+
+
 
 # Orchestrates the creation of a blog post
 def create_post():
@@ -23,9 +30,14 @@ def create_post():
 
 # Orchestrates fetching of all blog posts
 def get_all_posts():
-    posts = fetch_all_blog_posts()
-    schema = BlogPostSchema(many=True)
-    return jsonify(schema.dump(posts)), 200
+    try:
+        posts = fetch_all_blog_posts()
+        if not posts:
+            return jsonify({"message": "No blog posts found"}), 404
+        schema = BlogPostSchema(many=True)
+        return jsonify(schema.dump(posts)), 200
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500  # Internal server error
 
 
 # Orchestrates comparison between Google Drive and DB articles

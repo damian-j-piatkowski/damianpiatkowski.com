@@ -12,6 +12,7 @@ from app.routes.web.about_me import about_me_bp
 from app.routes.web.blog import blog_bp
 from app.routes.web.home import home_bp
 from app.routes.web.resume import resume_bp
+from app.routes.api.blog import api_blog_bp  # Import the new API blog blueprint
 from config import config, configure_logging
 
 
@@ -41,6 +42,7 @@ def create_app(config_name=None):
     flask_app.register_blueprint(blog_bp)
     flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(resume_bp)
+    flask_app.register_blueprint(api_blog_bp)  # Register the API blog blueprint
 
     with flask_app.app_context():
         app_logger = logging.getLogger(__name__)

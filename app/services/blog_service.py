@@ -6,13 +6,12 @@ def fetch_all_blog_posts():
     """Service function to fetch all blog posts."""
     session = db.session
     try:
-        return BlogPostRepository(session).fetch_all_blog_posts()
+        posts = BlogPostRepository(session).fetch_all_blog_posts()
+        return posts
     except RuntimeError as e:
-        # Log the error or take action
-        print(f"Error in service: {e}")
-
-        # Optionally handle it or re-raise it for higher layers (e.g., controller)
-        raise
+        # Log the error (you might want to use a proper logging system)
+        print(f"Error in BlogPostService: {e}")
+        raise RuntimeError("Failed to retrieve blog posts") from e
 
 
 def save_blog_post(validated_data):
