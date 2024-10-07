@@ -24,6 +24,9 @@ class Config:
     MYSQL_DATABASE: str = os.getenv('MYSQL_DATABASE', '')
     MYSQL_HOST: str = os.getenv('MYSQL_HOST', '')
 
+    # Google Drive API
+    GOOGLE_DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+
     # Other variables
     DEBUG: bool = False
     LOG_FILE: str = ''
@@ -67,6 +70,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = Config.get_database_url()
     LOG_FILE = '/logs/development/app.log'
     FALLBACK_LOG_PATH = '/logs/development/fallback.log'
+    DRIVE_BLOG_POSTS_FOLDER_ID = '1Ew-MQuUqw8ZYQFYa4ciGsrmHn4Kmv8Uv'
 
 
 class TestingConfig(Config):
@@ -77,6 +81,7 @@ class TestingConfig(Config):
     LOG_TO_DB = False
     LOG_FILE = None  # No log file in testing
     FALLBACK_LOG_PATH = None  # No fallback log in testing
+    DRIVE_BLOG_POSTS_FOLDER_ID = '1Ew-MQuUqw8ZYQFYa4ciGsrmHn4Kmv8Uv'
 
 
 class ProductionConfig(Config):
@@ -86,6 +91,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = Config.get_database_url()
     LOG_FILE = '/logs/production/app.log'
     FALLBACK_LOG_PATH = '/logs/production/fallback.log'
+    DRIVE_BLOG_POSTS_FOLDER_ID = '1YUSrQrLl_eckn6LAi_petVn_JPbS2Me6'
 
 
 config = {

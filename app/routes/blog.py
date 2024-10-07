@@ -1,10 +1,6 @@
 from flask import Blueprint
 
-blog_bp = Blueprint('blog', __name__)
-
-from flask import Blueprint
-from app.controllers.blog_controller import create_post, get_all_posts, \
-    compare_articles
+from app.controllers.blog_controller import create_post, get_all_posts
 
 blog_bp = Blueprint('blog', __name__)
 
@@ -20,10 +16,9 @@ def create_blog_post():
 def get_blog_posts():
     return get_all_posts()
 
-
 # Route for comparing articles between Google Drive and DB
-@blog_bp.route('/compare/articles', methods=['GET'])
-def compare_blog_posts():
-    return compare_articles()
+# @blog_bp.route('/compare/articles', methods=['GET'])
+# def compare_blog_posts():
+#     return compare_articles()
 
 # todo render views

@@ -8,10 +8,10 @@ from app.domain.blog_post import BlogPost
 from app.domain.log import Log
 from app.extensions import db, mail
 from app.orm import start_mappers
-from app.routes.web.about_me import about_me_bp
-from app.routes.web.blog import blog_bp
-from app.routes.web.home import home_bp
-from app.routes.web.resume import resume_bp
+from app.routes.about_me import about_me_bp
+from app.routes.blog import blog_bp
+from app.routes.home import home_bp
+from app.routes.resume import resume_bp
 from app.routes.api.blog import api_blog_bp  # Import the new API blog blueprint
 from config import config, configure_logging
 
