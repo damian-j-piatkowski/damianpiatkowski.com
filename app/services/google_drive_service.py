@@ -1,5 +1,7 @@
 import os
+from typing import Callable
 
+import googleapiclient
 from flask import current_app
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -13,7 +15,25 @@ from app.services import exceptions
 class GoogleDriveService:
     _cached_drive_service = None  # Class-level cache
 
-    def __init__(self, drive_service=None):
+    def __init__(
+            self,
+            drive_service=None,
+            authenticate_func: Callable[
+                [str, str, list], 'googleapiclient.discovery.Resource'
+            ] = None
+    ):
+        """
+        Initializes the GoogleDriveService.
+
+        Args:
+            drive_service (googleapiclient.discovery.Resource, optional): A pre-authenticated
+                Google Drive service instance. If not provided, the service will be
+                authenticated within the class.
+            authenticate_func (Callable, optional): A custom function to handle authentication.
+                The custom function must accept 'credentials_file_path', 'token_file_path',
+                and 'scopes' as arguments.
+        """
+        self.authenticate_func = authenticate_func or self._authenticate_google_drive
         self.drive_service = drive_service or self._get_drive_service()
 
     def _get_drive_service(self):
@@ -24,17 +44,19 @@ class GoogleDriveService:
             scopes = current_app.config.get('GOOGLE_DRIVE_SCOPES',
                                             ['https://www.googleapis.com/auth/drive'])
 
-            GoogleDriveService._cached_drive_service = self._authenticate_google_drive(
+            GoogleDriveService._cached_drive_service = self.authenticate_func(
                 credentials_file_path, token_file_path, scopes
             )
 
         return GoogleDriveService._cached_drive_service
 
-    def clear_cache(self):
+    @staticmethod
+    def clear_cache():
         """Clear the cached Google Drive service."""
         GoogleDriveService._cached_drive_service = None
 
-    def _authenticate_google_drive(self, credentials_file_path=None, token_file_path=None,
+    @staticmethod
+    def _authenticate_google_drive(credentials_file_path=None, token_file_path=None,
                                    scopes=None):
         """Authenticate and return a Google Drive service instance."""
         creds = None
@@ -49,9 +71,9 @@ class GoogleDriveService:
             with open(token_file_path, 'w') as token_file:
                 token_file.write(creds.to_json())
         else:
-            # Use the provided credentials file if no valid token
-            creds = ServiceAccountCredentials.from_service_account_file(
-                credentials_file_path, scopes=scopes)
+            # Load credentials and explicitly apply scopes
+            creds = ServiceAccountCredentials.from_service_account_file(credentials_file_path)
+            creds = creds.with_scopes(scopes)  # Apply scopes here
 
         return build('drive', 'v3', credentials=creds)
 
