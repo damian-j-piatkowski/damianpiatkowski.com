@@ -5,6 +5,7 @@ from google.oauth2.credentials import Credentials
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
 from app.services.google_drive_service import GoogleDriveService
+from app.services import exceptions
 
 
 @pytest.fixture
@@ -183,7 +184,7 @@ def test_authenticate_with_invalid_token_file(mock_env, mock_creds, scopes, tmpd
         # Simulate an error when trying to load invalid credentials
         mock_creds_loader.side_effect = ValueError("Invalid token file content")
 
-        with pytest.raises(ValueError, match="Invalid token file content"):
+        with pytest.raises(exceptions.GoogleDriveError, match="Unexpected error during authentication: Invalid token file content"):
             # Call the method under test
             GoogleDriveService._authenticate_google_drive(
                 '/fake/credentials.json', str(invalid_token_file), scopes)
@@ -191,9 +192,10 @@ def test_authenticate_with_invalid_token_file(mock_env, mock_creds, scopes, tmpd
 
 def test_authenticate_without_credentials_file(mock_env, mock_service_account_creds, scopes):
     """Test authentication when no credentials file is provided."""
-    with pytest.raises(TypeError):
-        # Call the method with no credentials file, expecting a TypeError
+    with pytest.raises(exceptions.GoogleDriveAuthenticationError, match="Credentials file path is missing or invalid."):
+        # Call the method with no credentials file, expecting a GoogleDriveAuthenticationError
         GoogleDriveService._authenticate_google_drive(None, None, scopes)
+
 
 
 def test_authenticate_expired_no_refresh_token(mock_env, mock_creds, scopes, write_token_file):
