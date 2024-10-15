@@ -11,8 +11,6 @@ from typing import Callable, List, Dict, Optional
 import google.auth.exceptions as google_exceptions
 import googleapiclient
 from flask import current_app
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -30,7 +28,7 @@ class GoogleDriveService:
             self,
             drive_service: Optional['googleapiclient.discovery.Resource'] = None,
             authenticate_func: Optional[
-                Callable[[str, str, List[str]], 'googleapiclient.discovery.Resource']] = None
+                Callable[[str, List[str]], 'googleapiclient.discovery.Resource']] = None
     ) -> None:
         """
         Initializes the GoogleDriveService.
@@ -40,8 +38,7 @@ class GoogleDriveService:
                 Google Drive service instance. If not provided, the service will be
                 authenticated within the class.
             authenticate_func (Callable, optional): A custom function to handle authentication.
-                The custom function must accept 'credentials_file_path', 'token_file_path',
-                and 'scopes' as arguments.
+                The custom function must accept 'credentials_file_path' and 'scopes' as arguments.
         """
         self.authenticate_func = authenticate_func or self._authenticate_google_drive
         self.drive_service = drive_service or self._get_drive_service()
@@ -57,12 +54,11 @@ class GoogleDriveService:
         """
         if GoogleDriveService._cached_drive_service is None:
             credentials_file_path = os.getenv('GOOGLE_CREDENTIALS_FILE')
-            token_file_path = os.getenv('GOOGLE_TOKEN_FILE')
             scopes = current_app.config.get('GOOGLE_DRIVE_SCOPES',
                                             ['https://www.googleapis.com/auth/drive'])
 
             GoogleDriveService._cached_drive_service = self.authenticate_func(
-                credentials_file_path, token_file_path, scopes
+                credentials_file_path, scopes
             )
 
         return GoogleDriveService._cached_drive_service
@@ -75,58 +71,36 @@ class GoogleDriveService:
     @staticmethod
     def _authenticate_google_drive(
             credentials_file_path: Optional[str] = None,
-            token_file_path: Optional[str] = None,
             scopes: Optional[List[str]] = None
     ) -> 'googleapiclient.discovery.Resource':
-        """Authenticate and return a Google Drive service instance.
+        """Authenticate and return a Google Drive service instance using service account creds.
 
         Args:
             credentials_file_path (str, optional): Path to the service account credentials file.
-            token_file_path (str, optional): Path to the token file for OAuth authentication.
             scopes (List[str], optional): List of Google API scopes.
 
         Returns:
             googleapiclient.discovery.Resource: Authenticated Google Drive service instance.
         """
-        creds = None
-
         try:
-            # Load credentials from token.json if available
-            if token_file_path and os.path.exists(token_file_path):
-                logger.info(f"Loading credentials from token file: {token_file_path}")
-                creds = Credentials.from_authorized_user_file(token_file_path, scopes)
-
-            # Refresh the token if it's expired
-            if creds and creds.expired and creds.refresh_token:
-                logger.info("Refreshing expired token.")
-                creds.refresh(Request())
-                logger.info(f"Token refreshed. Saving updated token to file: {token_file_path}")
-                with open(token_file_path, 'w') as token_file:
-                    token_file.write(creds.to_json())
+            if credentials_file_path:
+                logger.info(
+                    f"Loading service account credentials from file: {credentials_file_path}")
+                creds = ServiceAccountCredentials.from_service_account_file(credentials_file_path)
+                creds = creds.with_scopes(scopes)  # Apply scopes
             else:
-                # Load credentials from service account file if token not available or refresh fails
-                if credentials_file_path:
-                    logger.info(
-                        f"Loading service account credentials from file: {credentials_file_path}")
-                    creds = ServiceAccountCredentials.from_service_account_file(
-                        credentials_file_path)
-                    creds = creds.with_scopes(scopes)  # Apply scopes
-                else:
-                    logger.error("Credentials file path is missing or invalid.")
-                    raise exceptions.GoogleDriveAuthenticationError(
-                        "Credentials file path is missing or invalid.")
+                logger.error("Credentials file path is missing or invalid.")
+                raise exceptions.GoogleDriveAuthenticationError(
+                    "Credentials file path is missing or invalid."
+                )
 
             # Return the authenticated Google Drive service
-            logger.info("Google Drive service successfully authenticated.")
+            logger.info("Google Drive service successfully authenticated using service account.")
             return build('drive', 'v3', credentials=creds)
 
         except FileNotFoundError as e:
             logger.error(f"File not found during authentication: {str(e)}")
             raise exceptions.GoogleDriveAuthenticationError(f"File not found: {str(e)}")
-
-        except google_exceptions.RefreshError as e:
-            logger.error(f"Failed to refresh token: {str(e)}")
-            raise exceptions.GoogleDriveAuthenticationError(f"Failed to refresh token: {str(e)}")
 
         except google_exceptions.DefaultCredentialsError as e:
             logger.error(f"Error loading credentials: {str(e)}")
@@ -136,14 +110,6 @@ class GoogleDriveService:
             logger.error(f"Google API error during authentication: {str(e)}")
             raise exceptions.GoogleDriveAPIError(
                 f"Google API error during authentication: {str(e)}")
-
-        except exceptions.GoogleDriveAuthenticationError as e:
-            logger.error(str(e))
-            raise  # Re-raise the original exception
-
-        except Exception as e:
-            logger.error(f"Unexpected error during authentication: {str(e)}")
-            raise exceptions.GoogleDriveError(f"Unexpected error during authentication: {str(e)}")
 
     @staticmethod
     def _handle_google_drive_api_errors(error: HttpError, context: str = "operation") -> None:
