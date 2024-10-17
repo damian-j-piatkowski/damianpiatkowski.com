@@ -81,10 +81,10 @@ def create_token_file(tmp_path) -> str:
     # Cleanup is handled by tmp_path, no need for manual os.remove
 
 
-@pytest.fixture
-def drive_service():
-    """Fixture to initialize the real GoogleDriveService (for integration tests)."""
-    return GoogleDriveService()
+# @pytest.fixture
+# def drive_service():
+#     """Fixture to initialize the real GoogleDriveService (for integration tests)."""
+#     return GoogleDriveService()
 
 
 @pytest.fixture
