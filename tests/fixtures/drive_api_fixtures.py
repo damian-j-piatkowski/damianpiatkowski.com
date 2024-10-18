@@ -8,6 +8,20 @@ import pytest
 from app.services.google_drive_service import GoogleDriveService
 
 
+import pytest
+from app.services.google_drive_service import GoogleDriveService
+from unittest.mock import Mock
+
+@pytest.fixture
+def mock_google_drive_service():
+    # Create a mock drive_service (or use a real one if needed for integration tests)
+    mock_drive_service = Mock()
+
+    # Create the service instance
+    service = GoogleDriveService(drive_service=mock_drive_service)
+
+    return service
+
 # Fixture to mock the environment variables for service account
 @pytest.fixture
 def mock_env(monkeypatch):

@@ -4,6 +4,7 @@ This module provides functionalities to authenticate with Google Drive,
 list folder contents, and read files using the Google Drive API.
 """
 
+import json
 import logging
 import os
 from typing import Callable, List, Dict, Optional
@@ -112,30 +113,32 @@ class GoogleDriveService:
                 f"Google API error during authentication: {str(e)}")
 
     @staticmethod
-    def _handle_google_drive_api_errors(error: HttpError, context: str = "operation") -> None:
-        """Handle Google Drive API errors and raise appropriate custom exceptions.
-
-        Args:
-            error (HttpError): The error raised by the Google Drive API.
-            context (str, optional): Context in which the error occurred (default: "operation").
-
-        Raises:
-            GoogleDriveFileNotFoundError: If the error status is 404.
-            GoogleDrivePermissionError: If the error status is 403.
-            GoogleDriveAPIError: For other API errors or unexpected errors.
-        """
+    def _handle_google_drive_api_errors(error: Exception, context: str = "operation") -> None:
+        """Handle Google Drive API errors and raise appropriate custom exceptions."""
         if isinstance(error, HttpError):
+            try:
+                # Decode and extract the error message from the content
+                error_content = json.loads(error.content.decode("utf-8"))
+                error_message = error_content.get("error", {}).get("message", "Unknown error")
+            except (json.JSONDecodeError, AttributeError):
+                error_message = "Unknown error"
+
             if error.resp.status == 404:
                 raise exceptions.GoogleDriveFileNotFoundError(
-                    f"Resource not found during {context}.")
+                    f"Resource not found during {context}."
+                )
             elif error.resp.status == 403:
-                raise exceptions.GoogleDrivePermissionError(f"Permission denied during {context}.")
+                raise exceptions.GoogleDrivePermissionError(
+                    f"Permission denied during {context}."
+                )
             else:
                 raise exceptions.GoogleDriveAPIError(
-                    f"Google Drive API error occurred during {context}: {error}")
+                    f"Google Drive API error occurred during {context}: {error_message}"
+                )
         else:
             raise exceptions.GoogleDriveAPIError(
-                f"Unexpected error occurred during {context}: {error}")
+                f"Unexpected error occurred during {context}: {error}"
+            )
 
     def list_folder_contents(self, folder_id: str) -> List[Dict[str, str]]:
         """List contents of a Google Drive folder by ID.
