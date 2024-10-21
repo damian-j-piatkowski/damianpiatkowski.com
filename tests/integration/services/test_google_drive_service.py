@@ -32,19 +32,6 @@ DEFAULT_TEST_FILE_ID = '1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo'
 RESTRICTED_FILE_ID = '1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk'
 
 
-@pytest.fixture
-def google_drive_service_fixture(app) -> GoogleDriveService:
-    """Fixture to provide an instance of GoogleDriveService for integration testing."""
-    from app.services.google_drive_service import GoogleDriveService
-    return GoogleDriveService()
-
-
-@pytest.fixture
-def real_folder_id(app) -> str:
-    """Fixture to retrieve the real folder ID from the app configuration."""
-    return app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
-
-
 def test_list_folder_contents_success(
         google_drive_service_fixture: GoogleDriveService,
         real_folder_id: str

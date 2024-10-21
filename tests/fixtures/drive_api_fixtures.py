@@ -1,136 +1,83 @@
-import json
-from typing import List, Dict
+"""Fixtures for testing Google Drive service functionality.
+
+This module provides various pytest fixtures to support both unit and integration
+tests of the GoogleDriveService class. It includes fixtures for mocking the
+Google Drive service, environment variables, service account credentials,
+common Google Drive scopes, and retrieving real configuration values such as
+the folder ID for blog posts.
+"""
+
 from unittest import mock
-from unittest.mock import MagicMock
-
-import pytest
-
-from app.services.google_drive_service import GoogleDriveService
-
-
-import pytest
-from app.services.google_drive_service import GoogleDriveService
 from unittest.mock import Mock
 
+import pytest
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+
+from app.services.google_drive_service import GoogleDriveService
+
+
 @pytest.fixture
-def mock_google_drive_service():
-    # Create a mock drive_service (or use a real one if needed for integration tests)
+def google_drive_service_fixture(app) -> GoogleDriveService:
+    """Provides an instance of GoogleDriveService for integration testing.
+
+    Args:
+        app: The Flask app fixture.
+
+    Returns:
+        GoogleDriveService: An instance of the GoogleDriveService class.
+    """
+    return GoogleDriveService()
+
+
+@pytest.fixture
+def mock_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Mocks environment variables used in the method.
+
+    Args:
+        monkeypatch: pytest's monkeypatch fixture to mock environment variables.
+    """
+    monkeypatch.setenv('GOOGLE_CREDENTIALS_FILE', '/fake/credentials.json')
+
+
+@pytest.fixture
+def mock_google_drive_service() -> GoogleDriveService:
+    """Creates a mock Google Drive service instance.
+
+    Returns:
+        GoogleDriveService: A GoogleDriveService instance with a mocked drive_service.
+    """
     mock_drive_service = Mock()
-
-    # Create the service instance
-    service = GoogleDriveService(drive_service=mock_drive_service)
-
-    return service
-
-# Fixture to mock the environment variables for service account
-@pytest.fixture
-def mock_env(monkeypatch):
-    monkeypatch.setenv("GOOGLE_DRIVE_SCOPES",
-                       '["https://www.googleapis.com/auth/drive"]')
-    monkeypatch.setenv("GOOGLE_PROJECT_ID", "my-project-id")
-    monkeypatch.setenv("GOOGLE_PRIVATE_KEY_ID", "my-private-key-id")
-    monkeypatch.setenv("GOOGLE_PRIVATE_KEY", "my-private-key")
-    monkeypatch.setenv("GOOGLE_CLIENT_EMAIL",
-                       "my-client-email@my-project-id.iam.gserviceaccount.com")
-    monkeypatch.setenv("GOOGLE_CLIENT_ID", "my-client-id")
-    monkeypatch.setenv("GOOGLE_TOKEN_FILE", "test_token.json")
-
-
-# Fixture to mock the token.json file with valid credentials
-@pytest.fixture
-def mock_valid_token():
-    with mock.patch("builtins.open",
-                    mock.mock_open(read_data='{"token": "valid-token"}')), \
-            mock.patch("os.path.exists", return_value=True), \
-            mock.patch(
-                "google.oauth2.credentials.Credentials.from_authorized_user_file") as mock_creds:
-        mock_creds.return_value = mock.Mock(valid=True, expired=False)
-        yield mock_creds
-
-
-# Fixture to mock the token.json file with expired credentials and refresh token available
-@pytest.fixture
-def mock_expired_token():
-    mock_creds = mock.Mock(valid=False, expired=True,
-                           refresh_token="refresh-token")
-    with mock.patch("builtins.open",
-                    mock.mock_open(read_data='{"token": "expired-token"}')), \
-            mock.patch("os.path.exists", return_value=True), \
-            mock.patch(
-                "google.oauth2.credentials.Credentials.from_authorized_user_file",
-                return_value=mock_creds), \
-            mock.patch("google.auth.transport.requests.Request"):
-        yield mock_creds
-
-
-# Fixture to mock the service account credentials
-@pytest.fixture
-def mock_service_account_creds():
-    mock_creds = mock.Mock(valid=True)
-    with mock.patch(
-            "google.oauth2.service_account.Credentials.from_service_account_file",
-            return_value=mock_creds):
-        yield mock_creds
+    return GoogleDriveService(drive_service=mock_drive_service)
 
 
 @pytest.fixture
-def create_token_file(tmp_path) -> str:
-    """Fixture to create a mock token.json file with default data."""
-    default_data = {
-        "token": "valid-token",
-        "refresh_token": "valid-refresh-token",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "client_id": "test-client-id",
-        "client_secret": "test-client-secret",
-        "scopes": ['https://www.googleapis.com/auth/drive.readonly']
-    }
+def mock_service_account_creds() -> Mock:
+    """Mocks the service account credentials object.
 
-    # Create token.json in the provided tmp_path
-    token_file_path = tmp_path / "token.json"
-    with open(token_file_path, 'w') as token_file:
-        json.dump(default_data, token_file)
-
-    yield token_file_path  # Yield the path to the test
-
-    # Cleanup is handled by tmp_path, no need for manual os.remove
-
-
-# @pytest.fixture
-# def drive_service():
-#     """Fixture to initialize the real GoogleDriveService (for integration tests)."""
-#     return GoogleDriveService()
+    Returns:
+        Mock: A mock object representing service account credentials.
+    """
+    return mock.create_autospec(ServiceAccountCredentials)
 
 
 @pytest.fixture
-def mock_drive_service(mocker):
-    """Fixture to initialize a mocked GoogleDriveService (for unit tests)."""
-    mock_service = MagicMock(spec=GoogleDriveService)
+def real_folder_id(app) -> str:
+    """Retrieves the real folder ID from the app configuration.
 
-    # Mock list_files_in_drive method
-    mock_service.list_files_in_drive.return_value = [
-        {'id': '1', 'name': 'Mock File 1'},
-        {'id': '2', 'name': 'Mock File 2'},
-    ]
+    Args:
+        app: The Flask app fixture.
 
-    # Mock read_file method
-    mock_service.read_file.return_value = "This is mock file content"
-
-    return mock_service
+    Returns:
+        str: The folder ID for storing blog posts.
+    """
+    return app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
 
 
 @pytest.fixture
-def mock_drive_docs() -> List[Dict[str, str]]:
-    """Fixture to create mock Google Drive documents."""
-    return [
-        {'name': 'Post 1'},
-        {'name': 'Post 2'},
-        {'name': 'Post 4'},  # Post 4 is in Drive but not in DB
-    ]
+def scopes() -> list[str]:
+    """Fixture for the common Google Drive scopes.
 
-
-# @pytest.fixture
-# def mock_env_vars(monkeypatch):
-#     """Set mock environment variables."""
-#     monkeypatch.setenv('GOOGLE_CLIENT_ID', 'test-client-id')
-#     monkeypatch.setenv('GOOGLE_CLIENT_SECRET', 'test-client-secret')
-#     monkeypatch.setenv('GOOGLE_PROJECT_ID', 'test-project-id')
+    Returns:
+        list[str]: A list of Google Drive OAuth2 scopes.
+    """
+    return ['https://www.googleapis.com/auth/drive']
