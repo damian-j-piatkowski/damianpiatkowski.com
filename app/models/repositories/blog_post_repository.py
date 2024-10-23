@@ -12,7 +12,7 @@ Methods:
 from typing import List, Dict, Optional
 
 from sqlalchemy import select, insert
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.blog_post import blog_posts
@@ -59,10 +59,12 @@ class BlogPostRepository:
             insert_query = insert(blog_posts).values(new_post)
             self.session.execute(insert_query)
             return new_post
+        except IntegrityError:
+            self.session.rollback()  # Rollback the transaction on failure
+            raise  # Re-raise the IntegrityError
         except SQLAlchemyError as e:
             print(f"Database error occurred while creating a blog post: {e}")
-            raise RuntimeError(
-                "Failed to create blog post in the database.") from e
+            raise RuntimeError("Failed to create blog post in the database.") from e
 
     def fetch_all_blog_posts(self) -> List[Dict[str, str]]:
         try:

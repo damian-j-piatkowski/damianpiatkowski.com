@@ -1,5 +1,5 @@
-from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.extensions import db
+from app.models.repositories.blog_post_repository import BlogPostRepository
 
 
 def fetch_all_blog_posts():
@@ -15,23 +15,34 @@ def fetch_all_blog_posts():
 
 
 def save_blog_post(validated_data):
-    """Service function to save a blog post."""
+    """Service function to save a blog post.
+
+    Args:
+        validated_data (dict): Dictionary containing validated blog post data.
+            Expected fields: title, content, image_small, image_medium, image_large, url.
+
+    Returns:
+        dict: The newly created blog post data.
+
+    Raises:
+        KeyError: If any required fields are missing.
+    """
+    required_fields = ['title', 'content', 'image_small', 'image_medium', 'image_large', 'url']
+
+    for field in required_fields:
+        if field not in validated_data:
+            raise KeyError(field)
+
     session = db.session
     blog_post_repo = BlogPostRepository(session)
-    try:
-        blog_post = blog_post_repo.create_blog_post(
-            title=validated_data['title'],
-            content=validated_data['content'],
-            image_small=validated_data['image_small'],
-            image_medium=validated_data['image_medium'],
-            image_large=validated_data['image_large']
-        )
-        session.commit()
-        return blog_post
-    except RuntimeError as e:
-        # Log the error or take action
-        print(f"Error in service while saving blog post: {e}")
-        session.rollback()  # Rollback the transaction on failure
-        raise
 
-# todo finish
+    blog_post = blog_post_repo.create_blog_post(
+        title=validated_data['title'],
+        content=validated_data['content'],
+        image_small=validated_data['image_small'],
+        image_medium=validated_data['image_medium'],
+        image_large=validated_data['image_large'],
+        url=validated_data['url']
+    )
+
+    return blog_post
