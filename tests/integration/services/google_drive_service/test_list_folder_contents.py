@@ -19,7 +19,7 @@ Fixtures:
 
 import pytest
 
-from app.services import exceptions
+from app import exceptions
 from app.services.google_drive_service import GoogleDriveService
 
 

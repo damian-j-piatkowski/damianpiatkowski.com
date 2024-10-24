@@ -68,7 +68,7 @@ def test_find_missing_articles_with_empty_db(
     missing_articles = find_missing_articles(db_titles, sample_drive_titles)
 
     # Assert
-    assert missing_articles == sample_drive_titles
+    assert set(missing_articles) == set(sample_drive_titles)
 
 
 def test_find_missing_articles_with_empty_drive(

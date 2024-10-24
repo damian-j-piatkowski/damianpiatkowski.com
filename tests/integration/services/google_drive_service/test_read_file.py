@@ -20,7 +20,7 @@ Fixtures:
 
 import pytest
 
-from app.services import exceptions
+from app import exceptions
 from app.services.google_drive_service import GoogleDriveService
 
 DEFAULT_TEST_FILE_ID = '1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo'

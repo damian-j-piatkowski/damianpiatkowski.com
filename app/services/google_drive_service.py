@@ -16,7 +16,7 @@ from google.oauth2.service_account import Credentials as ServiceAccountCredentia
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from app.services import exceptions
+from app import exceptions
 
 logger = logging.getLogger(__name__)
 

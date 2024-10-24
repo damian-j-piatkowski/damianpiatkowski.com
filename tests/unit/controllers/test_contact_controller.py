@@ -20,7 +20,7 @@ from typing import Dict
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
-from app.controllers.contact_controller import handle_contact_form_submission
+from app.controllers.contact_form_controller import handle_contact_form_submission
 
 
 def test_handle_contact_form_submission_email_failure(

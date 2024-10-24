@@ -15,7 +15,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
-from tests import utils
+from tests.e2e import utils
 
 
 def test_contact_form_submission(driver) -> None:

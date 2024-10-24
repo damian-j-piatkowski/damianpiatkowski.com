@@ -24,7 +24,7 @@ from unittest.mock import Mock
 import pytest
 from googleapiclient.errors import HttpError
 
-from app.services import exceptions
+from app import exceptions
 from app.services.google_drive_service import GoogleDriveService
 
 
