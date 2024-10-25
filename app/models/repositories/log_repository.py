@@ -12,7 +12,7 @@ Methods:
 - fetch_log_by_id: Retrieves a log entry by its ID.
 - update_log: Updates an existing log entry by its ID.
 """
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.exc import SQLAlchemyError
@@ -68,21 +68,17 @@ class LogRepository:
             print(f"Database error occurred while deleting log: {e}")
             raise RuntimeError("Failed to delete log from the database.") from e
 
-    def fetch_all_logs(self) -> List[Log]:
+    def fetch_all_logs(self) -> List[Dict[str, str]]:
         """
-        Fetches all log entries from the database.
+        Fetches all log entries from the database in a dictionary format.
 
         Returns:
-            A list of Log objects representing the logs in the database.
+            A list of dictionaries representing the logs in the database.
         """
         try:
             stmt = select(logs)
-            result = self.session.execute(stmt).fetchall()
-
-            return [
-                Log(level=row.level, message=row.message)
-                for row in result
-            ]
+            result = self.session.execute(stmt).mappings().all()
+            return [dict(row) for row in result] if result else []
         except SQLAlchemyError as e:
             print(f"Database error occurred while fetching logs: {e}")
             raise RuntimeError("Failed to fetch logs from the database.") from e
@@ -129,5 +125,3 @@ class LogRepository:
         except SQLAlchemyError as e:
             print(f"Database error occurred while updating log: {e}")
             raise RuntimeError("Failed to update log in the database.") from e
-
-# todo main chatgpt account - write tests (integration and unit), replace prints with logs

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from app.controllers.blog_controller import create_post, get_all_posts
+from app.controllers.blog_controller import get_all_posts
 
 blog_bp = Blueprint('blog', __name__)
 
