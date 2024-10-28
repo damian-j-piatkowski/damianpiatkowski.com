@@ -16,8 +16,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests.e2e import utils
-
 
 def test_navigate_to_resume(driver) -> None:
     """Test navigation to the resume page.

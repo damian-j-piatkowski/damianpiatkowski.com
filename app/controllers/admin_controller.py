@@ -38,7 +38,7 @@ def find_unpublished_drive_articles() -> jsonify:
     try:
         # Fetch blog posts from the database and normalize their titles
         db_posts = fetch_all_blog_posts()
-        db_titles = [post['title'] for post in db_posts]
+        db_titles = [normalize_title(post['title']) for post in db_posts]
 
         # Fetch folder ID from the app configuration
         folder_id = current_app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
@@ -91,28 +91,33 @@ def get_logs_data() -> jsonify:
 
 
 def upload_blog_post() -> jsonify:
-    """Uploads a new blog post after validating and sanitizing the provided data.
+    """Uploads one or multiple blog posts after validating and sanitizing the provided data.
 
     Returns:
-        jsonify: JSON response with the newly created blog post data.
+        jsonify: JSON response with the newly created blog post data for each post.
 
     Raises:
         ValidationError: If input data fails validation.
-        RuntimeError: If there is an error saving the blog post.
+        RuntimeError: If there is an error saving a blog post.
     """
     data = request.get_json()
     schema = BlogPostSchema()
 
-    try:
-        validated_data = schema.load(data)
-    except ValidationError as err:
-        current_app.logger.warning(f"Validation error for blog post data: {err.messages}")
-        return jsonify(err.messages), 400
+    # Ensure data is in a list format to handle one or multiple posts
+    posts_data = data if isinstance(data, list) else [data]
+    response_data = []
 
-    try:
-        blog_post = save_blog_post(validated_data)
-        current_app.logger.info("Blog post created successfully.")
-        return jsonify(schema.dump(blog_post)), 201
-    except RuntimeError as e:
-        current_app.logger.error(f"Failed to save blog post: {e}")
-        return jsonify({'error': str(e)}), 500
+    for post_data in posts_data:
+        try:
+            validated_data = schema.load(post_data)
+            blog_post = save_blog_post(validated_data)
+            current_app.logger.info("Blog post created successfully.")
+            response_data.append(schema.dump(blog_post))
+        except ValidationError as err:
+            current_app.logger.warning(f"Validation error for blog post data: {err.messages}")
+            return jsonify({"errors": err.messages}), 400
+        except RuntimeError as e:
+            current_app.logger.error(f"Failed to save blog post: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify(response_data), 201
