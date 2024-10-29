@@ -15,8 +15,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import db
-from app.models.blog_post import metadata as blog_post_metadata
-from app.models.log import metadata as log_metadata
+from app.models.tables.blog_post import metadata as blog_post_metadata
+from app.models.tables.log import metadata as log_metadata
 
 # List of metadata objects to manage database tables
 all_metadata = [blog_post_metadata, log_metadata]

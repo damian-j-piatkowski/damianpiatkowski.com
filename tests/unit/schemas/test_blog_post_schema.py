@@ -17,7 +17,7 @@ from datetime import datetime
 import pytest
 from marshmallow.exceptions import ValidationError
 
-from app.api_schemas.blog_post_schema import BlogPostSchema
+from app.models.data_schemas.blog_post_schema import BlogPostSchema
 
 
 def test_blog_post_schema_empty_title(create_blog_post):

@@ -2,7 +2,7 @@ from flask import current_app
 from app.exceptions import EmailSendError
 from app.services.email_service import send_contact_email
 from app.services.sanitization_service import sanitize_contact_form_input
-from app.forms.contact_form import ContactForm
+from app.models.forms.contact_form import ContactForm
 
 
 def handle_contact_form_submission(form_data: dict) -> tuple[bool, str, str]:

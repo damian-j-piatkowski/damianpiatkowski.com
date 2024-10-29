@@ -2,8 +2,8 @@ from sqlalchemy.orm import registry
 
 from app.domain.blog_post import BlogPost
 from app.domain.log import Log
-from app.models.blog_post import blog_posts
-from app.models.log import logs
+from app.models.tables.blog_post import blog_posts
+from app.models.tables.log import logs
 
 mapper_registry = registry()
 

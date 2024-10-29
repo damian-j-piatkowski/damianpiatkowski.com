@@ -15,7 +15,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models.blog_post import blog_posts
+from app.models.tables.blog_post import blog_posts
 
 
 class BlogPostRepository:

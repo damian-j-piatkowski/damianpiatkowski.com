@@ -17,7 +17,7 @@ from datetime import datetime
 import pytest
 from marshmallow import ValidationError
 
-from app.api_schemas.log_schema import LogSchema
+from app.models.data_schemas.log_schema import LogSchema
 
 
 def test_log_schema_empty_level(valid_log_data):

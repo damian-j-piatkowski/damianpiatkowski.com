@@ -149,7 +149,10 @@ def test_find_unpublished_drive_articles_success(app, session, create_blog_post)
         # Call the actual find_unpublished_drive_articles controller function
         response, status_code = find_unpublished_drive_articles()
 
-        # Expected output should contain only the second article title
-        # ("value_objects") as it is unpublished.
+        # Expected output with exact id and title match
+        expected_response = [
+            {"id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E", "title": "value_objects"}
+        ]
+
         assert status_code == 200
-        assert response.json == ["value_objects"]
+        assert response.json == expected_response

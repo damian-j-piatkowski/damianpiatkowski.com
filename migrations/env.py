@@ -5,8 +5,8 @@ from alembic import context as alembic_context
 from flask import current_app
 from sqlalchemy import MetaData
 
-from app.models.blog_post import blog_posts
-from app.models.log import logs
+from app.models.tables.blog_post import blog_posts
+from app.models.tables.log import logs
 from app.orm import start_mappers
 from config import config as app_config  # Import the config dictionary
 

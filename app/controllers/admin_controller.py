@@ -12,10 +12,9 @@ Raises:
 """
 
 from flask import current_app, jsonify, request
-from marshmallow import ValidationError
 
 from app import exceptions
-from app.api_schemas.blog_post_schema import BlogPostSchema
+from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.article_sync_service import find_missing_articles
 from app.services.blog_service import fetch_all_blog_posts, save_blog_post
 from app.services.google_drive_service import GoogleDriveService
@@ -38,7 +37,8 @@ def find_unpublished_drive_articles() -> jsonify:
     try:
         # Fetch blog posts from the database and normalize their titles
         db_posts = fetch_all_blog_posts()
-        db_titles = [normalize_title(post['title']) for post in db_posts]
+        db_titles = {normalize_title(post['title']) for post in
+                     db_posts}  # Using a set for comparison efficiency
 
         # Fetch folder ID from the app configuration
         folder_id = current_app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
@@ -46,13 +46,22 @@ def find_unpublished_drive_articles() -> jsonify:
             current_app.logger.error("Google Drive folder ID is missing in the configuration.")
             return jsonify({'error': 'Google Drive folder ID is missing in the configuration'}), 500
 
-        # Get Google Drive service and list folder contents
+        # Get Google Drive service and list folder contents with IDs
         drive_service = GoogleDriveService()
         drive_files = drive_service.list_folder_contents(folder_id)
-        drive_titles = [normalize_title(file['name']) for file in drive_files]
 
-        # Compare and find missing articles
-        missing_articles = find_missing_articles(db_titles, drive_titles)
+        # Normalize titles and map them to IDs
+        drive_title_id_map = {
+            normalize_title(file['name']): file['id']
+            for file in drive_files
+        }
+
+        # Find missing articles by comparing with database titles
+        missing_titles = find_missing_articles(list(db_titles), list(drive_title_id_map.keys()))
+        missing_articles = [
+            {'title': title, 'id': drive_title_id_map[title]}
+            for title in missing_titles
+        ]
 
         return jsonify(missing_articles), 200
 
@@ -90,34 +99,51 @@ def get_logs_data() -> jsonify:
         return jsonify({"error": str(e)}), 500
 
 
-def upload_blog_post() -> jsonify:
-    """Uploads one or multiple blog posts after validating and sanitizing the provided data.
+def upload_blog_posts_from_drive() -> jsonify:
+    """Uploads blog posts from Google Drive using provided file IDs.
 
     Returns:
-        jsonify: JSON response with the newly created blog post data for each post.
+        jsonify: JSON response with the status of each file processed.
 
     Raises:
-        ValidationError: If input data fails validation.
-        RuntimeError: If there is an error saving a blog post.
+        GoogleDriveFileNotFoundError: If a file is not found.
+        GoogleDrivePermissionError: If permissions are insufficient.
+        GoogleDriveAPIError: For general API errors.
     """
-    data = request.get_json()
-    schema = BlogPostSchema()
+    # Retrieve the list of Google Drive file IDs from the request data
+    file_ids = request.get_json().get("file_ids", [])
+    if not file_ids:
+        return jsonify({"error": "No file IDs provided"}), 400
 
-    # Ensure data is in a list format to handle one or multiple posts
-    posts_data = data if isinstance(data, list) else [data]
     response_data = []
+    google_drive_service = GoogleDriveService()
 
-    for post_data in posts_data:
+    for file_id in file_ids:
         try:
-            validated_data = schema.load(post_data)
-            blog_post = save_blog_post(validated_data)
+            # Fetch file content from Google Drive
+            file_content = google_drive_service.read_file(file_id)
+
+            # Create blog post data using the fetched content
+            # Assuming file_content is already validated and formatted as needed
+            blog_post = save_blog_post({
+                "title": f"Imported Post {file_id}",  # Adjust title as needed
+                "content": file_content,
+                "image_small": "path/to/small_image.jpg",
+                # Replace with actual data or process if dynamic
+                "image_medium": "path/to/medium_image.jpg",
+                "image_large": "path/to/large_image.jpg",
+                "url": f"/blog/{file_id}"  # Assuming a URL pattern based on the file ID
+            })
+
             current_app.logger.info("Blog post created successfully.")
-            response_data.append(schema.dump(blog_post))
-        except ValidationError as err:
-            current_app.logger.warning(f"Validation error for blog post data: {err.messages}")
-            return jsonify({"errors": err.messages}), 400
+            response_data.append(BlogPostSchema().dump(blog_post))
+        except exceptions.GoogleDriveFileNotFoundError:
+            current_app.logger.warning(f"File not found on Google Drive: {file_id}")
+        except exceptions.GoogleDrivePermissionError:
+            current_app.logger.warning(f"Permission denied for file: {file_id}")
         except RuntimeError as e:
-            current_app.logger.error(f"Failed to save blog post: {e}")
+            current_app.logger.error(f"Failed to save blog post for file {file_id}: {e}")
             return jsonify({"error": str(e)}), 500
 
-    return jsonify(response_data), 201
+    return jsonify(response_data), 201 if response_data else 404
+

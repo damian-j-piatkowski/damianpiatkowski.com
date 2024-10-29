@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from app.api_schemas.blog_post_schema import BlogPostSchema
+from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import fetch_all_blog_posts
 
 

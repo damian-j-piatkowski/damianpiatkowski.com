@@ -19,7 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.domain.log import Log
-from app.models.log import logs
+from app.models.tables.log import logs
 
 
 class LogRepository:
