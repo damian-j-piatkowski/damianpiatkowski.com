@@ -3,9 +3,6 @@ from sqlalchemy import text
 from app.domain.log import Log
 from app.models.repositories.log_repository import LogRepository
 
-
-# Integration tests for LogRepository
-
 def test_fetch_all_logs(session, create_log):
     """Test fetching all log entries from the database."""
     # Arrange: Create and commit log entries
@@ -19,8 +16,9 @@ def test_fetch_all_logs(session, create_log):
 
     # Assert: Ensure the fetched data is correct
     assert len(result) == 2
-    assert result[0].message == log1.message
-    assert result[1].message == log2.message
+    assert result[0]["message"] == log1.message
+    assert result[1]["message"] == log2.message
+
 
 
 def test_create_log(session):

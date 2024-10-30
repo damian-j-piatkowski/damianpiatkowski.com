@@ -58,9 +58,15 @@ def app_context_with_mocked_config(mocker: MockerFixture, client: FlaskClient) -
             {
                 'MAIL_USERNAME': 'test@example.com',
                 'MAIL_RECIPIENT': 'Test Person',
-                'DEBUG': True
+                'DEBUG': True,
+                'SECRET_KEY': 'default-secret',
+                'SERVER_NAME': 'localhost',
+                'APPLICATION_ROOT': '/',
+                'PREFERRED_URL_SCHEME': 'http',
+                'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
             }
         )
+
         yield
 
 

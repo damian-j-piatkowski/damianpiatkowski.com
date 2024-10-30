@@ -38,15 +38,16 @@ def test_create_log_failure():
 
 
 def test_fetch_all_logs_success():
-    """Test successfully fetching all log entries."""
+    """Test successfully fetching all log entries as dictionaries."""
     # Arrange
     mock_session = MagicMock()
 
-    # Create mock Log objects
-    log1 = MagicMock(spec=Log, level='INFO', message='Log 1')
-    log2 = MagicMock(spec=Log, level='ERROR', message='Log 2')
+    # Mock query result to return a list of dictionaries
+    log1 = {'level': 'INFO', 'message': 'Log 1'}
+    log2 = {'level': 'ERROR', 'message': 'Log 2'}
 
-    mock_session.execute.return_value.fetchall.return_value = [log1, log2]
+    # Ensure mappings().all() returns the list of dictionaries
+    mock_session.execute.return_value.mappings.return_value.all.return_value = [log1, log2]
     repository = LogRepository(mock_session)
 
     # Act
@@ -54,10 +55,10 @@ def test_fetch_all_logs_success():
 
     # Assert
     assert len(logs) == 2
-    assert logs[0].message == 'Log 1'
-    assert logs[0].level == 'INFO'
-    assert logs[1].message == 'Log 2'
-    assert logs[1].level == 'ERROR'
+    assert logs[0]['message'] == 'Log 1'
+    assert logs[0]['level'] == 'INFO'
+    assert logs[1]['message'] == 'Log 2'
+    assert logs[1]['level'] == 'ERROR'
 
 
 def test_fetch_log_by_id_success():

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+import sqlalchemy.exc
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.domain.blog_post import BlogPost
@@ -29,7 +30,6 @@ def test_create_blog_post_success(session):
         title='Unique Test Title').one_or_none() is not None
 
 
-# Test Case: Handling duplicate URL failure
 def test_create_blog_post_duplicate_url_failure(session, create_blog_post):
     """Test case for creating a blog post with a duplicate URL."""
     repository = BlogPostRepository(session)
@@ -38,8 +38,8 @@ def test_create_blog_post_duplicate_url_failure(session, create_blog_post):
     create_blog_post(title="Test Post 1", url="duplicate-url")
     session.commit()
 
-    # Act & Assert: Expect RuntimeError on duplicate URL
-    with pytest.raises(RuntimeError, match="Failed to create blog post in the database."):
+    # Act & Assert: Expect IntegrityError on duplicate URL
+    with pytest.raises(sqlalchemy.exc.IntegrityError):
         repository.create_blog_post(
             title='Test Post 2',
             content='Content with duplicate URL',

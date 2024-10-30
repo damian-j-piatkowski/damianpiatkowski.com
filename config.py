@@ -18,7 +18,7 @@ class Config:
     MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD', '')
     MAIL_RECIPIENT: str = os.getenv('MAIL_RECIPIENT', '')
     MAIL_USERNAME: str = os.getenv('MAIL_USERNAME', '')
-    SECRET_KEY: str = os.getenv('SECRET_KEY', '')
+    SECRET_KEY: str = os.getenv('SECRET_KEY', 'default-secret')
     MYSQL_USER: str = os.getenv('MYSQL_USER', '')
     MYSQL_PASSWORD: str = os.getenv('MYSQL_PASSWORD', '')
     MYSQL_DATABASE: str = os.getenv('MYSQL_DATABASE', '')
