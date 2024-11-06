@@ -19,7 +19,8 @@ from app.services.article_sync_service import find_missing_articles
 from app.services.blog_service import fetch_all_blog_posts, save_blog_post
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
-from app.services.sanitization_service import normalize_title
+from app.services.sanitization_service import normalize_title, sanitize_html
+from app.services.formatting_service import convert_markdown_to_html
 
 
 def find_unpublished_drive_articles() -> jsonify:
@@ -110,7 +111,6 @@ def upload_blog_posts_from_drive() -> jsonify:
         GoogleDrivePermissionError: If permissions are insufficient.
         GoogleDriveAPIError: For general API errors.
     """
-    # Retrieve the list of Google Drive file IDs from the request data
     file_ids = request.get_json().get("file_ids", [])
     if not file_ids:
         return jsonify({"error": "No file IDs provided"}), 400
@@ -123,16 +123,20 @@ def upload_blog_posts_from_drive() -> jsonify:
             # Fetch file content from Google Drive
             file_content = google_drive_service.read_file(file_id)
 
-            # Create blog post data using the fetched content
-            # Assuming file_content is already validated and formatted as needed
+            # Convert plain text content to HTML
+            html_content = convert_markdown_to_html(file_content)
+
+            # Sanitize the HTML content for security
+            sanitized_content = sanitize_html(html_content)
+
+            # Create blog post data using the fetched and sanitized content
             blog_post = save_blog_post({
                 "title": f"Imported Post {file_id}",  # Adjust title as needed
-                "content": file_content,
+                "content": sanitized_content,
                 "image_small": "path/to/small_image.jpg",
-                # Replace with actual data or process if dynamic
                 "image_medium": "path/to/medium_image.jpg",
                 "image_large": "path/to/large_image.jpg",
-                "url": f"/blog/{file_id}"  # Assuming a URL pattern based on the file ID
+                "url": f"/blog/{file_id}"
             })
 
             current_app.logger.info("Blog post created successfully.")
