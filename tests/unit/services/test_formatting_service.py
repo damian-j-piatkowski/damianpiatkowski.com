@@ -104,7 +104,7 @@ def test_convert_markdown_to_html_multiline_paragraphs() -> None:
 def test_convert_markdown_to_html_with_blockquotes() -> None:
     """Tests conversion of blockquotes in markdown to HTML."""
     text = "> This is a blockquote.\nThis is not a blockquote."
-    expected_html = ("<blockquote><p>This is a blockquote. "
+    expected_html = ("<blockquote><p>This is a blockquote.<br />"
                      "This is not a blockquote.</p></blockquote>")
     assert ''.join(convert_markdown_to_html(text).split()) == ''.join(expected_html.split())
 
