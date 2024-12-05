@@ -1,5 +1,5 @@
 import logging
-import os
+from typing import Type
 
 from flask import Flask
 from flask_migrate import Migrate
@@ -12,14 +12,24 @@ from app.routes.about_me import about_me_bp
 from app.routes.blog import blog_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
-from config import config, configure_logging
+from config import Config
+from config import configure_logging
 
 
-def create_app(config_name=None):
+def create_app(config_class: Type[Config]) -> Flask:
+    """Creates and configures the Flask application.
+
+        Args:
+            config_class: A configuration class (e.g., DevelopmentConfig, ProductionConfig)
+                          to use for initializing the app.
+
+        Returns:
+            Flask: The configured Flask application instance.
+    """
     flask_app = Flask(__name__)
-    # Use the provided config_name, or default to the one from env variables
-    config_to_use = config_name or os.getenv('FLASK_ENV', 'default')
-    flask_app.config.from_object(config[config_to_use])
+
+    # Apply the provided configuration
+    flask_app.config.from_object(config_class)
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)

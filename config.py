@@ -5,9 +5,14 @@ from logging.handlers import RotatingFileHandler
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.domain.log import Log
+from enum import Enum
 from app.extensions import db
 import re
 
+class Environment(Enum):
+    DEVELOPMENT = 'development'
+    TESTING = 'testing'
+    PRODUCTION = 'production'
 
 @dataclass
 class Config:
@@ -94,15 +99,11 @@ class ProductionConfig(Config):
     DRIVE_BLOG_POSTS_FOLDER_ID = '1YUSrQrLl_eckn6LAi_petVn_JPbS2Me6'
 
 
-config = {
-    'development': DevelopmentConfig,
-    'testing': TestingConfig,
-    'production': ProductionConfig,
-    'default': DevelopmentConfig
+ENVIRONMENT_CONFIG_MAPPING = {
+    Environment.DEVELOPMENT: DevelopmentConfig,
+    Environment.TESTING: TestingConfig,
+    Environment.PRODUCTION: ProductionConfig,
 }
-
-# Validate environment variables at startup
-config['default']().validate()
 
 
 def configure_logging(app):

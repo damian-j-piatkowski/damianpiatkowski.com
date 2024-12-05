@@ -95,4 +95,23 @@ To run commands inside the web container, you need to use `docker-compose exec`:
     ```sh
     docker-compose exec web bash
 
+### Testing
+
+When running tests, it's helpful to manage and control the types of tests being executed. With `pytest` markers, you can categorize and selectively run tests. Here are some useful commands and how to use them.
+
+#### Using the `api` Marker
+
+In some cases, you may want to run tests that involve actual API calls, such as integration tests with external services like Google Drive. To control the execution of these tests, we use the `api` marker.
+
+- **Run all tests except API tests**:  
+  If you want to run all tests excluding the ones that make actual API calls, use the following command:  
+  ```bash
+  pytest -m "not api"
+  
+- **Run only the API tests**:  
+  To run only the tests that make real API calls, use the command below:
+  ```bash
+  pytest -m api
+
+
 
