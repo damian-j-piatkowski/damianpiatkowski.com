@@ -1,10 +1,7 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, request, render_template, jsonify
 
-from app.controllers.admin_controller import (
-    get_logs_data,
-    find_unpublished_drive_articles,
-    upload_blog_post
-)
+from app.controllers.admin_controller import find_unpublished_drive_articles, get_logs_data, \
+    upload_blog_posts_from_drive
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -23,5 +20,9 @@ def admin_posts():
 
 @admin_bp.route('/admin/upload_post', methods=['POST'])
 def admin_upload_post():
-    response = upload_blog_post()
-    return response
+    # Extract JSON data from the request
+    files = request.get_json().get("files", [])
+
+    # Pass data to the controller
+    result, status_code = upload_blog_posts_from_drive(files)
+    return jsonify(result), status_code

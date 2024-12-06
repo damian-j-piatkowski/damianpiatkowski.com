@@ -1,77 +1,38 @@
-"""Module for representing and managing blog posts.
+"""Defines the BlogPost domain model with essential attributes for a blog post.
 
-This module contains the definition of the `BlogPost` class,
-which models a blog post in the system.
+This module defines the BlogPost domain model, representing the core attributes
+of a blog post within the application.
 
-The `BlogPost` class includes attributes to store various details of a blog post
-such as its title, content, images, and URL slug.
+The BlogPost class encapsulates essential properties of a blog post, including
+the title, content, associated Google Drive file ID, and an automatically
+assigned timestamp for when the post was created.
 
-The class-level type hints provide clear indications of the expected data
-types for each attribute.
+This model is designed to be ORM-agnostic, making it versatile for use with
+different data storage layers. The created_at timestamp is set automatically
+upon instantiation to record the post creation time.
 
 Classes:
-- BlogPost: Represents a blog post with attributes for title, content, images,
-    and URL.
-
-Example Usage:
-    post = BlogPost(
-        title='Sample Post',
-        content='This is the content of the post.',
-        image_small='path/to/small/image.jpg',
-        image_medium='path/to/medium/image.jpg',
-        image_large='path/to/large/image.jpg',
-        url='sample-post'
-    )
+    BlogPost: Represents a blog post with title, content, Google Drive file ID,
+              and creation timestamp.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class BlogPost:
-    """Represents a blog post.
+    """Represents a blog post in the domain model."""
 
-    Attributes:
-        title: The title of the blog post.
-        content: The content of the blog post.
-        image_small: URL or path to the small-sized image.
-        image_medium: URL or path to the medium-sized image.
-        image_large: URL or path to the large-sized image.
-        url: The desired URL slug for the blog post.
-        created_at: The timestamp when the blog post was created.
-    """
-
-    title: str
-    content: str
-    image_small: str
-    image_medium: str
-    image_large: str
-    url: str
-    created_at: datetime
-
-    def __init__(
-            self,
-            title: str,
-            content: str,
-            image_small: str,
-            image_medium: str,
-            image_large: str,
-            url: str
-    ) -> None:
+    def __init__(self, title: str, content: str, drive_file_id: str) -> None:
         """
-        Constructs all the necessary attributes for the BlogPost object.
+        Initializes a new BlogPost instance with title, content, and drive file ID.
+        Automatically sets the creation timestamp to the current time.
 
         Args:
-            title: The title of the blog post.
-            content: The content of the blog post.
-            image_small: URL or path to the small-sized image.
-            image_medium: URL or path to the medium-sized image.
-            image_large: URL or path to the large-sized image.
-            url: The desired URL slug for the blog post.
+            title (str): The title of the blog post.
+            content (str): The content of the blog post.
+            drive_file_id (str): The unique file ID from Google Drive.
         """
         self.title = title
         self.content = content
-        self.image_small = image_small
-        self.image_medium = image_medium
-        self.image_large = image_large
-        self.url = url
-        self.created_at = datetime.now()  # Automatically set creation timestamp
+        self.drive_file_id = drive_file_id
+        self.created_at = datetime.now(timezone.utc)  # Use UTC timestamp

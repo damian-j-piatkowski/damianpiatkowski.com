@@ -14,7 +14,7 @@ def fetch_all_blog_posts():
         logger.info("Fetching all blog posts from the database.")
         posts = BlogPostRepository(session).fetch_all_blog_posts()
         logger.info("Successfully fetched blog posts.")
-        return posts
+        return posts  # List[BlogPost]
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
         raise RuntimeError("Failed to retrieve blog posts") from e
@@ -28,12 +28,12 @@ def save_blog_post(validated_data):
             Expected fields: title, content, image_small, image_medium, image_large, url.
 
     Returns:
-        dict: The newly created blog post data.
+        dict: A dictionary containing the newly created blog post's data.
 
     Raises:
         KeyError: If any required fields are missing.
     """
-    required_fields = ['title', 'content', 'image_small', 'image_medium', 'image_large', 'url']
+    required_fields = ['title', 'content', 'drive_file_id']
 
     # Check for required fields
     logger.info("Validating required fields for blog post.")
@@ -56,11 +56,15 @@ def save_blog_post(validated_data):
     blog_post = blog_post_repo.create_blog_post(
         title=validated_data['title'],
         content=validated_data['content'],
-        image_small=validated_data['image_small'],
-        image_medium=validated_data['image_medium'],
-        image_large=validated_data['image_large'],
-        url=validated_data['url']
+        drive_file_id=validated_data.get('drive_file_id', '')
     )
-    logger.info("Blog post saved successfully with ID: %s", blog_post.get('id', 'unknown'))
 
-    return blog_post
+    logger.info("Blog post saved successfully with title: %s", blog_post.title)
+
+    # Return a dictionary representation of the BlogPost instance
+    return {
+        'title': blog_post.title,
+        'content': blog_post.content,
+        'drive_file_id': blog_post.drive_file_id,
+        'created_at': blog_post.created_at
+    }

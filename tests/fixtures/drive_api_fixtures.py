@@ -7,9 +7,13 @@ common Google Drive scopes, and retrieving real configuration values such as
 the folder ID for blog posts.
 """
 
+from datetime import datetime, timezone
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
+from app import exceptions
 
+from freezegun import freeze_time
+import datetime as dt
 import pytest
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
@@ -40,14 +44,42 @@ def mock_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def mock_google_drive_service() -> GoogleDriveService:
-    """Creates a mock Google Drive service instance.
+def mock_google_drive_service(mocker, request) -> MagicMock:
+    """Creates a mock Google Drive service instance with extended functionality."""
+    # Create a mock for the GoogleDriveService class
+    mock_google_drive_service = mocker.Mock(spec=GoogleDriveService)
 
-    Returns:
-        GoogleDriveService: A GoogleDriveService instance with a mocked drive_service.
-    """
-    mock_drive_service = Mock()
-    return GoogleDriveService(drive_service=mock_drive_service)
+    # Patch the instantiation in the process_file function to return the mock
+    mocker.patch(
+        "app.services.file_processing_service.GoogleDriveService",
+        return_value=mock_google_drive_service
+    )
+
+    # Preconfigure default behaviors for the mock methods
+    mock_google_drive_service.list_folder_contents.return_value = [
+        {"id": "1", "name": "Mock File", "mimeType": "application/vnd.google-apps.document"}
+    ]
+    mock_google_drive_service.read_file.return_value = "Mock file content"
+
+    # Allow test-specific overrides of read_file.side_effect via request.param
+    if hasattr(request, "param"):
+        # Apply test-specific side effects
+        if "read_file_side_effect" in request.param:
+            mock_google_drive_service.read_file.side_effect = request.param["read_file_side_effect"]
+            print(f"Configured read_file.side_effect: {request.param['read_file_side_effect']}")  # Debug
+        # Apply test-specific list folder return values
+        if "list_folder_contents_return" in request.param:
+            mock_google_drive_service.list_folder_contents.return_value = request.param["list_folder_contents_return"]
+            print(f"Configured list_folder_contents.return_value: {request.param['list_folder_contents_return']}")  # Debug
+
+    # Debug output for mock service methods
+    print(f"Default list_folder_contents.return_value: {mock_google_drive_service.list_folder_contents.return_value}")
+    print(f"Default read_file.return_value: {mock_google_drive_service.read_file.return_value}")
+
+    return mock_google_drive_service
+
+
+
 
 
 @pytest.fixture

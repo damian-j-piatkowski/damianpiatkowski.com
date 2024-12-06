@@ -11,16 +11,20 @@ Raises:
 
 """
 
-from flask import current_app, jsonify, request
+import logging
+from typing import List, Dict, Tuple
+
+from flask import current_app, jsonify
 
 from app import exceptions
-from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.article_sync_service import find_missing_articles
-from app.services.blog_service import fetch_all_blog_posts, save_blog_post
+from app.services.blog_service import fetch_all_blog_posts
+from app.services.file_processing_service import process_file
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
-from app.services.sanitization_service import normalize_title, sanitize_html
-from app.services.formatting_service import convert_markdown_to_html
+from app.services.sanitization_service import normalize_title
+
+logger = logging.getLogger(__name__)
 
 
 def find_unpublished_drive_articles() -> jsonify:
@@ -38,8 +42,7 @@ def find_unpublished_drive_articles() -> jsonify:
     try:
         # Fetch blog posts from the database and normalize their titles
         db_posts = fetch_all_blog_posts()
-        db_titles = {normalize_title(post['title']) for post in
-                     db_posts}  # Using a set for comparison efficiency
+        db_titles = {normalize_title(post.title) for post in db_posts}
 
         # Fetch folder ID from the app configuration
         folder_id = current_app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
@@ -100,54 +103,108 @@ def get_logs_data() -> jsonify:
         return jsonify({"error": str(e)}), 500
 
 
-def upload_blog_posts_from_drive() -> jsonify:
-    """Uploads blog posts from Google Drive using provided file IDs.
+def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
+    """Uploads blog posts from Google Drive using provided file IDs and titles.
+
+    Args:
+        files (List[Dict[str, str]]): A list of dictionaries, each containing:
+            - "id" (str): The Google Drive file ID.
+            - "title" (str): The title to assign to the blog post.
 
     Returns:
-        jsonify: JSON response with the status of each file processed.
+        Tuple[Response, int]: A tuple containing:
+            - A dictionary response, formatted as:
+                - {"error": "No files provided"} if the input is invalid.
+                - {"success": [...], "errors": [...]}:
+                    - "success" contains a list of serialized blog post data for successfully
+                        processed files.
+                    - "errors" contains a list of dictionaries describing issues with individual
+                        files.
+            - An HTTP status code indicating the result:
+                - 400 if no files are provided or none are valid for processing.
+                - 201 if all blog posts are successfully created.
+                - 207 if some blog posts are successfully created and there are errors.
+                - 500 for unexpected critical errors during processing.
 
     Raises:
-        GoogleDriveFileNotFoundError: If a file is not found.
-        GoogleDrivePermissionError: If permissions are insufficient.
-        GoogleDriveAPIError: For general API errors.
+        RuntimeError: For critical failures during blog post processing.
+
+    Examples:
+        Success Response:
+        {
+            "success": [
+                {
+                    "title": "Example Blog Post",
+                    "content": "...",
+                    "drive_file_id": "12345",
+                    "created_at": "2024-12-02T12:00:00"
+                }
+            ],
+            "errors": []
+        }
+
+        Mixed Response (Success and Errors):
+        {
+            "success": [
+                {
+                    "title": "Example Blog Post",
+                    "content": "...",
+                    "drive_file_id": "12345",
+                    "created_at": "2024-12-02T12:00:00"
+                }
+            ],
+            "errors": [
+                {"file_id": "67890", "error": "File not found"}
+            ]
+        }
     """
-    file_ids = request.get_json().get("file_ids", [])
-    if not file_ids:
-        return jsonify({"error": "No file IDs provided"}), 400
+    if not files:
+        return {"success": [], "errors": [{"error": "No files provided"}]}, 400
 
-    response_data = []
-    google_drive_service = GoogleDriveService()
+    response_data = {"success": [], "errors": []}
 
-    for file_id in file_ids:
+    for file in files:
+        file_id = file.get("id")
+        title = file.get("title")
+
+        if not file_id or not title:
+            response_data["errors"].append({"file_id": file_id, "error": "Missing required fields"})
+            continue
+
         try:
-            # Fetch file content from Google Drive
-            file_content = google_drive_service.read_file(file_id)
+            success, message = process_file(file_id, title)
+            if success:
+                response_data["success"].append({"file_id": file_id, "message": message})
+            else:
+                response_data["errors"].append(
+                    {"file_id": file_id, "error": message})  # Use raw message
+                if "unexpected" in message.lower():
+                    logger.error(
+                        f"Critical error encountered for file ID {file_id}: {message}")
+                    return response_data, 500
+        except Exception as e:
+            error_message = str(e)
 
-            # Convert plain text content to HTML
-            html_content = convert_markdown_to_html(file_content)
+            # Normalize error message: Remove redundant prefixes, if any
+            if "for file ID" in error_message:
+                # Extract part after the colon
+                error_message = error_message.split(": ", 1)[-1]
 
-            # Sanitize the HTML content for security
-            sanitized_content = sanitize_html(html_content)
+            response_data["errors"].append(
+                {"file_id": file_id, "error": error_message})  # Append cleaned message
 
-            # Create blog post data using the fetched and sanitized content
-            blog_post = save_blog_post({
-                "title": f"Imported Post {file_id}",  # Adjust title as needed
-                "content": sanitized_content,
-                "image_small": "path/to/small_image.jpg",
-                "image_medium": "path/to/medium_image.jpg",
-                "image_large": "path/to/large_image.jpg",
-                "url": f"/blog/{file_id}"
-            })
+            logger.error(f"Critical exception for file ID {file_id}: {error_message}")
+            return response_data, 500
 
-            current_app.logger.info("Blog post created successfully.")
-            response_data.append(BlogPostSchema().dump(blog_post))
-        except exceptions.GoogleDriveFileNotFoundError:
-            current_app.logger.warning(f"File not found on Google Drive: {file_id}")
-        except exceptions.GoogleDrivePermissionError:
-            current_app.logger.warning(f"Permission denied for file: {file_id}")
-        except RuntimeError as e:
-            current_app.logger.error(f"Failed to save blog post for file {file_id}: {e}")
-            return jsonify({"error": str(e)}), 500
+    # Determine HTTP status code
+    if response_data["success"] and response_data["errors"]:
+        return response_data, 207
 
-    return jsonify(response_data), 201 if response_data else 404
+    if response_data["success"]:
+        return response_data, 201
 
+    if response_data["errors"]:
+        return response_data, 400
+
+    # Fallback case (shouldn't occur in normal processing)
+    return {"success": [], "errors": [{"error": "Unexpected processing issue"}]}, 500

@@ -61,3 +61,13 @@ class GoogleDrivePermissionError(GoogleDriveError):
 class GoogleDriveAPIError(GoogleDriveError):
     """Raised for general API errors that do not fall under other categories."""
     pass
+
+# todo consider the below
+
+# @app.errorhandler(Exception)
+# def handle_unexpected_error(error):
+#     """Handle any unexpected errors and return a 500 response."""
+#     return jsonify({
+#         "success": [],
+#         "errors": [{"error": str(error)}]
+#     }), 500

@@ -19,6 +19,7 @@ from flask.testing import FlaskClient, FlaskCliRunner
 from pytest_mock import MockerFixture
 
 from app import create_app
+from config import TestingConfig
 
 
 @pytest.fixture(scope='session')
@@ -28,7 +29,7 @@ def app() -> Flask:
     Yields:
         Flask: The Flask application instance configured for testing.
     """
-    app = create_app('testing')
+    app = create_app(TestingConfig)
     with app.app_context():
         print(f"Running with config: {app.config['SQLALCHEMY_DATABASE_URI']}")
         yield app

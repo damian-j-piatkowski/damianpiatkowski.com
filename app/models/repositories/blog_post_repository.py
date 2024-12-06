@@ -1,20 +1,21 @@
 """BlogPostRepository for database operations.
 
 This module defines the BlogPostRepository class, responsible for handling
-CRUD operations on the blog_posts table. It provides methods for creating and 
-fetching blog posts from the database, and raises informative errors in case 
+CRUD operations on the blog_posts table. It provides methods for creating and
+fetching blog posts from the database, and raises informative errors in case
 of database issues.
 
 Methods:
-- create_blog_post: Inserts a new blog post into the database.
-- fetch_all_blog_posts: Retrieves all blog posts from the database.
+- create_blog_post: Inserts a new blog post into the database and returns the BlogPost instance.
+- fetch_all_blog_posts: Retrieves all blog posts as BlogPost instances from the database.
 """
-from typing import List, Dict, Optional
 
+from typing import List, Optional
 from sqlalchemy import select, insert
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
+from app.domain.blog_post import BlogPost
 from app.models.tables.blog_post import blog_posts
 
 
@@ -28,37 +29,35 @@ class BlogPostRepository:
             self,
             title: str,
             content: str,
-            image_small: str,
-            image_medium: str,
-            image_large: str,
-            url: str  # Added URL parameter
-    ) -> Optional[Dict[str, str]]:
+            drive_file_id: str
+    ) -> Optional[BlogPost]:
         """Create a new blog post using SQLAlchemy.
 
         Args:
             title (str): The title of the blog post.
             content (str): The content of the blog post.
-            image_small (str): URL for the small-sized image.
-            image_medium (str): URL for the medium-sized image.
-            image_large (str): URL for the large-sized image.
-            url (str): The unique URL slug for the blog post.
+            drive_file_id (str): The unique Google Drive file ID for the post.
 
         Returns:
-            Optional[Dict[str, str]]: The newly created blog post data, or
+            Optional[BlogPost]: The newly created BlogPost instance, or
                 None if an error occurs.
         """
         try:
-            new_post = {
+            new_post_data = {
                 'title': title,
                 'content': content,
-                'image_small': image_small,
-                'image_medium': image_medium,
-                'image_large': image_large,
-                'url': url
+                'drive_file_id': drive_file_id
             }
-            insert_query = insert(blog_posts).values(new_post)
+            insert_query = insert(blog_posts).values(new_post_data)
             self.session.execute(insert_query)
-            return new_post
+            self.session.commit()  # Commit the transaction
+
+            # Return a new BlogPost instance
+            return BlogPost(
+                title=title,
+                content=content,
+                drive_file_id=drive_file_id
+            )
         except IntegrityError:
             self.session.rollback()  # Rollback the transaction on failure
             raise  # Re-raise the IntegrityError
@@ -66,16 +65,28 @@ class BlogPostRepository:
             print(f"Database error occurred while creating a blog post: {e}")
             raise RuntimeError("Failed to create blog post in the database.") from e
 
-    def fetch_all_blog_posts(self) -> List[Dict[str, str]]:
+    def fetch_all_blog_posts(self) -> List[BlogPost]:
+        """Fetch all blog posts from the database.
+
+        Returns:
+            List[BlogPost]: A list of BlogPost instances.
+
+        Raises:
+            RuntimeError: If a database error occurs.
+        """
         try:
-            # Corrected select statement for SQLAlchemy 1.4+
             query = select(blog_posts)
-            result = self.session.execute(
-                query).mappings().all()  # Use .mappings() to return dict-like rows
-            print(f"Query result: {result}")
-            return [dict(row) for row in
-                    result] if result else []  # Convert mappings to dict
+            result = self.session.execute(query).mappings().all()  # Use .mappings() for dict-like rows
+
+            # Convert database rows to BlogPost instances
+            return [
+                BlogPost(
+                    title=row['title'],
+                    content=row['content'],
+                    drive_file_id=row['drive_file_id']
+                )
+                for row in result
+            ] if result else []
         except SQLAlchemyError as e:
             print(f"Database error occurred while fetching blog posts: {e}")
-            raise RuntimeError(
-                "Failed to fetch blog posts from the database.") from e
+            raise RuntimeError("Failed to fetch blog posts from the database.") from e
