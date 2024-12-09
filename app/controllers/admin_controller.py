@@ -158,10 +158,11 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
             ]
         }
     """
-    if not files:
-        return {"success": [], "errors": [{"error": "No files provided"}]}, 400
-
+    # Initialize response data
     response_data = {"success": [], "errors": []}
+
+    if not files:
+        return {"error": "No files provided"}, 400
 
     for file in files:
         file_id = file.get("id")
@@ -176,35 +177,31 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
             if success:
                 response_data["success"].append({"file_id": file_id, "message": message})
             else:
-                response_data["errors"].append(
-                    {"file_id": file_id, "error": message})  # Use raw message
-                if "unexpected" in message.lower():
-                    logger.error(
-                        f"Critical error encountered for file ID {file_id}: {message}")
-                    return response_data, 500
+                response_data["errors"].append({"file_id": file_id, "error": message})
+        except ValueError as ve:
+            # Handle expected errors like "File not found"
+            error_message = str(ve)
+            response_data["errors"].append({"file_id": file_id, "error": error_message})
         except Exception as e:
+            # Handle unexpected critical errors
             error_message = str(e)
-
-            # Normalize error message: Remove redundant prefixes, if any
-            if "for file ID" in error_message:
-                # Extract part after the colon
-                error_message = error_message.split(": ", 1)[-1]
-
             response_data["errors"].append(
-                {"file_id": file_id, "error": error_message})  # Append cleaned message
+                {"file_id": file_id, "error": "Unexpected error occurred."})
+            logger.error(f"Critical exception encountered for file ID {file_id}: {error_message}")
+            break
 
-            logger.error(f"Critical exception for file ID {file_id}: {error_message}")
-            return response_data, 500
-
-    # Determine HTTP status code
-    if response_data["success"] and response_data["errors"]:
+    # Determine status code
+    if any(error.get("error") == "Unexpected error occurred." for error in response_data["errors"]):
+        # Critical or unexpected error occurred, halt processing and return 500
+        return response_data, 500
+    elif not response_data["success"] and response_data["errors"]:
+        # All errors, no successes, return 500
+        return response_data, 500
+    elif response_data["success"] and response_data["errors"]:
+        # Mixed results (non-critical errors), return 207
         return response_data, 207
-
-    if response_data["success"]:
+    elif response_data["success"]:
+        # All successful
         return response_data, 201
 
-    if response_data["errors"]:
-        return response_data, 400
-
-    # Fallback case (shouldn't occur in normal processing)
-    return {"success": [], "errors": [{"error": "Unexpected processing issue"}]}, 500
+    return response_data, 400  # Fallback for invalid input

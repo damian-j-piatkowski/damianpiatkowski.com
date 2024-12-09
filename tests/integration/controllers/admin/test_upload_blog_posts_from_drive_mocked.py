@@ -366,103 +366,106 @@ def test_upload_blog_posts_from_drive_errors_only(
     [
         # Scenario 1: Single file, unexpected error, immediate halt
         (
-            [{"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"}],
-            [Exception("Unexpected error occurred")],
-            500,
-            {
-                "success": [],
-                "errors": [
-                    {
-                        "file_id": "unexpected_error_file_id",
-                        "error": "Unexpected error occurred.",
-                    }
-                ],
-            },
+                [{"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"}],
+                [Exception("Unexpected error occurred")],
+                500,
+                {
+                    "success": [],
+                    "errors": [
+                        {
+                            "file_id": "unexpected_error_file_id",
+                            "error": "Unexpected error occurred.",
+                        }
+                    ],
+                },
         ),
         # Scenario 2: Expected error, then unexpected error, immediate halt
         (
-            [
-                {"id": "expected_error_file_id", "title": "Expected Error Blog Post"},
-                {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"},
-            ],
-            [
-                ValueError("File not found"),
-                Exception("Unexpected error occurred"),
-            ],
-            500,
-            {
-                "success": [],
-                "errors": [
-                    {
-                        "file_id": "expected_error_file_id",
-                        "error": "File not found",
-                    },
-                    {
-                        "file_id": "unexpected_error_file_id",
-                        "error": "Unexpected error occurred.",
-                    },
+                [
+                    {"id": "expected_error_file_id", "title": "Expected Error Blog Post"},
+                    {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"},
                 ],
-            },
+                [
+                    GoogleDriveFileNotFoundError,
+                    Exception("Unexpected error occurred"),
+                ],
+                500,
+                {
+                    "success": [],
+                    "errors": [
+                        {"file_id": "expected_error_file_id", "error": "File not found"},
+                        {"file_id": "unexpected_error_file_id",
+                         "error": "Unexpected error occurred."},
+                    ],
+                },
         ),
         # Scenario 3: One success, then unexpected error, immediate halt
         (
-            [
-                {"id": "success_file_id", "title": "Successful Blog Post"},
-                {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"},
-            ],
-            [
-                {"file_id": "success_file_id", "message": "Processed successfully"},
-                Exception("Unexpected error occurred"),
-            ],
-            500,
-            {
-                "success": [
-                    {"file_id": "success_file_id", "message": "Processed successfully"}
+                [
+                    {"id": "success_file_id", "title": "Successful Blog Post"},
+                    {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post"},
                 ],
-                "errors": [
-                    {
-                        "file_id": "unexpected_error_file_id",
-                        "error": "Unexpected error occurred",
-                    },
+                [
+                    "Expected file content to be a string.",
+                    Exception("Unexpected error occurred"),
                 ],
-            },
+                500,
+                {
+                    'success': [{'file_id': 'success_file_id',
+                                 'message': "Blog post successfully processed: {'title': 'Successful Blog Post', 'content': 'Expected file content to be a string.', 'drive_file_id': 'success_file_id', 'created_at': '2024-12-04T14:18:16+00:00'}"}],
+                    # noqa: E501
+                    "errors": [
+                        {"file_id": "unexpected_error_file_id",
+                         "error": "Unexpected error occurred."},
+                    ],
+                },
         ),
         # Scenario 4: Three successes, then critical error, immediate halt
         (
-            [
-                {"id": "success_file_id_1", "title": "Successful Blog Post 1"},
-                {"id": "success_file_id_2", "title": "Successful Blog Post 2"},
-                {"id": "success_file_id_3", "title": "Successful Blog Post 3"},
-                {"id": "critical_error_file_id", "title": "Critical Error Blog Post"},
-                {"id": "unprocessed_file_id", "title": "Unprocessed Blog Post"},
-            ],
-            [
-                {"file_id": "success_file_id_1", "message": "Processed successfully"},
-                {"file_id": "success_file_id_2", "message": "Processed successfully"},
-                {"file_id": "success_file_id_3", "message": "Processed successfully"},
-                Exception("Critical error occurred"),
-            ],
-            500,
-            {
-                "success": [
-                    {"file_id": "success_file_id_1", "message": "Processed successfully"},
-                    {"file_id": "success_file_id_2", "message": "Processed successfully"},
-                    {"file_id": "success_file_id_3", "message": "Processed successfully"},
+                [
+                    {"id": "success_file_id_1", "title": "Successful Blog Post 1"},
+                    {"id": "success_file_id_2", "title": "Successful Blog Post 2"},
+                    {"id": "success_file_id_3", "title": "Successful Blog Post 3"},
+                    {"id": "critical_error_file_id", "title": "Critical Error Blog Post"},
+                    {"id": "unprocessed_file_id", "title": "Unprocessed Blog Post"},
                 ],
-                "errors": [
-                    {
-                        "file_id": "critical_error_file_id",
-                        "error": "Critical error occurred",
-                    },
+                [
+                    "Expected file content to be a string.",
+                    "Expected file content to be a string.",
+                    "Expected file content to be a string.",
+                    Exception("Critical error occurred"),
                 ],
-            },
+                500,
+                {
+                    "success": [{'file_id': 'success_file_id_1',
+                                 'message': "Blog post successfully processed: {'title': "
+                                            "'Successful Blog Post 1', 'content': 'Expected file "
+                                            "content to be a string.', 'drive_file_id': "
+                                            "'success_file_id_1', 'created_at': "
+                                            "'2024-12-04T14:18:16+00:00'}"},
+                                {'file_id': 'success_file_id_2',
+                                 'message': "Blog post successfully processed: {'title': "
+                                            "'Successful Blog Post 2', 'content': 'Expected file "
+                                            "content to be a string.', 'drive_file_id': "
+                                            "'success_file_id_2', 'created_at': "
+                                            "'2024-12-04T14:18:16+00:00'}"},
+                                {'file_id': 'success_file_id_3',
+                                 'message': "Blog post successfully processed: {'title': "
+                                            "'Successful Blog Post 3', 'content': 'Expected file "
+                                            "content to be a string.', 'drive_file_id': "
+                                            "'success_file_id_3', 'created_at': "
+                                            "'2024-12-04T14:18:16+00:00'}"}],
+                    "errors": [
+                        {"file_id": "critical_error_file_id", "error": "Unexpected error occurred."},
+                    ],
+                },
         ),
     ],
 )
 @freeze_time("2024-12-04 14:18:16")
 def test_upload_blog_posts_from_drive_unexpected_error(
-    app: Flask, mock_google_drive_service: Mock, session: Session, files, side_effects,
-    expected_status, expected_response
+        app: Flask, mock_google_drive_service: Mock, session: Session, files, side_effects,
+        expected_status, expected_response
 ) -> None:
     """Tests the behavior of uploading blog posts when a critical error happens."""
     with app.app_context():
@@ -477,4 +480,3 @@ def test_upload_blog_posts_from_drive_unexpected_error(
         assert response == expected_response, (
             f"Expected response: {expected_response}, got {response}"
         )
-

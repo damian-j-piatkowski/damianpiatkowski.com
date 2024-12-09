@@ -13,6 +13,10 @@ def process_file(file_id: str, title: str) -> tuple[bool, str]:
     """
     Processes a single file: reads from Google Drive, sanitizes, and saves as a blog post.
 
+    Args:
+        file_id (str): ID of the file to process.
+        title (str): Title of the blog post.
+
     Returns:
         tuple: (success: bool, message: str) where success indicates if the operation succeeded,
                and message contains either the success message or error details.
@@ -33,23 +37,24 @@ def process_file(file_id: str, title: str) -> tuple[bool, str]:
         blog_post = save_blog_post({
             "title": title,
             "content": sanitized_content,
-            "drive_file_id": file_id
+            "drive_file_id": file_id,
         })
 
         # Return success tuple with serialized blog post
         success_message = f"Blog post successfully processed: {BlogPostSchema().dump(blog_post)}"
         return True, success_message
 
-    except GoogleDriveFileNotFoundError:
-        logger.error(f"File not found on Google Drive for file ID {file_id}.")
-        return False, "File not found on Google Drive."
-    except GoogleDrivePermissionError:
-        logger.error(f"Permission denied for file ID {file_id} on Google Drive.")
-        return False, "Permission denied on Google Drive."
+    except GoogleDriveFileNotFoundError as e:
+        logger.error(f"File not found for file ID {file_id}: {str(e)}")
+        raise ValueError("File not found")  # Propagate meaningful error
+    except GoogleDrivePermissionError as e:
+        logger.error(f"Permission denied for file ID {file_id}: {str(e)}")
+        raise PermissionError("Permission denied on Google Drive")
     except RuntimeError as e:
         logger.error(f"Error saving blog post for file ID {file_id}: {str(e)}")
-        return False, "Error saving blog post."
+        return False, f"Error saving blog post: {str(e)}"
     except Exception as e:
         logger.error(f"Unexpected error for file ID {file_id}: {str(e)}")
-        return False, "Unexpected error occurred."
+        raise RuntimeError("Unexpected error occurred.")
+
 
