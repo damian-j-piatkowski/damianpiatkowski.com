@@ -1,5 +1,6 @@
 import logging
 
+from app.exceptions import BlogPostDuplicateError
 from app.extensions import db
 from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.services.sanitization_service import sanitize_html
@@ -32,6 +33,8 @@ def save_blog_post(validated_data):
 
     Raises:
         KeyError: If any required fields are missing.
+        BlogPostDuplicateError: If a duplicate blog post is detected.
+        RuntimeError: For other unexpected errors during blog post creation.
     """
     required_fields = ['title', 'content', 'drive_file_id']
 
@@ -51,20 +54,33 @@ def save_blog_post(validated_data):
     session = db.session
     blog_post_repo = BlogPostRepository(session)
 
-    # Create and save blog post
-    logger.info("Saving the blog post to the database.")
-    blog_post = blog_post_repo.create_blog_post(
-        title=validated_data['title'],
-        content=validated_data['content'],
-        drive_file_id=validated_data.get('drive_file_id', '')
-    )
+    try:
+        # Create and save blog post
+        logger.info("Saving the blog post to the database.")
+        blog_post = blog_post_repo.create_blog_post(
+            title=validated_data['title'],
+            content=validated_data['content'],
+            drive_file_id=validated_data.get('drive_file_id', '')
+        )
 
-    logger.info("Blog post saved successfully with title: %s", blog_post.title)
+        logger.info("Blog post saved successfully with title: %s", blog_post.title)
 
-    # Return a dictionary representation of the BlogPost instance
-    return {
-        'title': blog_post.title,
-        'content': blog_post.content,
-        'drive_file_id': blog_post.drive_file_id,
-        'created_at': blog_post.created_at
-    }
+        # Return a dictionary representation of the BlogPost instance
+        return {
+            'title': blog_post.title,
+            'content': blog_post.content,
+            'drive_file_id': blog_post.drive_file_id,
+            'created_at': blog_post.created_at
+        }
+
+    except BlogPostDuplicateError as e:
+        # Log the duplicate error and re-raise
+        logger.warning(
+            f"Duplicate blog post detected: {e.message} (field: {e.field_name}, "
+            f"value: {e.field_value})")
+        raise
+
+    except Exception as e:
+        # Log unexpected errors and re-raise
+        logger.error(f"Unexpected error during blog post creation: {str(e)}")
+        raise RuntimeError("Failed to save blog post due to an unexpected error.") from e

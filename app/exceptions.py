@@ -24,14 +24,19 @@ Classes:
 
 class BlogPostDuplicateError(Exception):
     """Raised when a duplicate blog post is detected during database operations."""
-    def __init__(self, message, title, url):
+
+    def __init__(self, message, field_name, field_value):
         """Initializes the BlogPostDuplicateError exception.
 
         Args:
             message (str): The error message to display.
-            title (str): The title of the duplicate blog post.
+            field_name (str): The name of the field causing the duplication
+                (e.g., 'title' or 'drive_file_id').
+            field_value (str): The value of the duplicate field.
         """
-        self.title = title
+        self.message = message
+        self.field_name = field_name
+        self.field_value = field_value
         super().__init__(message)
 
 
@@ -58,6 +63,7 @@ class GoogleDriveError(Exception):
 
 class GoogleDriveAuthenticationError(GoogleDriveError):
     """Raised when there is an authentication error while interacting with Google Drive."""
+
     def __init__(self, message, user_email=None):
         """Initializes the GoogleDriveAuthenticationError exception.
 
@@ -71,6 +77,7 @@ class GoogleDriveAuthenticationError(GoogleDriveError):
 
 class GoogleDriveFileNotFoundError(GoogleDriveError):
     """Raised when the requested file is not found in Google Drive."""
+
     def __init__(self, message, file_id=None):
         """Initializes the GoogleDriveFileNotFoundError exception.
 
@@ -84,6 +91,7 @@ class GoogleDriveFileNotFoundError(GoogleDriveError):
 
 class GoogleDrivePermissionError(GoogleDriveError):
     """Raised when there is a permission error while accessing Google Drive."""
+
     def __init__(self, message, permission=None):
         """Initializes the GoogleDrivePermissionError exception.
 
@@ -97,6 +105,7 @@ class GoogleDrivePermissionError(GoogleDriveError):
 
 class GoogleDriveAPIError(GoogleDriveError):
     """Raised for general API errors that do not fall under other categories."""
+
     def __init__(self, message, api_method=None, error_code=None):
         """Initializes the GoogleDriveAPIError exception.
 
@@ -108,4 +117,3 @@ class GoogleDriveAPIError(GoogleDriveError):
         self.api_method = api_method
         self.error_code = error_code
         super().__init__(message)
-

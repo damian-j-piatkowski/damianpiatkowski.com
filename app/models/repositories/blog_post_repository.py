@@ -11,11 +11,13 @@ Methods:
 """
 
 from typing import List, Optional
+
 from sqlalchemy import select, insert
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
 from app.domain.blog_post import BlogPost
+from app.exceptions import BlogPostDuplicateError
 from app.models.tables.blog_post import blog_posts
 
 
@@ -41,6 +43,11 @@ class BlogPostRepository:
         Returns:
             Optional[BlogPost]: The newly created BlogPost instance, or
                 None if an error occurs.
+
+        Raises:
+            BlogPostDuplicateError: If a blog post with a duplicate title or
+                drive_file_id is detected.
+            RuntimeError: If a general database error occurs during the operation.
         """
         try:
             new_post_data = {
@@ -58,11 +65,24 @@ class BlogPostRepository:
                 content=content,
                 drive_file_id=drive_file_id
             )
-        except IntegrityError:
-            self.session.rollback()  # Rollback the transaction on failure
-            raise  # Re-raise the IntegrityError
+        except IntegrityError as e:
+            self.session.rollback()
+
+            # Detect which unique constraint failed
+            if 'title' in str(e.orig):
+                raise BlogPostDuplicateError(
+                    message="A blog post with this title already exists.",
+                    field_name="title",
+                    field_value=title
+                )
+            elif 'drive_file_id' in str(e.orig):
+                raise BlogPostDuplicateError(
+                    message="A blog post with this drive_file_id already exists.",
+                    field_name="drive_file_id",
+                    field_value=drive_file_id
+                )
+            raise
         except SQLAlchemyError as e:
-            print(f"Database error occurred while creating a blog post: {e}")
             raise RuntimeError("Failed to create blog post in the database.") from e
 
     def fetch_all_blog_posts(self) -> List[BlogPost]:
@@ -76,7 +96,8 @@ class BlogPostRepository:
         """
         try:
             query = select(blog_posts)
-            result = self.session.execute(query).mappings().all()  # Use .mappings() for dict-like rows
+            result = self.session.execute(
+                query).mappings().all()  # Use .mappings() for dict-like rows
 
             # Convert database rows to BlogPost instances
             return [

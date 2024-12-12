@@ -182,6 +182,12 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
             # Handle expected errors like "File not found"
             error_message = str(ve)
             response_data["errors"].append({"file_id": file_id, "error": error_message})
+        except PermissionError as pe:
+            # Handle permission-related errors
+            error_message = str(pe)
+            response_data["errors"].append(
+                {"file_id": file_id, "error": "Permission denied on Google Drive"})
+            logger.error(f"Permission error encountered for file ID {file_id}: {error_message}")
         except Exception as e:
             # Handle unexpected critical errors
             error_message = str(e)
@@ -196,7 +202,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
         return response_data, 500
     elif not response_data["success"] and response_data["errors"]:
         # All errors, no successes, return 500
-        return response_data, 500
+        return response_data, 400
     elif response_data["success"] and response_data["errors"]:
         # Mixed results (non-critical errors), return 207
         return response_data, 207
