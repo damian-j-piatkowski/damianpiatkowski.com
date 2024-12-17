@@ -9,7 +9,7 @@ from app.models.repositories.log_repository import LogRepository
 
 # Unit tests for LogRepository
 
-def test_create_log_success():
+def test_create_log_success(): # todo this one next
     """Test successfully creating a log entry."""
     # Arrange
     mock_session = MagicMock()
