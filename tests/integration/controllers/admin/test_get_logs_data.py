@@ -16,37 +16,39 @@ Fixtures:
     - session: Provides a session object for database interactions.
 """
 
+from datetime import datetime, timezone
+
+from freezegun import freeze_time
+
 from app.controllers.admin_controller import get_logs_data
+from app.models.data_schemas.log_schema import LogSchema
 
 
-def test_get_logs_data_success(app, session, create_log) -> None:
+@freeze_time("2024-12-04 14:18:16")
+def test_get_logs_data_success(app, session, create_log):
     """Test successful retrieval of log data."""
     with app.app_context():
-        # Create sample logs
-        create_log(level='INFO', message='Log entry 1')
-        create_log(level='ERROR', message='Log entry 2')
+        first_log_id = create_log(level='INFO', message='Log entry 1').log_id
+        second_log_id = create_log(level='ERROR', message='Log entry 2').log_id
         session.commit()
 
-        # Call the function
         response, status_code = get_logs_data()
 
-        # Adjust expected data to include all fields
         expected_data = [
             {
-                'id': 1,
+                'log_id': first_log_id,
                 'level': 'INFO',
                 'message': 'Log entry 1',
-                'timestamp': response.json[0]['timestamp']  # Match actual timestamp format
+                'timestamp': "2024-12-04T14:18:16+00:00"
             },
             {
-                'id': 2,
+                'log_id': second_log_id,
                 'level': 'ERROR',
                 'message': 'Log entry 2',
-                'timestamp': response.json[1]['timestamp']  # Match actual timestamp format
+                'timestamp': "2024-12-04T14:18:16+00:00"
             }
         ]
 
-        # Assert response data and status code
         assert status_code == 200
         assert response.json == expected_data
 

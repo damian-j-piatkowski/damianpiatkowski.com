@@ -7,14 +7,12 @@ errors in case of database issues.
 
 Methods:
 - create_log: Inserts a new log entry into the database.
-- delete_log: Deletes a log entry from the database.
-- fetch_all_logs: Retrieves all log entries from the database.
-- fetch_log_by_id: Retrieves a log entry by its ID.
-- update_log: Updates an existing log entry by its ID.
+- fetch_all_logs: Retrieves all log entries as Log domain objects.
 """
-from typing import List, Optional, Dict
 
-from sqlalchemy import insert, select, update, delete
+from typing import List
+
+from sqlalchemy import insert, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -34,94 +32,51 @@ class LogRepository:
         """
         self.session = session
 
-    def create_log(self, log: Log) -> None:
+    def create_log(self, log: Log) -> Log:
         """
         Inserts a new log entry into the database.
 
         Args:
-            log: The Log object containing the level, message, and timestamp.
+            log: The Log object containing the level and message.
+
+        Returns:
+            The created Log object with the database-generated ID and timestamp.
         """
         try:
             stmt = insert(logs).values(
                 level=log.level,
                 message=log.message,
-                timestamp=log.timestamp
-            )
-            self.session.execute(stmt)
+            ).returning(logs.c.id, logs.c.timestamp)  # Fetch generated ID and timestamp
+            result = self.session.execute(stmt).one()
             self.session.commit()
+
+            # Update the log object with generated ID and timestamp
+            log.log_id = result.id
+            log.timestamp = result.timestamp
+            return log
         except SQLAlchemyError as e:
-            print(f"Database error occurred while creating a log: {e}")
+            self.session.rollback()
             raise RuntimeError("Failed to create log in the database.") from e
 
-    def delete_log(self, log_id: int) -> None:
+    def fetch_all_logs(self) -> List[Log]:
         """
-        Deletes a log entry from the database by its ID.
-
-        Args:
-            log_id: The ID of the log entry to delete.
-        """
-        try:
-            stmt = delete(logs).where(logs.c.id == log_id)
-            self.session.execute(stmt)
-            self.session.commit()
-        except SQLAlchemyError as e:
-            print(f"Database error occurred while deleting log: {e}")
-            raise RuntimeError("Failed to delete log from the database.") from e
-
-    def fetch_all_logs(self) -> List[Dict[str, str]]:
-        """
-        Fetches all log entries from the database in a dictionary format.
+        Retrieves all log entries as Log domain objects.
 
         Returns:
-            A list of dictionaries representing the logs in the database.
+            A list of Log objects representing all log entries.
         """
         try:
-            stmt = select(logs)
-            result = self.session.execute(stmt).mappings().all()
-            return [dict(row) for row in result] if result else []
+            query = select(logs)  # SQLAlchemy select statement
+            result = self.session.execute(query).mappings().all()  # Dict-like rows
+
+            return [
+                Log(
+                    log_id=row['id'],
+                    level=row['level'],
+                    message=row['message'],
+                    timestamp=row['timestamp'],  # Assume DB timestamps are UTC
+                )
+                for row in result
+            ] if result else []
         except SQLAlchemyError as e:
-            print(f"Database error occurred while fetching logs: {e}")
             raise RuntimeError("Failed to fetch logs from the database.") from e
-
-    def fetch_log_by_id(self, log_id: int) -> Optional[Log]:
-        """
-        Fetches a single log entry by its ID.
-
-        Args:
-            log_id: The ID of the log entry to fetch.
-
-        Returns:
-            A Log object if found, otherwise None.
-        """
-        try:
-            stmt = select(logs).where(logs.c.id == log_id)
-            result = self.session.execute(stmt).first()
-
-            if result:
-                return Log(level=result.level, message=result.message)
-            return None
-        except SQLAlchemyError as e:
-            print(f"Database error occurred while fetching log by ID: {e}")
-            raise RuntimeError(
-                "Failed to fetch log by ID from the database.") from e
-
-    def update_log(self, log_id: int, level: str, message: str) -> None:
-        """
-        Updates an existing log entry by its ID.
-
-        Args:
-            log_id: The ID of the log entry to update.
-            level: The updated severity level.
-            message: The updated log message.
-        """
-        try:
-            stmt = (
-                update(logs)
-                .where(logs.c.id == log_id)
-                .values(level=level, message=message)
-            )
-            self.session.execute(stmt)
-            self.session.commit()
-        except SQLAlchemyError as e:
-            print(f"Database error occurred while updating log: {e}")
-            raise RuntimeError("Failed to update log in the database.") from e

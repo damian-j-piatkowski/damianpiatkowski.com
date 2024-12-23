@@ -1,16 +1,18 @@
 import logging
+from typing import List
 
+from app.domain.log import Log
 from app.extensions import db
 from app.models.repositories.log_repository import LogRepository
 
 logger = logging.getLogger(__name__)
 
 
-def fetch_all_logs():
+def fetch_all_logs() -> List[Log]:
     """Service function to fetch all logs from the database.
 
     Returns:
-        list: A list of log entries, where each log entry is represented as a dictionary.
+        List[Log]: A list of Log domain objects.
 
     Raises:
         RuntimeError: If there is an error fetching the logs from the database.
@@ -18,7 +20,7 @@ def fetch_all_logs():
     session = db.session
     log_repo = LogRepository(session)
     try:
-        logs = log_repo.fetch_all_logs()
+        logs = log_repo.fetch_all_logs()  # Fetch as Log objects
         return logs
     except RuntimeError as e:
         logger.error(f"Error in LogService: {e}")

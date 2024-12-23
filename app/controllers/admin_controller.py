@@ -23,6 +23,7 @@ from app.services.file_processing_service import process_file
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
 from app.services.sanitization_service import normalize_title
+from app.models.data_schemas.log_schema import LogSchema
 
 logger = logging.getLogger(__name__)
 
@@ -83,24 +84,20 @@ def find_unpublished_drive_articles() -> jsonify:
         return jsonify({"error": str(e)}), 500
 
 
-def get_logs_data() -> jsonify:
-    """Fetches all logs from the database and returns them in JSON format.
-
-    Returns:
-        jsonify: JSON response containing logs or a message if none are found.
-
-    Raises:
-        RuntimeError: If there is an error retrieving the logs.
-    """
+def get_logs_data():
+    """Fetch logs and serialize them for JSON response."""
     try:
-        logs = fetch_all_logs()
+        logs = fetch_all_logs()  # List[Log]
         if not logs:
             current_app.logger.info("No logs found.")
             return jsonify({"message": "No logs found"}), 404
-        return jsonify(logs), 200
+
+        schema = LogSchema(many=True)  # Instantiate schema for multiple logs
+        serialized_logs = schema.dump(logs)  # Serialize the domain objects
+        return jsonify(serialized_logs), 200  # Return serialized data with status 200
     except RuntimeError as e:
         current_app.logger.error(f"Failed to retrieve logs: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500  # Return error with status 500
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
