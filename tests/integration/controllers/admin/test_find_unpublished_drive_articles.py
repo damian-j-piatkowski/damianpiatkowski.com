@@ -40,12 +40,10 @@ def test_find_unpublished_drive_articles_all_articles_published(app, session, cr
             title="01_six_essential_object_oriented_design_principles_from_matthias_"
                   "nobacks_object_design_style_guide",
             content="Content about design principles",
-            url="post-1"
         )
         create_blog_post(
             title="02_value_objects",
             content="Content about value objects",
-            url="post-2"
         )
         session.commit()
 

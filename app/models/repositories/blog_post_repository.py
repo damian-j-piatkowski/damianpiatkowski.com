@@ -8,11 +8,13 @@ of database issues.
 Methods:
 - create_blog_post: Inserts a new blog post into the database and returns the BlogPost instance.
 - fetch_all_blog_posts: Retrieves all blog posts as BlogPost instances from the database.
+- fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
+- count_total_blog_posts: Returns the total number of blog posts in the database.
 """
 
 from typing import List, Optional
 
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, func
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
@@ -96,8 +98,7 @@ class BlogPostRepository:
         """
         try:
             query = select(blog_posts)
-            result = self.session.execute(
-                query).mappings().all()  # Use .mappings() for dict-like rows
+            result = self.session.execute(query).mappings().all()
 
             # Convert database rows to BlogPost instances
             return [
@@ -109,5 +110,49 @@ class BlogPostRepository:
                 for row in result
             ] if result else []
         except SQLAlchemyError as e:
-            print(f"Database error occurred while fetching blog posts: {e}")
             raise RuntimeError("Failed to fetch blog posts from the database.") from e
+
+    def fetch_paginated_blog_posts(self, page: int, limit: int) -> List[BlogPost]:
+        """Fetch paginated blog posts from the database.
+
+        Args:
+            page (int): The current page number (1-based index).
+            limit (int): The number of posts per page.
+
+        Returns:
+            List[BlogPost]: A list of BlogPost instances for the requested page.
+
+        Raises:
+            RuntimeError: If a database error occurs.
+        """
+        try:
+            offset = (page - 1) * limit
+            query = select(blog_posts).limit(limit).offset(offset)
+            result = self.session.execute(query).mappings().all()
+
+            return [
+                BlogPost(
+                    title=row['title'],
+                    content=row['content'],
+                    drive_file_id=row['drive_file_id']
+                )
+                for row in result
+            ] if result else []
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to fetch paginated blog posts from the database.") from e
+
+    def count_total_blog_posts(self) -> int:
+        """Returns the total number of blog posts in the database.
+
+        Returns:
+            int: The total count of blog posts.
+
+        Raises:
+            RuntimeError: If a database error occurs.
+        """
+        try:
+            query = select(func.count()).select_from(blog_posts)
+            total_posts = self.session.execute(query).scalar()
+            return total_posts or 0  # Ensure it returns at least 0
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to count blog posts.") from e
