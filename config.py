@@ -44,6 +44,9 @@ class Config:
     MAIL_USE_TLS: bool = True
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
+    # Pagination
+    PER_PAGE: int = 10
+
     @staticmethod
     def get_database_url():
         mysql_user = os.getenv('MYSQL_USER', 'default_user')

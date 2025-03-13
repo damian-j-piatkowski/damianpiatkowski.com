@@ -7,30 +7,30 @@ Routes:
     - /blog/<post_id>: Renders a single blog post based on its ID.
 """
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, Response, current_app
 
 from app.controllers.blog_controller import get_all_posts
 
 blog_bp = Blueprint('blog', __name__)
 
-@blog_bp.route('/blog', methods=['GET'])
-def render_blog_posts():
-    """Renders the blog posts page with pagination.
 
-    Retrieves paginated blog posts from the controller and renders them in a template.
+@blog_bp.route("/blog", methods=["GET"])
+def render_blog_posts() -> Response:
+    """Render the blog posts page with pagination.
 
-    Query Params:
-        page (int): The current page number (default is 1).
-        per_page (int): The number of posts per page (default is 10).
+    Query Parameters:
+        page (int, optional): The current page number. Example: `/blog?page=2`
+        per_page (int, optional): The number of posts per page. Example: `/blog?page=2&per_page=5`
+            (Defaults to `Config.PER_PAGE` if not provided).
 
     Returns:
-        Response: Rendered HTML template with paginated blog posts.
+        Response: Rendered HTML page with paginated blog posts.
     """
-    page = request.args.get('page', 1, type=int)
-    per_page = 10  # TODO: Make this configurable
+    page: int = request.args.get("page", 1, type=int)
+    per_page: int = request.args.get("per_page", current_app.config["PER_PAGE"], type=int)
 
-    posts_data = get_all_posts(page, per_page)
-    return render_template('blog.html', posts_data=posts_data)
+    posts_data, total_pages = get_all_posts(page, per_page)
+    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page)
 
 # @blog_bp.route('/blog/<string:post_id>', methods=['GET'])
 # def render_single_blog_post(post_id):
