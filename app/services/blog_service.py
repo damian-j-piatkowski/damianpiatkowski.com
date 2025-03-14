@@ -1,5 +1,4 @@
-"""
-Service layer for handling blog post business logic.
+"""Service layer for handling blog post business logic.
 
 This module provides functions to fetch paginated blog posts from the database.
 """
@@ -37,14 +36,13 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     try:
         logger.info(f"Fetching page {page} with {per_page} posts per page.")
         repository = BlogPostRepository(session)
-        posts, total_pages = repository.get_paginated_blog_posts(page, per_page)
+        posts, total_pages = repository.fetch_paginated_blog_posts(page, per_page)
 
         logger.info(f"Successfully retrieved {len(posts)} blog posts.")
         return posts, total_pages
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
         raise RuntimeError("Failed to retrieve blog posts") from e
-
 
 
 def fetch_all_blog_posts():

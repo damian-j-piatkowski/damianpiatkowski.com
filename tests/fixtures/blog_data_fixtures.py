@@ -64,6 +64,6 @@ def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
         Callable[[int], List[BlogPost]]: A function that accepts the desired number of blog posts to create.
     """
     def _seed_blog_posts(count: int = 25) -> List[BlogPost]:
-        return [create_blog_post(f"Title {i}", f"Content {i}", f"drive_id_{i}") for i in range(count)]
+        return [create_blog_post(f"Post {i+1}", f"Content {i+1}", f"drive_id_{i+1}") for i in range(count)]
 
     return _seed_blog_posts

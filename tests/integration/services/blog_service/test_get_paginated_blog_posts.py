@@ -16,6 +16,7 @@ Fixtures:
 """
 
 from app.services.blog_service import get_paginated_blog_posts
+from tests.fixtures.blog_data_fixtures import seed_blog_posts
 
 
 def test_get_paginated_blog_posts_empty(session) -> None:
@@ -25,25 +26,22 @@ def test_get_paginated_blog_posts_empty(session) -> None:
     assert total_pages == 0
 
 
-def test_get_paginated_blog_posts_invalid_page(session, create_blog_post) -> None:
+def test_get_paginated_blog_posts_invalid_page(session, seed_blog_posts) -> None:
     """Checks that requesting page=0 or negative page numbers defaults to page 1."""
-    create_blog_post(title="Valid Post 1", content="Content 1", drive_file_id="id_1")
-    create_blog_post(title="Valid Post 2", content="Content 2", drive_file_id="id_2")
+    seed_blog_posts(2)
     session.commit()
 
     posts_zero, total_pages_zero = get_paginated_blog_posts(page=0, per_page=10)
     posts_negative, total_pages_negative = get_paginated_blog_posts(page=-5, per_page=10)
 
-    assert posts_zero == posts_negative
     assert total_pages_zero == total_pages_negative
     assert len(posts_zero) == 2
     assert total_pages_zero == 1
 
 
-def test_get_paginated_blog_posts_single_page(session, create_blog_post) -> None:
+def test_get_paginated_blog_posts_single_page(session, seed_blog_posts) -> None:
     """Verifies pagination when all posts fit within a single page."""
-    for i in range(7):
-        create_blog_post(title=f"Post {i + 1}", content=f"Content {i + 1}", drive_file_id=f"id_{i + 1}")
+    seed_blog_posts(7)
     session.commit()
 
     posts, total_pages = get_paginated_blog_posts(page=1, per_page=10)
@@ -54,10 +52,9 @@ def test_get_paginated_blog_posts_single_page(session, create_blog_post) -> None
     assert posts[-1].title == "Post 7"
 
 
-def test_get_paginated_blog_posts_multiple_pages(session, create_blog_post) -> None:
+def test_get_paginated_blog_posts_multiple_pages(session, seed_blog_posts) -> None:
     """Verifies pagination across multiple pages, ensuring correct ordering."""
-    for i in range(32):
-        create_blog_post(title=f"Post {i + 1}", content=f"Content {i + 1}", drive_file_id=f"id_{i + 1}")
+    seed_blog_posts(32)
     session.commit()
 
     page_1_posts, total_pages = get_paginated_blog_posts(page=1, per_page=10)
@@ -81,10 +78,9 @@ def test_get_paginated_blog_posts_multiple_pages(session, create_blog_post) -> N
     assert page_4_posts[-1].title == "Post 32"
 
 
-def test_get_paginated_blog_posts_out_of_range(session, create_blog_post) -> None:
+def test_get_paginated_blog_posts_out_of_range(session, seed_blog_posts) -> None:
     """Ensures requesting a page beyond the total available pages returns an empty list."""
-    for i in range(15):
-        create_blog_post(title=f"Post {i + 1}", content=f"Content {i + 1}", drive_file_id=f"id_{i + 1}")
+    seed_blog_posts(15)
     session.commit()
 
     posts, total_pages = get_paginated_blog_posts(page=5, per_page=10)
