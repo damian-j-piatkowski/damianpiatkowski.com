@@ -29,6 +29,10 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     Raises:
         RuntimeError: If database retrieval fails.
     """
+    if page < 1:
+        logger.warning(f"Invalid page number {page}, defaulting to page 1.")
+        page = 1  # Normalize to first page
+
     session = db.session
     try:
         logger.info(f"Fetching page {page} with {per_page} posts per page.")
@@ -40,6 +44,7 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
         raise RuntimeError("Failed to retrieve blog posts") from e
+
 
 
 def fetch_all_blog_posts():

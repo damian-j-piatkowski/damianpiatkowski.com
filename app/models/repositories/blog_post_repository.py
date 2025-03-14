@@ -112,25 +112,16 @@ class BlogPostRepository:
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch blog posts from the database.") from e
 
-    def fetch_paginated_blog_posts(self, page: int, limit: int) -> List[BlogPost]:
-        """Fetch paginated blog posts from the database.
-
-        Args:
-            page (int): The current page number (1-based index).
-            limit (int): The number of posts per page.
-
-        Returns:
-            List[BlogPost]: A list of BlogPost instances for the requested page.
-
-        Raises:
-            RuntimeError: If a database error occurs.
-        """
+    def fetch_paginated_blog_posts(self, page: int, limit: int) -> tuple[List[BlogPost], int]:
+        """Fetch paginated blog posts and return total pages count."""
         try:
+            total_posts = self.count_total_blog_posts()
+            total_pages = (total_posts + limit - 1) // limit  # Ceiling division
             offset = (page - 1) * limit
             query = select(blog_posts).limit(limit).offset(offset)
             result = self.session.execute(query).mappings().all()
 
-            return [
+            posts = [
                 BlogPost(
                     title=row['title'],
                     content=row['content'],
@@ -138,6 +129,8 @@ class BlogPostRepository:
                 )
                 for row in result
             ] if result else []
+
+            return posts, total_pages
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch paginated blog posts from the database.") from e
 

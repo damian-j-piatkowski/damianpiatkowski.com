@@ -1,14 +1,13 @@
-"""Fixtures for testing BlogPost instances.
+"""Fixtures for seeding blog post data in tests.
 
-This module contains fixtures for creating and manipulating BlogPost instances
-in tests. These fixtures include options for generating customizable blog posts
-that can be added to the database session or used as mock data for unit tests.
-They cover various use cases, including default blog post data, edge cases,
-and missing fields.
+This module provides reusable fixtures for creating and managing BlogPost instances
+in the test database. These fixtures streamline test setup by allowing individual
+or bulk creation of blog posts, supporting various test cases such as pagination,
+retrieval, and validation scenarios.
 
 Fixtures:
-- create_blog_post: Creates a BlogPost instance with customizable fields.
-- mock_db_posts: Provides a list of mock BlogPost instances for testing scenarios.
+- create_blog_post: Creates a single BlogPost instance with customizable attributes.
+- seed_blog_posts: Seeds multiple BlogPost instances with a configurable count.
 """
 
 from typing import Callable, List, Optional
@@ -52,33 +51,19 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
 
 
 @pytest.fixture(scope='function')
-def mock_db_posts() -> List[BlogPost]:
-    """Provides a list of mock BlogPost instances for testing.
+def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
+    """Seeds a configurable number of blog posts using the create_blog_post fixture.
 
-    This fixture generates a list of BlogPost objects with various attributes,
-    covering typical cases and edge cases (e.g., long content, missing `drive_file_id`).
-    These instances do not interact with the database and are solely for mock use
-    within tests.
+    This fixture generates a list of blog posts in the database to facilitate
+    pagination and retrieval tests. The number of posts can be configured by the test.
+
+    Args:
+        create_blog_post (Callable[..., BlogPost]): Fixture for creating individual blog posts.
 
     Returns:
-        List[BlogPost]: A list of BlogPost instances with varying attributes.
+        Callable[[int], List[BlogPost]]: A function that accepts the desired number of blog posts to create.
     """
-    return [
-        BlogPost(
-            title='Post 1', content='Content 1', drive_file_id='drive_file_1'
-        ),
-        BlogPost(
-            title='Post 2', content='Content 2', drive_file_id='drive_file_2'
-        ),
-        BlogPost(
-            title='Post 3', content='Content 3', drive_file_id='drive_file_3'
-        ),
-        BlogPost(
-            title='Post with very long content', content='A' * 5000,
-            drive_file_id='drive_file_long_content'
-        ),
-        BlogPost(
-            title='Post with missing drive file ID', content='Content without drive file ID',
-            drive_file_id=None  # type: ignore
-        )
-    ]
+    def _seed_blog_posts(count: int = 25) -> List[BlogPost]:
+        return [create_blog_post(f"Title {i}", f"Content {i}", f"drive_id_{i}") for i in range(count)]
+
+    return _seed_blog_posts
