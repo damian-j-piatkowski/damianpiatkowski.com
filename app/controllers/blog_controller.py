@@ -9,7 +9,7 @@ from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_paginated_blog_posts
 
 
-def get_all_posts(page: int, per_page: int):
+def get_paginated_posts(page: int, per_page: int):
     """Fetch paginated blog posts and return them as JSON.
 
     Args:

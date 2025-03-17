@@ -14,19 +14,23 @@ logger = logging.getLogger(__name__)
 
 
 def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
-    """Retrieve paginated blog posts from the database.
+    """Fetches paginated blog posts via the repository.
+
+    This method retrieves blog posts for a given page, ensuring proper pagination
+    logic and handling potential errors. It delegates the actual data retrieval
+    to the BlogPostRepository.
 
     Args:
-        page (int): The page number to retrieve.
-        per_page (int): The number of posts per page.
+        page (int): The page number to retrieve (must be >= 1).
+        per_page (int): The fixed number of posts per page.
 
     Returns:
         tuple[list, int]: A tuple containing:
             - A list of BlogPost objects (or an empty list if no posts are found).
-            - The total number of pages.
+            - The total number of pages available.
 
     Raises:
-        RuntimeError: If database retrieval fails.
+        RuntimeError: If retrieving posts from the repository fails.
     """
     if page < 1:
         logger.warning(f"Invalid page number {page}, defaulting to page 1.")

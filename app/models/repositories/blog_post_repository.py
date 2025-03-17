@@ -112,13 +112,26 @@ class BlogPostRepository:
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch blog posts from the database.") from e
 
-    def fetch_paginated_blog_posts(self, page: int, limit: int) -> tuple[List[BlogPost], int]:
-        """Fetch paginated blog posts and return total pages count."""
+    def fetch_paginated_blog_posts(self, page: int, per_page: int) -> tuple[List[BlogPost], int]:
+        """Retrieve paginated blog posts from the database.
+
+        Args:
+            page (int): The page number to retrieve.
+            per_page (int): The number of posts per page.
+
+        Returns:
+            tuple[List[BlogPost], int]: A tuple containing:
+                - A list of `BlogPost` objects (or an empty list if no posts are found).
+                - The total number of pages.
+
+        Raises:
+            RuntimeError: If database retrieval fails.
+        """
         try:
             total_posts = self.count_total_blog_posts()
-            total_pages = (total_posts + limit - 1) // limit  # Ceiling division
-            offset = (page - 1) * limit
-            query = select(blog_posts).limit(limit).offset(offset)
+            total_pages = (total_posts + per_page - 1) // per_page  # Ceiling division
+            offset = (page - 1) * per_page
+            query = select(blog_posts).limit(per_page).offset(offset)
             result = self.session.execute(query).mappings().all()
 
             posts = [
@@ -135,13 +148,13 @@ class BlogPostRepository:
             raise RuntimeError("Failed to fetch paginated blog posts from the database.") from e
 
     def count_total_blog_posts(self) -> int:
-        """Returns the total number of blog posts in the database.
+        """Retrieve the total number of blog posts in the database.
 
         Returns:
             int: The total count of blog posts.
 
         Raises:
-            RuntimeError: If a database error occurs.
+            RuntimeError: If database retrieval fails.
         """
         try:
             query = select(func.count()).select_from(blog_posts)
