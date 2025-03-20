@@ -18,9 +18,10 @@ Fixtures:
     - session: Provides a session object for database interactions.
 """
 
+from freezegun import freeze_time
+
 from app.controllers.blog_controller import get_paginated_posts
 from tests.fixtures.blog_data_fixtures import seed_blog_posts
-from freezegun import freeze_time
 
 
 def test_get_paginated_posts_custom_per_page(session, seed_blog_posts):
@@ -34,6 +35,7 @@ def test_get_paginated_posts_custom_per_page(session, seed_blog_posts):
     assert status_code == 200
     assert len(json_data["posts"]) == 5
     assert json_data["total_pages"] == 4
+    assert "slug" in json_data["posts"][0]  # Verify slug is included
 
 
 def test_get_paginated_posts_empty(session):
@@ -43,7 +45,6 @@ def test_get_paginated_posts_empty(session):
 
     assert status_code == 404
     assert json_data == {"message": "No blog posts found"}
-
 
 
 @freeze_time("2024-12-04 14:18:16")
@@ -75,7 +76,9 @@ def test_get_paginated_posts_multiple_pages(session, seed_blog_posts):
     assert len(response_page_3.get_json()["posts"]) == 10
     assert len(response_page_4.get_json()["posts"]) == 2
     assert response_page_1.get_json()["posts"][0]["title"] == "Post 1"
+    assert response_page_1.get_json()["posts"][0]["slug"] == "post-1"
     assert response_page_2.get_json()["posts"][0]["title"] == "Post 11"
+    assert response_page_2.get_json()["posts"][0]["slug"] == "post-11"
 
 
 def test_get_paginated_posts_multiple_pages_custom_per_page(session, seed_blog_posts):
@@ -92,6 +95,7 @@ def test_get_paginated_posts_multiple_pages_custom_per_page(session, seed_blog_p
     assert len(response_page_2.get_json()["posts"]) == 7
     assert len(response_page_3.get_json()["posts"]) == 7
     assert len(response_page_4.get_json()["posts"]) == 4
+    assert response_page_1.get_json()["posts"][0]["slug"] == "post-1"
 
 
 def test_get_paginated_posts_out_of_range(session, seed_blog_posts):
@@ -118,4 +122,6 @@ def test_get_paginated_posts_single_page(session, seed_blog_posts):
     assert len(json_data["posts"]) == 7
     assert json_data["total_pages"] == 1
     assert json_data["posts"][0]["title"] == "Post 1"
+    assert json_data["posts"][0]["slug"] == "post-1"
     assert json_data["posts"][-1]["title"] == "Post 7"
+    assert json_data["posts"][-1]["slug"] == "post-7"

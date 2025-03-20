@@ -1,11 +1,14 @@
 """Database-related pytest fixtures.
 
 This module includes fixtures for initializing the database and managing
-database sessions during tests.
+database sessions during tests. These fixtures ensure that each test runs in
+a clean database environment, preventing data persistence across tests.
 
 Fixtures:
-    - _db: Provides a session-wide test database with created tables.
-    - session: Creates a new database session for each test function.
+    - _db: Sets up a fresh test database with tables created before each test
+           and dropped afterward to maintain test isolation.
+    - session: Provides a new database session for each test function, using
+               transactions to ensure that database state resets automatically.
 """
 from typing import Generator
 
@@ -24,8 +27,15 @@ all_metadata = [blog_post_metadata, log_metadata]
 
 @pytest.fixture(scope='function')
 def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
-    """
-    Provides a session-wide test database with created tables.
+    """Sets up a fresh test database before each test and tears it down afterward.
+
+    This fixture:
+    - Runs within the Flask application context to ensure proper access to `db`.
+    - Creates all necessary tables at the start of each test.
+    - Yields the database instance for use in tests.
+    - Drops all tables after the test completes to clean up.
+
+    This guarantees a clean slate for every test, preventing data contamination.
     """
     with app.app_context():
         for metadata in all_metadata:
@@ -37,8 +47,18 @@ def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
 
 @pytest.fixture(scope='function')
 def session(_db: SQLAlchemy) -> Generator[Session, None, None]:
-    """
-    Creates a new database session for each test function.
+    """Provides a fresh database session for each test function.
+
+    This fixture:
+    - Establishes a **new connection** to the test database.
+    - Begins a **transaction**, ensuring all changes are rolled back after the test.
+    - Uses a **session factory** to create an independent session for each test.
+    - Yields the session to the test function.
+    - Rolls back any changes made during the test to keep the database clean.
+    - Closes the session and connection afterward.
+
+    Since the transaction is rolled back at the end of each test, no data persists,
+    ensuring each test starts with a **pristine database state**.
     """
     connection = _db.engine.connect()
     transaction = connection.begin()

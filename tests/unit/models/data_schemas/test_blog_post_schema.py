@@ -6,8 +6,10 @@ present, fields have valid values, and that timestamps are correctly formatted.
 
 Test functions:
 - test_blog_post_schema_empty_title: Tests schema when the title is empty.
+- test_blog_post_schema_empty_slug: Tests schema when the slug is empty.
 - test_blog_post_schema_missing_content: Tests schema when content is missing.
 - test_blog_post_schema_missing_drive_file_id: Tests schema when the drive file ID is missing.
+- test_blog_post_schema_missing_slug: Tests schema when the slug is missing.
 - test_blog_post_schema_missing_title: Tests schema when the title is missing.
 - test_blog_post_schema_timestamp_dumps: Tests schema timestamp serialization.
 - test_blog_post_schema_valid: Tests schema with valid blog post data.
@@ -21,60 +23,90 @@ from marshmallow.exceptions import ValidationError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 
 
-def test_blog_post_schema_empty_title(create_blog_post):
-    """Tests schema when the title is empty.
-
-    This test ensures that the schema raises a ValidationError when the title
-    field is present but contains an empty string.
-    """
+def test_blog_post_schema_empty_slug():
+    """Tests schema when the slug is empty."""
     schema = BlogPostSchema()
-    blog_post = create_blog_post(title="")
+    blog_post_data = {
+        "title": "Valid Title",
+        "slug": "",
+        "content": "Some content",
+        "drive_file_id": "some-drive-id",
+    }
     with pytest.raises(ValidationError) as excinfo:
-        schema.load(blog_post.__dict__)
+        schema.load(blog_post_data)
+    assert "slug" in excinfo.value.messages
+    assert "Shorter than minimum length 1." in excinfo.value.messages["slug"]
+
+
+def test_blog_post_schema_empty_title():
+    """Tests schema when the title is empty."""
+    schema = BlogPostSchema()
+    blog_post_data = {
+        "title": "",
+        "slug": "valid-slug",
+        "content": "Some content",
+        "drive_file_id": "some-drive-id",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        schema.load(blog_post_data)
     assert "title" in excinfo.value.messages
     assert "Shorter than minimum length 1." in excinfo.value.messages["title"]
 
 
-def test_blog_post_schema_missing_content(create_blog_post):
-    """Tests schema when content is missing.
-
-    This test validates that the schema raises a ValidationError when the
-    content field is missing from the input data.
-    """
+def test_blog_post_schema_missing_content():
+    """Tests schema when content is missing."""
     schema = BlogPostSchema()
-    blog_post = create_blog_post(content=None)
+    blog_post_data = {
+        "title": "Valid Title",
+        "slug": "valid-slug",
+        "drive_file_id": "some-drive-id",
+    }
     with pytest.raises(ValidationError) as excinfo:
-        schema.load(blog_post.__dict__)
+        schema.load(blog_post_data)
     assert "content" in excinfo.value.messages
-    assert "Field may not be null." in excinfo.value.messages["content"]
+    assert "Missing data for required field." in excinfo.value.messages["content"]
 
 
-def test_blog_post_schema_missing_drive_file_id(create_blog_post):
-    """Tests schema when the drive file ID is missing.
-
-    This test ensures that the schema raises a ValidationError when the drive_file_id
-    field is not provided.
-    """
+def test_blog_post_schema_missing_drive_file_id():
+    """Tests schema when the drive file ID is missing."""
     schema = BlogPostSchema()
-    blog_post = create_blog_post(drive_file_id=None)
+    blog_post_data = {
+        "title": "Valid Title",
+        "slug": "valid-slug",
+        "content": "Some content",
+    }
     with pytest.raises(ValidationError) as excinfo:
-        schema.load(blog_post.__dict__)
+        schema.load(blog_post_data)
     assert "drive_file_id" in excinfo.value.messages
-    assert "Field may not be null." in excinfo.value.messages["drive_file_id"]
+    assert "Missing data for required field." in excinfo.value.messages["drive_file_id"]
 
 
-def test_blog_post_schema_missing_title(create_blog_post):
-    """Tests schema when the title is missing.
-
-    This test checks that the schema raises a ValidationError when the title
-    field is missing from the input data.
-    """
+def test_blog_post_schema_missing_slug():
+    """Tests schema when the slug is missing."""
     schema = BlogPostSchema()
-    blog_post = create_blog_post(title=None)
+    blog_post_data = {
+        "title": "Valid Title",
+        "content": "Some content",
+        "drive_file_id": "some-drive-id",
+    }
     with pytest.raises(ValidationError) as excinfo:
-        schema.load(blog_post.__dict__)
+        schema.load(blog_post_data)
+    assert "slug" in excinfo.value.messages
+    assert "Missing data for required field." in excinfo.value.messages["slug"]
+
+
+def test_blog_post_schema_missing_title():
+    """Tests schema when the title is missing."""
+    schema = BlogPostSchema()
+    blog_post_data = {
+        "slug": "valid-slug",
+        "content": "Some content",
+        "drive_file_id": "some-drive-id",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        schema.load(blog_post_data)
     assert "title" in excinfo.value.messages
-    assert "Field may not be null." in excinfo.value.messages["title"]
+    assert "Missing data for required field." in excinfo.value.messages["title"]
 
 
 def test_blog_post_schema_timestamp_dumps(create_blog_post):

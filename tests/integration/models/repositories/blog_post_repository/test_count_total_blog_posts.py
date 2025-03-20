@@ -73,9 +73,9 @@ def test_count_total_blog_posts_after_concurrent_insert(session, seed_blog_posts
     assert initial_count == 10
 
     # Insert 3 more posts
-    create_blog_post("New Post 1", "Content 1", "drive_id_101")
-    create_blog_post("New Post 2", "Content 2", "drive_id_102")
-    create_blog_post("New Post 3", "Content 3", "drive_id_103")
+    create_blog_post("New Post 1", "test-blog-post-another", "Content 1", "drive_id_101")
+    create_blog_post("New Post 2", "test-blog-post-and-another", "Content 2", "drive_id_102")
+    create_blog_post("New Post 3", "test-blog-post-and-another-and-another", "Content 3", "drive_id_103")
     session.commit()
 
     # Count again

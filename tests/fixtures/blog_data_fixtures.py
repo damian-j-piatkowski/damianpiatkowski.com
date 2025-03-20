@@ -16,36 +16,43 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.domain.blog_post import BlogPost
+from app.models.tables.blog_post import blog_posts
 
 
 @pytest.fixture(scope='function')
 def create_blog_post(session: Session) -> Callable[..., BlogPost]:
-    """Creates a BlogPost instance with customizable attributes.
+    """Creates and persists a BlogPost instance with customizable attributes.
 
-    This fixture provides a BlogPost instance with default values for
-    `title`, `content`, and `drive_file_id`. Users can override these
-    defaults when creating the instance. The created BlogPost object
-    is added to the session, but the commit responsibility is deferred
-    to the calling test.
+    This fixture creates a BlogPost entry in the database and commits it.
+    It returns a domain-level `BlogPost` object without an ID.
 
     Args:
         session (Session): The SQLAlchemy session for database interactions.
 
     Returns:
-        Callable[..., BlogPost]: A function to create a BlogPost with specified attributes.
+        Callable[..., BlogPost]: A function to create and return a BlogPost object.
     """
     def _create_blog_post(
             title: Optional[str] = 'Test Blog Post',
+            slug: Optional[str] = 'test-blog-post',
             content: Optional[str] = 'This is the content of the blog post.',
             drive_file_id: Optional[str] = 'unique_drive_file_id_1'
     ) -> BlogPost:
-        post = BlogPost(
+        query = blog_posts.insert().values(
             title=title,
+            slug=slug,
+            content=content,
+            drive_file_id=drive_file_id
+        ).returning(blog_posts.c.id)
+        result = session.execute(query)
+        session.commit()
+
+        return BlogPost(
+            title=title,
+            slug=slug,
             content=content,
             drive_file_id=drive_file_id
         )
-        session.add(post)
-        return post
 
     return _create_blog_post
 
@@ -64,6 +71,13 @@ def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
         Callable[[int], List[BlogPost]]: A function that accepts the desired number of blog posts to create.
     """
     def _seed_blog_posts(count: int = 25) -> List[BlogPost]:
-        return [create_blog_post(f"Post {i+1}", f"Content {i+1}", f"drive_id_{i+1}") for i in range(count)]
+        return [
+            create_blog_post(
+                title=f"Post {i+1}",
+                slug=f"post-{i+1}",
+                content=f"Content {i+1}",
+                drive_file_id=f"drive_id_{i+1}"
+            ) for i in range(count)
+        ]
 
     return _seed_blog_posts

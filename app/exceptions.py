@@ -7,6 +7,7 @@ of the app.
 
 Classes:
     - BlogPostDuplicateError: Raised when attempting to load a duplicate blog post into the db.
+    - BlogPostNotFoundError: Raised when a requested blog post is not found in the database.
     - EmailSendError: Raised when an error occurs while sending an email,
         providing additional context such as the email address and optional
         error code.
@@ -37,6 +38,20 @@ class BlogPostDuplicateError(Exception):
         self.message = message
         self.field_name = field_name
         self.field_value = field_value
+        super().__init__(message)
+
+
+class BlogPostNotFoundError(Exception):
+    """Raised when a requested blog post is not found in the database."""
+
+    def __init__(self, message, post_id=None):
+        """Initializes the BlogPostNotFoundError exception.
+
+        Args:
+            message (str): The error message to display.
+            post_id (Optional[int]): The ID of the missing blog post.
+        """
+        self.post_id = post_id
         super().__init__(message)
 
 

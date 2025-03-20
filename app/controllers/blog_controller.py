@@ -3,8 +3,7 @@
 This module provides a function for fetching paginated blog posts.
 """
 
-from flask import Response
-from flask import jsonify, current_app
+from flask import Response, jsonify, current_app
 
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_paginated_blog_posts
@@ -30,8 +29,8 @@ def get_paginated_posts(page: int, per_page: int) -> tuple[Response, int]:
           ```json
           {
               "posts": [
-                  {"title": "Post 1", "content": "...", "drive_file_id": "..."},
-                  {"title": "Post 2", "content": "...", "drive_file_id": "..."}
+                  {"title": "Post 1", "slug": "post-1", "content": "...", "drive_file_id": "..."},
+                  {"title": "Post 2", "slug": "post-2", "content": "...", "drive_file_id": "..."}
               ],
               "total_pages": 5
           }

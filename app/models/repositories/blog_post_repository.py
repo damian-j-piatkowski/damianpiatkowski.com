@@ -10,16 +10,17 @@ Methods:
 - fetch_all_blog_posts: Retrieves all blog posts as BlogPost instances from the database.
 - fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
 - count_total_blog_posts: Returns the total number of blog posts in the database.
+- fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 """
 
 from typing import List, Optional
 
-from sqlalchemy import select, insert, func
+from sqlalchemy import select, insert, func, column
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
 from app.domain.blog_post import BlogPost
-from app.exceptions import BlogPostDuplicateError
+from app.exceptions import BlogPostDuplicateError, BlogPostNotFoundError
 from app.models.tables.blog_post import blog_posts
 
 
@@ -32,6 +33,7 @@ class BlogPostRepository:
     def create_blog_post(
             self,
             title: str,
+            slug: str,
             content: str,
             drive_file_id: str
     ) -> Optional[BlogPost]:
@@ -39,6 +41,7 @@ class BlogPostRepository:
 
         Args:
             title (str): The title of the blog post.
+            slug (str): The unique slug for the blog post.
             content (str): The content of the blog post.
             drive_file_id (str): The unique Google Drive file ID for the post.
 
@@ -47,13 +50,14 @@ class BlogPostRepository:
                 None if an error occurs.
 
         Raises:
-            BlogPostDuplicateError: If a blog post with a duplicate title or
+            BlogPostDuplicateError: If a blog post with a duplicate slug or
                 drive_file_id is detected.
             RuntimeError: If a general database error occurs during the operation.
         """
         try:
             new_post_data = {
                 'title': title,
+                'slug': slug,
                 'content': content,
                 'drive_file_id': drive_file_id
             }
@@ -61,9 +65,9 @@ class BlogPostRepository:
             self.session.execute(insert_query)
             self.session.commit()  # Commit the transaction
 
-            # Return a new BlogPost instance
             return BlogPost(
                 title=title,
+                slug=slug,
                 content=content,
                 drive_file_id=drive_file_id
             )
@@ -71,11 +75,11 @@ class BlogPostRepository:
             self.session.rollback()
 
             # Detect which unique constraint failed
-            if 'title' in str(e.orig):
+            if 'slug' in str(e.orig):
                 raise BlogPostDuplicateError(
-                    message="A blog post with this title already exists.",
-                    field_name="title",
-                    field_value=title
+                    message="A blog post with this slug already exists.",
+                    field_name="slug",
+                    field_value=slug
                 )
             elif 'drive_file_id' in str(e.orig):
                 raise BlogPostDuplicateError(
@@ -100,10 +104,10 @@ class BlogPostRepository:
             query = select(blog_posts)
             result = self.session.execute(query).mappings().all()
 
-            # Convert database rows to BlogPost instances
             return [
                 BlogPost(
                     title=row['title'],
+                    slug=row['slug'],  # Ensure slug is included
                     content=row['content'],
                     drive_file_id=row['drive_file_id']
                 )
@@ -137,6 +141,7 @@ class BlogPostRepository:
             posts = [
                 BlogPost(
                     title=row['title'],
+                    slug=row['slug'],
                     content=row['content'],
                     drive_file_id=row['drive_file_id']
                 )
@@ -162,3 +167,32 @@ class BlogPostRepository:
             return total_posts or 0  # Ensure it returns at least 0
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to count blog posts.") from e
+
+    def fetch_blog_post_by_slug(self, slug: str) -> BlogPost:
+        """Retrieve a single blog post by its slug.
+
+        Args:
+            slug (str): The unique slug of the blog post.
+
+        Returns:
+            BlogPost: The retrieved blog post instance.
+
+        Raises:
+            BlogPostNotFoundError: If no blog post with the given slug exists.
+            RuntimeError: If a database error occurs.
+        """
+        try:
+            query = select(blog_posts).where(column("slug") == slug)
+            result = self.session.execute(query).mappings().first()
+
+            if not result:
+                raise BlogPostNotFoundError(f"No blog post found with slug {slug}")
+
+            return BlogPost(
+                title=result["title"],
+                slug=result["slug"],
+                content=result["content"],
+                drive_file_id=result["drive_file_id"]
+            )
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to fetch blog post from the database.") from e
