@@ -1,15 +1,15 @@
 """Blog routes for the Flask application.
 
-This module defines the routes for displaying blog posts.
+This module defines routes for rendering blog-related pages.
 
 Routes:
-    - /blog: Renders a paginated list of blog posts.
-    - /blog/<post_id>: Renders a single blog post based on its ID.
+- /blog: Renders a paginated list of blog posts.
+- /blog/<slug>: Renders a single blog post based on the given slug.
 """
 
 from flask import Blueprint, render_template, request, current_app
 
-from app.controllers.blog_controller import get_paginated_posts
+from app.controllers.blog_controller import get_paginated_posts, get_single_post
 
 blog_bp = Blueprint("blog", __name__)
 
@@ -39,21 +39,20 @@ def render_blog_posts():
 
     return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page)
 
-#
-#
-# @blog_bp.route("/blog/<int:post_id>", methods=["GET"])
-# def render_single_blog_post(post_id: int) -> Response:
-#     """Render a single blog post page.
-#
-#     Args:
-#         post_id (int): The ID of the blog post to retrieve.
-#
-#     Returns:
-#         Response: Rendered HTML page displaying the blog post.
-#     """
-#     post_data = get_single_blog_post(post_id)
-#
-#     if not post_data:
-#         abort(404, description="Blog post not found.")
-#
-#     return render_template("single_blog_post.html", post=post_data)
+
+@blog_bp.route("/blog/<slug>", methods=["GET"])
+def render_single_blog_post(slug: str):
+    """Render a single blog post based on the provided slug.
+
+    Args:
+        slug (str): The unique identifier for the blog post.
+
+    Returns:
+        Response: Rendered HTML page displaying the blog post details.
+    """
+    json_response, status_code = get_single_post(slug)
+
+    if status_code != 200:
+        return render_template("single_blog_post.html", post=None), status_code
+
+    return render_template("single_blog_post.html", post=json_response.json)

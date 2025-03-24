@@ -18,6 +18,7 @@ Test functions:
 from datetime import datetime
 
 import pytest
+from freezegun import freeze_time
 from marshmallow.exceptions import ValidationError
 
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
@@ -120,16 +121,20 @@ def test_blog_post_schema_timestamp_dumps(create_blog_post):
     assert result["created_at"] == "2023-07-02T12:00:00"
 
 
+@freeze_time("2024-12-04 14:18:16")
 def test_blog_post_schema_valid(create_blog_post):
     """Tests schema with valid blog post data."""
     schema = BlogPostSchema()
     blog_post = create_blog_post()
 
-    # Remove SQLAlchemy-specific fields before validation
+    # Serialize to dict
     blog_post_dict = schema.dump(blog_post)
-    # Remove dump-only fields before loading
-    blog_post_dict.pop('id', None)
-    blog_post_dict.pop('created_at', None)
+    blog_post_dict.pop("id", None)
 
+    # Deserialize back
     result = schema.load(blog_post_dict)
+
+    # Convert datetime object to string for comparison
+    result["created_at"] = result["created_at"].isoformat()
+
     assert result == blog_post_dict

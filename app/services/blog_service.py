@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     """Fetches paginated blog posts via the repository.
 
-    This method retrieves blog posts for a given page, ensuring proper pagination
+    This function retrieves blog posts for a given page, ensuring proper pagination
     logic and handling potential errors. It delegates the actual data retrieval
     to the BlogPostRepository.
 
@@ -100,6 +100,7 @@ def save_blog_post(validated_data):
         logger.info("Saving the blog post to the database.")
         blog_post = blog_post_repo.create_blog_post(
             title=validated_data['title'],
+            slug=validated_data['slug'],
             content=validated_data['content'],
             drive_file_id=validated_data.get('drive_file_id', '')
         )
@@ -125,3 +126,36 @@ def save_blog_post(validated_data):
         # Log unexpected errors and re-raise
         logger.error(f"Unexpected error during blog post creation: {str(e)}")
         raise RuntimeError("Failed to save blog post due to an unexpected error.") from e
+
+
+def get_blog_post(slug: str):
+    """Fetches a single blog post by slug via the repository.
+
+    This function retrieves a blog post based on its unique slug. It delegates
+    the actual database retrieval to the BlogPostRepository.
+
+    Args:
+        slug (str): The slug of the blog post to retrieve.
+
+    Returns:
+        BlogPost: The retrieved blog post instance.
+
+    Raises:
+        RuntimeError: If retrieving the blog post fails.
+    """
+    session = db.session
+    try:
+        logger.info(f"Fetching blog post with slug: {slug}")
+        repository = BlogPostRepository(session)
+        blog_post = repository.fetch_blog_post_by_slug(slug)
+
+        if not blog_post:
+            logger.warning(f"No blog post found for slug: {slug}")
+            return None  # Allows the controller to handle a 404 case
+
+        logger.info(f"Successfully retrieved blog post: {blog_post.title}")
+        return blog_post
+
+    except RuntimeError as e:
+        logger.error(f"Error retrieving blog post: {e}")
+        raise RuntimeError("Failed to retrieve blog post") from e
