@@ -10,22 +10,59 @@ from typing import Dict
 from bleach import clean
 
 
-def normalize_title(title: str) -> str:
-    """Normalize a title by stripping prefixes like '01_'.
+def extract_slug_and_title(file_name: str) -> tuple[str, str]:
+    """Extracts a slug and title from a Google Drive file name, enforcing numeric prefixes.
+
+    - Numeric prefix (e.g., "01_") is required but removed in the final output.
+    - The first `_` is replaced with `-`, and all remaining `_` are converted to `-`.
+    - Extra spaces are trimmed and normalized.
+    - The final slug is always kebab-case (lowercase, hyphenated).
+    - The title is in title case.
 
     Args:
-        title (str): The title to be normalized.
+        file_name (str): The file name to process.
 
     Returns:
-        str: The normalized title with any prefix removed.
+        tuple[str, str]: A tuple containing:
+            - The slug (str) → Derived from the file name with hyphens.
+            - The title (str) → The human-readable version in title case.
 
     Raises:
-        ValueError: If the title does not contain a valid prefix.
-    """
-    if '_' not in title:
-        raise ValueError(f"Invalid title format: '{title}'. Expected a prefix separated by '_'.")
+        ValueError: If the file name does not start with a numeric prefix followed by `_`.
 
-    return title.split('_', 1)[1]
+    Examples:
+        >>> extract_slug_and_title("01_hello_world.md")
+        ("hello-world", "Hello World")
+
+        >>> extract_slug_and_title("02_another-post.txt")
+        ("another-post", "Another Post")
+    """
+    # Ensure the file name starts with a numeric prefix followed by `_` or `-`
+    if not re.match(r'^\d+[-_]', file_name):
+        raise ValueError(f"Invalid file name format: '{file_name}'. Expected a prefix separated by '-'.")
+
+    # Normalize prefix separator to always be `-`
+    file_name = re.sub(r'^(\d+)_', r'\1-', file_name)
+
+    # Remove numeric prefix (e.g., "08-" from "08-messy-file-name")
+    file_name = re.sub(r'^\d+-', '', file_name)
+
+    # Remove file extension if present
+    title_without_ext = file_name.rsplit('.', 1)[0]
+
+    # Normalize spaces (remove leading/trailing and replace multiple spaces with a single space)
+    title_without_ext = re.sub(r'\s+', ' ', title_without_ext.strip())
+
+    # Convert all remaining underscores to hyphens for slug consistency
+    title_without_ext = title_without_ext.replace('_', '-')
+
+    # Generate slug: lowercase + hyphenate (no underscores)
+    slug = title_without_ext.replace(' ', '-').lower()
+
+    # Convert title to title case
+    title = title_without_ext.replace('-', ' ').title()
+
+    return slug, title
 
 
 def sanitize_contact_form_input(form_data: Dict[str, str]) -> Dict[str, str]:
@@ -73,4 +110,3 @@ def sanitize_html(content: str) -> str:
                                sanitized_content)  # Collapse multiple spaces to a single space
 
     return sanitized_content.strip()  # Return the trimmed result
-

@@ -22,7 +22,7 @@ from app.services.blog_service import fetch_all_blog_posts
 from app.services.file_processing_service import process_file
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
-from app.services.sanitization_service import normalize_title
+from app.services.sanitization_service import extract_slug_and_title
 from app.models.data_schemas.log_schema import LogSchema
 
 logger = logging.getLogger(__name__)
@@ -31,19 +31,45 @@ logger = logging.getLogger(__name__)
 def find_unpublished_drive_articles() -> jsonify:
     """Fetches unpublished articles from Google Drive and compares with database entries.
 
+    This function retrieves a list of blog post files from Google Drive, extracts slugs and titles,
+    and compares them with existing blog posts in the database. It returns a list of articles
+    that are present in Google Drive but not yet stored in the database.
+
     Returns:
-        jsonify: JSON response with missing articles.
+        jsonify: JSON response containing missing articles, each with:
+            - `slug` (str): The slugified version of the file name (used for URLs).
+            - `title` (str): The formatted title extracted from the file name.
+            - `id` (str): The Google Drive file ID.
 
     Raises:
         GoogleDriveFileNotFoundError: If specific file(s) are not found in Google Drive.
         GoogleDrivePermissionError: If permissions are insufficient for Google Drive access.
         GoogleDriveAPIError: For general Google Drive API failures.
         RuntimeError: For other errors during article comparison.
+
+    Example Response:
+        If some articles are missing from the database:
+        ```json
+        [
+            {"slug": "hello-world", "title": "Hello World", "id": "12345"},
+            {"slug": "python-for-beginners", "title": "Python For Beginners", "id": "67890"}
+        ]
+        ```
+
+        If all Drive articles are already in the database:
+        ```json
+        []
+        ```
+
+        If an error occurs (e.g., missing folder ID):
+        ```json
+        {"error": "Google Drive folder ID is missing in the configuration"}
+        ```
     """
     try:
-        # Fetch blog posts from the database and normalize their titles
+        # Fetch blog posts from the database and normalize their slugs
         db_posts = fetch_all_blog_posts()
-        db_titles = {normalize_title(post.title) for post in db_posts}
+        db_slugs = {post.slug for post in db_posts}  # Now comparing SLUGS, not titles
 
         # Fetch folder ID from the app configuration
         folder_id = current_app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
@@ -55,17 +81,22 @@ def find_unpublished_drive_articles() -> jsonify:
         drive_service = GoogleDriveService()
         drive_files = drive_service.list_folder_contents(folder_id)
 
-        # Normalize titles and map them to IDs
-        drive_title_id_map = {
-            normalize_title(file['name']): file['id']
-            for file in drive_files
-        }
+        # Extract slugs and titles from file names
+        drive_slug_map = {}  # Maps slug -> (title, id)
+        for file in drive_files:
+            try:
+                slug, title = extract_slug_and_title(file['name'])
+                drive_slug_map[slug] = (title, file['id'])
+            except ValueError:
+                # Log and skip invalid filenames
+                current_app.logger.warning(f"Skipping invalid file name: {file['name']}")
+                continue
 
-        # Find missing articles by comparing with database titles
-        missing_titles = find_missing_articles(list(db_titles), list(drive_title_id_map.keys()))
+        # Find missing articles by comparing slugs (not just titles)
+        missing_slugs = set(drive_slug_map.keys()) - db_slugs
         missing_articles = [
-            {'title': title, 'id': drive_title_id_map[title]}
-            for title in missing_titles
+            {'slug': slug, 'title': drive_slug_map[slug][0], 'id': drive_slug_map[slug][1]}
+            for slug in missing_slugs
         ]
 
         return jsonify(missing_articles), 200
@@ -82,6 +113,7 @@ def find_unpublished_drive_articles() -> jsonify:
     except RuntimeError as e:
         current_app.logger.error(f"Error in finding unpublished articles: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 
 def get_logs_data():
@@ -101,12 +133,12 @@ def get_logs_data():
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
-    """Uploads blog posts from Google Drive using provided file IDs and titles.
+    """Uploads blog posts from Google Drive using provided file IDs and slugs.
 
     Args:
         files (List[Dict[str, str]]): A list of dictionaries, each containing:
             - "id" (str): The Google Drive file ID.
-            - "title" (str): The title to assign to the blog post.
+            - "slug" (str): The slug to assign to the blog post.
 
     Returns:
         Tuple[Response, int]: A tuple containing:
@@ -131,7 +163,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
         {
             "success": [
                 {
-                    "title": "Example Blog Post",
+                    "slug": "example-blog-post",
                     "content": "...",
                     "drive_file_id": "12345",
                     "created_at": "2024-12-02T12:00:00"
@@ -144,7 +176,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
         {
             "success": [
                 {
-                    "title": "Example Blog Post",
+                    "slug": "example-blog-post",
                     "content": "...",
                     "drive_file_id": "12345",
                     "created_at": "2024-12-02T12:00:00"
@@ -163,14 +195,14 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
 
     for file in files:
         file_id = file.get("id")
-        title = file.get("title")
+        slug = file.get("slug")  # Now using "slug" instead of "title"
 
-        if not file_id or not title:
+        if not file_id or not slug:
             response_data["errors"].append({"file_id": file_id, "error": "Missing required fields"})
             continue
 
         try:
-            success, message = process_file(file_id, title)
+            success, message = process_file(file_id, slug)  # Passing slug instead of title
             if success:
                 response_data["success"].append({"file_id": file_id, "message": message})
             else:
@@ -195,16 +227,13 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
 
     # Determine status code
     if any(error.get("error") == "Unexpected error occurred." for error in response_data["errors"]):
-        # Critical or unexpected error occurred, halt processing and return 500
-        return response_data, 500
+        return response_data, 500  # Critical failure
     elif not response_data["success"] and response_data["errors"]:
-        # All errors, no successes, return 500
-        return response_data, 400
+        return response_data, 400  # All errors, no success
     elif response_data["success"] and response_data["errors"]:
-        # Mixed results (non-critical errors), return 207
-        return response_data, 207
+        return response_data, 207  # Mixed results
     elif response_data["success"]:
-        # All successful
-        return response_data, 201
+        return response_data, 201  # All successful
 
-    return response_data, 400  # Fallback for invalid input
+    return response_data, 400  # Fallback case
+

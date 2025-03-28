@@ -12,7 +12,8 @@ Routes:
     - /admin/upload_post: Handles uploading blog posts from Google Drive.
 """
 
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
+
 from app.controllers.admin_controller import (
     find_unpublished_drive_articles,
     get_logs_data,
@@ -22,6 +23,7 @@ from app.controllers.admin_controller import (
 )
 
 admin_bp = Blueprint('admin', __name__)
+
 
 # @admin_bp.route('/admin/delete_post', methods=['DELETE'])
 # def admin_delete_post():
@@ -49,6 +51,7 @@ def admin_logs():
     log_data = get_logs_data()
     return render_template('admin_logs.html', log_data=log_data)
 
+
 # @admin_bp.route('/admin/published_posts', methods=['GET'])
 # def admin_published_posts():
 #     """Renders the admin published posts page.
@@ -73,16 +76,32 @@ def admin_unpublished_posts():
     posts_data = find_unpublished_drive_articles()
     return render_template('admin_unpublished_posts.html', posts_data=posts_data)
 
-@admin_bp.route('/admin/upload_post', methods=['POST'])
-def admin_upload_post():
-    """Handles the upload of blog posts from Google Drive.
 
-    Extracts the list of selected files from the JSON request body and
-    delegates the upload operation to the controller.
+@admin_bp.route("/admin/upload_post", methods=["POST"])
+def admin_upload_post():
+    """Process unpublished blog posts from Google Drive and return a structured JSON response.
+
+    This endpoint is triggered by a button in `/admin/unpublished_posts`. Instead of rendering
+    a template, it processes selected unpublished blog posts from Google Drive and returns a JSON
+    response indicating the outcome.
+
+    Flow:
+    - User selects unpublished posts and submits the form at `/admin/unpublished_posts`.
+    - The front-end sends a JSON payload with a list of files to this endpoint.
+    - This endpoint extracts the list and calls `upload_blog_posts_from_drive(files)`.
+    - The service reads the file, sanitizes content, and saves the blog post.
+    - The response contains a `success` flag and a `message` explaining the result.
 
     Returns:
-        Response: JSON response with the upload result and HTTP status code.
+        JSON response with:
+        - `success` (bool): Whether the operation was successful.
+        - `message` (str): A status message indicating success or failure.
     """
-    files = request.get_json().get("files", [])
-    result, status_code = upload_blog_posts_from_drive(files)
-    return jsonify(result), status_code
+    data = request.get_json()
+    if not data or "files" not in data:
+        return jsonify({"success": False, "message": "Missing 'files' data in request"}), 400
+
+    files = data["files"]
+    response, status_code = upload_blog_posts_from_drive(files)
+
+    return jsonify(response), status_code
