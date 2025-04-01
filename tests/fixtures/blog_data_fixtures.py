@@ -10,6 +10,7 @@ Fixtures:
 - seed_blog_posts: Seeds multiple BlogPost instances with a configurable count.
 """
 
+from datetime import datetime, UTC
 from typing import Callable, List, Optional
 
 import pytest
@@ -32,26 +33,33 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
     Returns:
         Callable[..., BlogPost]: A function to create and return a BlogPost object.
     """
+
     def _create_blog_post(
             title: Optional[str] = 'Test Blog Post',
             slug: Optional[str] = 'test-blog-post',
             content: Optional[str] = 'This is the content of the blog post.',
-            drive_file_id: Optional[str] = 'unique_drive_file_id_1'
+            drive_file_id: Optional[str] = 'unique_drive_file_id_1',
+            created_at: Optional[datetime] = None
     ) -> BlogPost:
+        if created_at is None:
+            created_at = datetime.now(UTC)  # Use timezone-aware UTC datetime
+
         query = blog_posts.insert().values(
             title=title,
             slug=slug,
             content=content,
-            drive_file_id=drive_file_id
+            drive_file_id=drive_file_id,
+            created_at=created_at
         ).returning(blog_posts.c.id)
-        result = session.execute(query)
+        session.execute(query)
         session.commit()
 
         return BlogPost(
             title=title,
             slug=slug,
             content=content,
-            drive_file_id=drive_file_id
+            drive_file_id=drive_file_id,
+            created_at=created_at
         )
 
     return _create_blog_post
@@ -70,13 +78,15 @@ def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
     Returns:
         Callable[[int], List[BlogPost]]: A function that accepts the desired number of blog posts to create.
     """
+
     def _seed_blog_posts(count: int = 25) -> List[BlogPost]:
         return [
             create_blog_post(
-                title=f"Post {i+1}",
-                slug=f"post-{i+1}",
-                content=f"Content {i+1}",
-                drive_file_id=f"drive_id_{i+1}"
+                title=f"Post {i + 1}",
+                slug=f"post-{i + 1}",
+                content=f"Content {i + 1}",
+                drive_file_id=f"drive_id_{i + 1}",
+                created_at=datetime.now(UTC)  # Always create timezone-aware timestamps
             ) for i in range(count)
         ]
 

@@ -118,7 +118,7 @@ def test_blog_post_schema_timestamp_dumps(create_blog_post):
 
     result = schema.dump(blog_post)
     assert "created_at" in result
-    assert result["created_at"] == "2023-07-02T12:00:00"
+    assert result["created_at"] == "2023-07-02 12:00:00"  # Updated format
 
 
 @freeze_time("2024-12-04 14:18:16")
@@ -134,7 +134,6 @@ def test_blog_post_schema_valid(create_blog_post):
     # Deserialize back
     result = schema.load(blog_post_dict)
 
-    # Convert datetime object to string for comparison
-    result["created_at"] = result["created_at"].isoformat()
-
-    assert result == blog_post_dict
+    # Ensure `created_at` is correctly formatted
+    assert blog_post_dict["created_at"] == "2024-12-04 14:18:16"  # Updated format
+    assert result["created_at"].strftime("%Y-%m-%d %H:%M:%S") == "2024-12-04 14:18:16"

@@ -13,4 +13,4 @@ class BlogPostSchema(Schema):
     slug = fields.Str(required=True, validate=validate.Length(min=1))  # Ensuring slug is required
     content = fields.Str(required=True)
     drive_file_id = fields.Str(required=True, validate=validate.Length(min=1))
-    created_at = fields.DateTime(required=True)
+    created_at = fields.DateTime(required=True, format="%Y-%m-%d %H:%M:%S")  # Custom format

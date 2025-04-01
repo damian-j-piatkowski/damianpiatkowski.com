@@ -19,15 +19,19 @@ from sqlalchemy import select, insert, func, column
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
-from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError, BlogPostNotFoundError
+from app.models.tables.blog_post import blog_posts
+from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from app.domain.blog_post import BlogPost
+from app.exceptions import BlogPostDuplicateError
 from app.models.tables.blog_post import blog_posts
 
 
 class BlogPostRepository:
     """Repository for handling blog post database operations."""
 
-    def __init__(self, session: Session):
+    def __init__(self, session):
         self.session = session
 
     def create_blog_post(
@@ -36,7 +40,7 @@ class BlogPostRepository:
             slug: str,
             content: str,
             drive_file_id: str
-    ) -> Optional[BlogPost]:
+    ) -> BlogPost:
         """Create a new blog post using SQLAlchemy.
 
         Args:
@@ -46,8 +50,7 @@ class BlogPostRepository:
             drive_file_id (str): The unique Google Drive file ID for the post.
 
         Returns:
-            Optional[BlogPost]: The newly created BlogPost instance, or
-                None if an error occurs.
+            BlogPost: The newly created BlogPost instance.
 
         Raises:
             BlogPostDuplicateError: If a blog post with a duplicate slug or
@@ -61,20 +64,20 @@ class BlogPostRepository:
                 'content': content,
                 'drive_file_id': drive_file_id
             }
-            insert_query = insert(blog_posts).values(new_post_data)
-            self.session.execute(insert_query)
-            self.session.commit()  # Commit the transaction
+            insert_query = insert(blog_posts).values(new_post_data).returning(blog_posts.c.created_at)
+            result = self.session.execute(insert_query).scalar_one()
+            self.session.commit()
 
             return BlogPost(
                 title=title,
                 slug=slug,
                 content=content,
-                drive_file_id=drive_file_id
+                drive_file_id=drive_file_id,
+                created_at=result  # Pass database-created timestamp
             )
         except IntegrityError as e:
             self.session.rollback()
 
-            # Detect which unique constraint failed
             if 'slug' in str(e.orig):
                 raise BlogPostDuplicateError(
                     message="A blog post with this slug already exists.",
@@ -90,6 +93,7 @@ class BlogPostRepository:
             raise
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to create blog post in the database.") from e
+
 
     def fetch_all_blog_posts(self) -> List[BlogPost]:
         """Fetch all blog posts from the database.
@@ -192,7 +196,9 @@ class BlogPostRepository:
                 title=result["title"],
                 slug=result["slug"],
                 content=result["content"],
-                drive_file_id=result["drive_file_id"]
+                drive_file_id=result["drive_file_id"],
+                created_at=result["created_at"]  # Pass DB timestamp
             )
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch blog post from the database.") from e
+
