@@ -9,6 +9,7 @@ from app.exceptions import BlogPostDuplicateError
 from app.extensions import db
 from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.services.sanitization_service import sanitize_html
+from app.domain.blog_post import BlogPost
 
 logger = logging.getLogger(__name__)
 
@@ -62,24 +63,24 @@ def fetch_all_blog_posts():
         raise RuntimeError("Failed to retrieve blog posts") from e
 
 
-def save_blog_post(validated_data):
+def save_blog_post(validated_data) -> BlogPost:
     """Service function to save a blog post.
 
     Args:
         validated_data (dict): Dictionary containing validated blog post data.
-            Expected fields: title, content, image_small, image_medium, image_large, url.
+            Expected fields: title, content, slug, drive_file_id.
 
     Returns:
-        dict: A dictionary containing the newly created blog post's data.
+        BlogPost: The newly created blog post domain object.
 
     Raises:
         KeyError: If any required fields are missing.
         BlogPostDuplicateError: If a duplicate blog post is detected.
         RuntimeError: For other unexpected errors during blog post creation.
     """
-    required_fields = ['title', 'content', 'drive_file_id']
+    required_fields = ['title', 'content', 'slug', 'drive_file_id']
 
-    # Check for required fields
+    # Validate required fields
     logger.info("Validating required fields for blog post.")
     for field in required_fields:
         if field not in validated_data:
@@ -102,30 +103,22 @@ def save_blog_post(validated_data):
             title=validated_data['title'],
             slug=validated_data['slug'],
             content=validated_data['content'],
-            drive_file_id=validated_data.get('drive_file_id', '')
+            drive_file_id=validated_data['drive_file_id']
         )
 
         logger.info("Blog post saved successfully with title: %s", blog_post.title)
-
-        # Return a dictionary representation of the BlogPost instance
-        return {
-            'title': blog_post.title,
-            'content': blog_post.content,
-            'drive_file_id': blog_post.drive_file_id,
-            'created_at': blog_post.created_at
-        }
+        return blog_post
 
     except BlogPostDuplicateError as e:
-        # Log the duplicate error and re-raise
         logger.warning(
             f"Duplicate blog post detected: {e.message} (field: {e.field_name}, "
             f"value: {e.field_value})")
         raise
 
     except Exception as e:
-        # Log unexpected errors and re-raise
         logger.error(f"Unexpected error during blog post creation: {str(e)}")
         raise RuntimeError("Failed to save blog post due to an unexpected error.") from e
+
 
 
 def get_blog_post(slug: str):

@@ -13,18 +13,15 @@ Methods:
 - fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 """
 
-from typing import List, Optional
+from typing import List
 
-from sqlalchemy import select, insert, func, column
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlalchemy.orm import Session
-
-from app.exceptions import BlogPostDuplicateError, BlogPostNotFoundError
-from app.models.tables.blog_post import blog_posts
+from sqlalchemy import func, column
 from sqlalchemy import insert, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
+from app.exceptions import BlogPostNotFoundError
 from app.models.tables.blog_post import blog_posts
 
 
@@ -64,10 +61,13 @@ class BlogPostRepository:
                 'content': content,
                 'drive_file_id': drive_file_id
             }
+
+            # Insert the new blog post into the database
             insert_query = insert(blog_posts).values(new_post_data).returning(blog_posts.c.created_at)
             result = self.session.execute(insert_query).scalar_one()
             self.session.commit()
 
+            # Return the newly created BlogPost object
             return BlogPost(
                 title=title,
                 slug=slug,
@@ -75,9 +75,12 @@ class BlogPostRepository:
                 drive_file_id=drive_file_id,
                 created_at=result  # Pass database-created timestamp
             )
+
         except IntegrityError as e:
+            # Rollback the session in case of an integrity error (e.g., duplicate entry)
             self.session.rollback()
 
+            # Check for duplicate constraints
             if 'slug' in str(e.orig):
                 raise BlogPostDuplicateError(
                     message="A blog post with this slug already exists.",
@@ -90,10 +93,19 @@ class BlogPostRepository:
                     field_name="drive_file_id",
                     field_value=drive_file_id
                 )
-            raise
-        except SQLAlchemyError as e:
-            raise RuntimeError("Failed to create blog post in the database.") from e
+            elif 'title' in str(e.orig):
+                raise BlogPostDuplicateError(
+                    message="A blog post with this title already exists.",
+                    field_name="title",
+                    field_value=title
+                )
 
+            # If the error is not a known integrity error, re-raise
+            raise
+
+        except SQLAlchemyError as e:
+            # Catch any other database-related errors
+            raise RuntimeError("Failed to create blog post in the database.") from e
 
     def fetch_all_blog_posts(self) -> List[BlogPost]:
         """Fetch all blog posts from the database.
@@ -201,4 +213,3 @@ class BlogPostRepository:
             )
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch blog post from the database.") from e
-

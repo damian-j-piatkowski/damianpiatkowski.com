@@ -7,6 +7,8 @@ service correctly saves blog posts under various conditions.
 Tests included:
     - test_save_blog_post_duplicate_drive_file_id: Ensures saving a blog post with a
       duplicate drive_file_id raises a BlogPostDuplicateError.
+    - test_save_blog_post_duplicate_slug: Ensures saving a blog post with a duplicate
+      slug raises a BlogPostDuplicateError.
     - test_save_blog_post_duplicate_title: Ensures saving a blog post with a duplicate
       title raises a BlogPostDuplicateError.
     - test_save_blog_post_missing_fields: Ensures missing required fields raise a KeyError.
@@ -19,6 +21,7 @@ Fixtures:
 
 import pytest
 
+from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
 from app.services.blog_service import save_blog_post
 
@@ -32,6 +35,7 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
     # Arrange: Create the first blog post with a unique drive file ID
     initial_data = {
         'title': "First Post",
+        'slug': "first-post",
         'content': "Content for the first post.",
         'drive_file_id': "unique_drive_file_id_1"
     }
@@ -43,6 +47,7 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
     # Arrange: Create a second blog post with the same drive file ID
     duplicate_data = {
         'title': "Second Post",
+        'slug': "second-post",
         'content': "Content for the second post.",
         'drive_file_id': "unique_drive_file_id_1"  # Duplicate drive_file_id
     }
@@ -53,6 +58,42 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
 
     assert exc_info.value.field_name == 'drive_file_id'
     assert exc_info.value.field_value == 'unique_drive_file_id_1'
+    assert exc_info.value.message == "A blog post with this drive_file_id already exists."
+
+
+def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
+    """Integration test for save_blog_post service with a duplicate slug.
+
+    This test checks that attempting to save a blog post with a duplicate slug
+    raises a BlogPostDuplicateError.
+    """
+    # Arrange: Create the first blog post with a unique slug
+    initial_data = {
+        'title': "First Post",
+        'slug': "first-post",
+        'content': "Content for the first post.",
+        'drive_file_id': "unique_drive_file_id_1"
+    }
+
+    # Create and commit the first blog post
+    create_blog_post(**initial_data)
+    session.commit()  # Commit the transaction to save the first post
+
+    # Arrange: Create a second blog post with the same slug
+    duplicate_data = {
+        'title': "Second Post",
+        'slug': "first-post",  # Duplicate slug
+        'content': "Content for the second post.",
+        'drive_file_id': "unique_drive_file_id_2"
+    }
+
+    # Act & Assert: Ensure that calling the service function raises a BlogPostDuplicateError
+    with pytest.raises(BlogPostDuplicateError) as exc_info:
+        save_blog_post(duplicate_data)
+
+    assert exc_info.value.field_name == 'slug'
+    assert exc_info.value.field_value == 'first-post'
+    assert exc_info.value.message == "A blog post with this slug already exists."
 
 
 def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
@@ -64,6 +105,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     # Arrange: Create the first blog post with a unique title
     initial_data = {
         'title': "First Post",
+        'slug': "first-post",
         'content': "Content for the first post.",
         'drive_file_id': "unique_drive_file_id_1"
     }
@@ -75,6 +117,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     # Arrange: Create a second blog post with the same title
     duplicate_data = {
         'title': "First Post",  # Duplicate title
+        'slug': "first-post-duplicate",
         'content': "Content for the second post.",
         'drive_file_id': "unique_drive_file_id_2"
     }
@@ -85,6 +128,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
 
     assert exc_info.value.field_name == 'title'
     assert exc_info.value.field_value == 'First Post'
+    assert exc_info.value.message == "A blog post with this title already exists."
 
 
 def test_save_blog_post_missing_fields(session) -> None:
@@ -95,6 +139,7 @@ def test_save_blog_post_missing_fields(session) -> None:
     # Arrange: Create a dictionary with missing required fields
     incomplete_data = {
         'title': "Incomplete Post",
+        'slug': "incomplete-post",
         'content': "Content for the incomplete post.",
         # Missing drive_file_id
     }
@@ -104,7 +149,7 @@ def test_save_blog_post_missing_fields(session) -> None:
         save_blog_post(incomplete_data)
 
     # Assert: Check that the raised KeyError message mentions the missing key
-    assert "drive_file_id" in str(exc_info.value), \
+    assert str(exc_info.value) == "'drive_file_id'", \
         "Expected KeyError for missing 'drive_file_id' field."
 
 
@@ -112,11 +157,12 @@ def test_save_blog_post_success(session) -> None:
     """Integration test for save_blog_post service with valid data.
 
     This test verifies that a valid blog post is saved correctly and returns
-    the expected data.
+    the expected data as a BlogPost domain object.
     """
     # Arrange: Create a dictionary with valid blog post data
     valid_data = {
         'title': "First Post",
+        'slug': "first-post",
         'content': "Content for the first post.",
         'drive_file_id': "unique_drive_file_id_1"
     }
@@ -124,7 +170,9 @@ def test_save_blog_post_success(session) -> None:
     # Act: Save the blog post using the service function
     saved_post = save_blog_post(valid_data)
 
-    # Assert: Validate that the saved post data matches the input
-    assert saved_post['title'] == valid_data['title']
-    assert saved_post['content'] == valid_data['content']
-    assert saved_post['drive_file_id'] == valid_data['drive_file_id']
+    # Assert: Validate that the saved post is a BlogPost domain object
+    assert isinstance(saved_post, BlogPost)
+    assert saved_post.title == valid_data['title']
+    assert saved_post.slug == valid_data['slug']  # Check slug
+    assert saved_post.content == valid_data['content']
+    assert saved_post.drive_file_id == valid_data['drive_file_id']

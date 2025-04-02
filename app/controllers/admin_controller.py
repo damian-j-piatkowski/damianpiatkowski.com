@@ -14,16 +14,17 @@ Raises:
 import logging
 from typing import List, Dict, Tuple
 
-from flask import current_app, jsonify
+from flask import current_app
+from flask import jsonify
 
 from app import exceptions
-from app.services.article_sync_service import find_missing_articles
+from app.models.data_schemas.blog_post_schema import BlogPostSchema
+from app.models.data_schemas.log_schema import LogSchema
 from app.services.blog_service import fetch_all_blog_posts
 from app.services.file_processing_service import process_file
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
 from app.services.sanitization_service import extract_slug_and_title
-from app.models.data_schemas.log_schema import LogSchema
 
 logger = logging.getLogger(__name__)
 
@@ -187,53 +188,47 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
             ]
         }
     """
-    # Initialize response data
-    response_data = {"success": [], "errors": []}
-
     if not files:
-        return {"error": "No files provided"}, 400
+        return jsonify({"error": "No files provided"}), 400
+
+    response_data = {"success": [], "errors": []}
+    schema = BlogPostSchema()
 
     for file in files:
         file_id = file.get("id")
-        slug = file.get("slug")  # Now using "slug" instead of "title"
+        slug = file.get("slug")  # Using "slug" instead of "title"
 
         if not file_id or not slug:
             response_data["errors"].append({"file_id": file_id, "error": "Missing required fields"})
             continue
 
         try:
-            success, message = process_file(file_id, slug)  # Passing slug instead of title
-            if success:
-                response_data["success"].append({"file_id": file_id, "message": message})
-            else:
-                response_data["errors"].append({"file_id": file_id, "error": message})
+            blog_post = process_file(file_id, slug)  # Ensure this returns a `BlogPost` object
+
+            serialized_post = schema.dump(blog_post)  # Serialize the BlogPost object
+            response_data["success"].append(serialized_post)
+
         except ValueError as ve:
-            # Handle expected errors like "File not found"
-            error_message = str(ve)
-            response_data["errors"].append({"file_id": file_id, "error": error_message})
+            response_data["errors"].append({"file_id": file_id, "error": str(ve)})
         except PermissionError as pe:
-            # Handle permission-related errors
-            error_message = str(pe)
             response_data["errors"].append(
-                {"file_id": file_id, "error": "Permission denied on Google Drive"})
-            logger.error(f"Permission error encountered for file ID {file_id}: {error_message}")
+                {"file_id": file_id, "error": "Permission denied on Google Drive"}
+            )
+            logger.error(f"Permission error for file ID {file_id}: {pe}")
         except Exception as e:
-            # Handle unexpected critical errors
-            error_message = str(e)
-            response_data["errors"].append(
-                {"file_id": file_id, "error": "Unexpected error occurred."})
-            logger.error(f"Critical exception encountered for file ID {file_id}: {error_message}")
-            break
+            response_data["errors"].append({"file_id": file_id, "error": "Unexpected error occurred."})
+            logger.error(f"Critical exception for file ID {file_id}: {e}")
+            break  # Stop processing further files in case of a critical failure
 
     # Determine status code
-    if any(error.get("error") == "Unexpected error occurred." for error in response_data["errors"]):
-        return response_data, 500  # Critical failure
+    if any(error["error"] == "Unexpected error occurred." for error in response_data["errors"]):
+        return jsonify(response_data), 500  # Critical failure
     elif not response_data["success"] and response_data["errors"]:
-        return response_data, 400  # All errors, no success
+        return jsonify(response_data), 400  # All errors, no success
     elif response_data["success"] and response_data["errors"]:
-        return response_data, 207  # Mixed results
+        return jsonify(response_data), 207  # Mixed results
     elif response_data["success"]:
-        return response_data, 201  # All successful
+        return jsonify(response_data), 201  # All successful
 
-    return response_data, 400  # Fallback case
+    return jsonify(response_data), 400  # Fallback case
 
