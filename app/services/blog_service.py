@@ -5,11 +5,10 @@ This module provides functions to fetch paginated blog posts from the database.
 
 import logging
 
+from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
 from app.extensions import db
 from app.models.repositories.blog_post_repository import BlogPostRepository
-from app.services.sanitization_service import sanitize_html
-from app.domain.blog_post import BlogPost
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +87,6 @@ def save_blog_post(validated_data) -> BlogPost:
             raise KeyError(field)
     logger.info("All required fields are present.")
 
-    # Sanitize HTML content before saving
-    logger.info("Sanitizing HTML content for the blog post.")
-    validated_data['content'] = sanitize_html(validated_data['content'])
-    logger.info("HTML content sanitized successfully.")
-
     session = db.session
     blog_post_repo = BlogPostRepository(session)
 
@@ -102,7 +96,7 @@ def save_blog_post(validated_data) -> BlogPost:
         blog_post = blog_post_repo.create_blog_post(
             title=validated_data['title'],
             slug=validated_data['slug'],
-            content=validated_data['content'],
+            content=validated_data['content'],  # Already sanitized earlier
             drive_file_id=validated_data['drive_file_id']
         )
 
@@ -118,7 +112,6 @@ def save_blog_post(validated_data) -> BlogPost:
     except Exception as e:
         logger.error(f"Unexpected error during blog post creation: {str(e)}")
         raise RuntimeError("Failed to save blog post due to an unexpected error.") from e
-
 
 
 def get_blog_post(slug: str):

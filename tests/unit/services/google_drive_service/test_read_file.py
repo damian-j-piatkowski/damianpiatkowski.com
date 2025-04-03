@@ -28,6 +28,7 @@ from app import exceptions
 from app.services.google_drive_service import GoogleDriveService
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_success(mock_google_drive_service: GoogleDriveService) -> None:
     """Tests that a successful file read returns the file content."""
     # Arrange
@@ -47,6 +48,7 @@ def test_read_file_success(mock_google_drive_service: GoogleDriveService) -> Non
     )
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_404_error(mock_google_drive_service: GoogleDriveService) -> None:
     """Tests that a 404 HttpError raises GoogleDriveFileNotFoundError."""
     # Arrange
@@ -64,6 +66,7 @@ def test_read_file_404_error(mock_google_drive_service: GoogleDriveService) -> N
         mock_google_drive_service.read_file('invalid_file')
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_403_error(mock_google_drive_service: GoogleDriveService) -> None:
     """Tests that a 403 HttpError raises GoogleDrivePermissionError."""
     # Arrange
@@ -81,6 +84,7 @@ def test_read_file_403_error(mock_google_drive_service: GoogleDriveService) -> N
         mock_google_drive_service.read_file('restricted_file')
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_other_http_error(mock_google_drive_service: GoogleDriveService) -> None:
     """Tests that other HttpErrors raise GoogleDriveAPIError."""
     # Arrange

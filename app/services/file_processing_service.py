@@ -1,22 +1,23 @@
 import logging
 
+from app.exceptions import BlogPostDuplicateError
 from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import save_blog_post
 from app.services.google_drive_service import GoogleDriveService
 from app.services.sanitization_service import sanitize_html
-from app.exceptions import BlogPostDuplicateError
 
 logger = logging.getLogger(__name__)
 
 
-def process_file(file_id: str, title: str) -> tuple[bool, str]:
+def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
     """
     Processes a single file: reads from Google Drive, sanitizes, and saves as a blog post.
 
     Args:
         file_id (str): ID of the file to process.
         title (str): Title of the blog post.
+        slug (str): URL-friendly slug derived from the title.
 
     Returns:
         tuple: (success: bool, message: str) where success indicates if the operation succeeded,
@@ -29,14 +30,15 @@ def process_file(file_id: str, title: str) -> tuple[bool, str]:
         logger.info(f"Reading file with ID {file_id} from Google Drive.")
         file_content = google_drive_service.read_file(file_id)
 
-        # Step 2: Convert and sanitize content
+        # Step 2: Sanitize content
         logger.info(f"Sanitizing content for file ID {file_id}.")
         sanitized_content = sanitize_html(file_content)
 
         # Step 3: Save the blog post
-        logger.info(f"Saving blog post with title: {title}.")
+        logger.info(f"Saving blog post with title: {title}, slug: {slug}.")
         blog_post = save_blog_post({
             "title": title,
+            "slug": slug,  # Ensure slug is passed
             "content": sanitized_content,
             "drive_file_id": file_id,
         })
@@ -58,5 +60,3 @@ def process_file(file_id: str, title: str) -> tuple[bool, str]:
     except Exception as e:
         logger.error(f"Unexpected error for file ID {file_id}: {str(e)}")
         raise RuntimeError("Unexpected error occurred.")
-
-

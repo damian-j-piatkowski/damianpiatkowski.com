@@ -95,23 +95,55 @@ To run commands inside the web container, you need to use `docker-compose exec`:
     ```sh
     docker-compose exec web bash
 
-### Testing
+## Testing
 
-When running tests, it's helpful to manage and control the types of tests being executed. With `pytest` markers, you can categorize and selectively run tests. Here are some useful commands and how to use them.
+### Testing Framework and Organization
 
-#### Using the `api` Marker
+This project uses `pytest` as the testing framework.  
+Tests are organized into three main directories:
 
-In some cases, you may want to run tests that involve actual API calls, such as integration tests with external services like Google Drive. To control the execution of these tests, we use the `api` marker.
+- **`unit`** – Tests for individual components, such as functions, models, and services, in isolation.
+- **`integration`** – Tests that verify interactions between multiple components, such as repositories, services, and external APIs.
+- **`e2e`** – End-to-end tests that simulate real user interactions and full workflows.
 
-- **Run all tests except API tests**:  
-  If you want to run all tests excluding the ones that make actual API calls, use the following command:  
+### Running Tests by Marker
+
+Tests are categorized using `pytest` markers for selective execution.
+Markers list can be found in pytest.ini under the [pytest] markers section.
+
+**Run tests for a specific feature or route** (e.g., `/admin/upload_post` route):  
   ```bash
-  pytest -m "not api"
-  
-- **Run only the API tests**:  
-  To run only the tests that make real API calls, use the command below:
+  pytest -m admin_upload_post
+  ```
+
+### Pytest Extensions for Test Execution Order
+
+To improve test reliability and catch hidden dependencies, these extensions modify the order in which tests run:
+
+- **[`pytest-random-order`](https://pypi.org/project/pytest-random-order/)** – Runs tests in a random order on each execution, helping to uncover implicit dependencies between tests.  
+- **[`pytest-reverse`](https://pypi.org/project/pytest-reverse/)** – Runs tests in reverse order, useful for identifying order-dependent failures and ensuring tests do not rely on side effects from previous ones.  
+
+#### Installation
+
+Install these extensions with:
+```bash
+pip install pytest-random-order pytest-reverse
+```
+
+#### Usage
+
+- **Run tests in a random order to detect hidden dependencies:**
   ```bash
-  pytest -m api
+  pytest --random-order
+  ```
+- **Run tests in reverse order to check for order-dependent failures:**
+  ```bash
+  pytest --reverse
+  ```
+- **Combine both for thorough test order variation:**
+   ```bash
+   pytest --random-order --reverse
+   ```
 
 
 

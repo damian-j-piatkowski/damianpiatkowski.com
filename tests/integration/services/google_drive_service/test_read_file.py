@@ -27,6 +27,7 @@ DEFAULT_TEST_FILE_ID = '1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo'
 RESTRICTED_FILE_ID = '1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk'
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_not_found(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
@@ -37,6 +38,7 @@ def test_read_file_not_found(
         "Expected GoogleDriveFileNotFoundError for a non-existent file."
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_permission_denied(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
@@ -51,10 +53,12 @@ def test_read_file_permission_denied(
         "Expected GoogleDriveFileNotFoundError for a file with insufficient permissions."
 
 
+@pytest.mark.admin_upload_post
 def test_read_file_success(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
     """Tests reading the contents of a file with a valid file ID."""
     file_content = google_drive_service_fixture.read_file(DEFAULT_TEST_FILE_ID)
     assert isinstance(file_content, str), "Expected file content to be a string."
+    print(file_content)
     assert len(file_content) > 0, "File content should not be empty."

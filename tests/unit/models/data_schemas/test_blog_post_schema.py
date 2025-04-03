@@ -24,6 +24,7 @@ from marshmallow.exceptions import ValidationError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_empty_slug():
     """Tests schema when the slug is empty."""
     schema = BlogPostSchema()
@@ -39,6 +40,7 @@ def test_blog_post_schema_empty_slug():
     assert "Shorter than minimum length 1." in excinfo.value.messages["slug"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_empty_title():
     """Tests schema when the title is empty."""
     schema = BlogPostSchema()
@@ -54,6 +56,7 @@ def test_blog_post_schema_empty_title():
     assert "Shorter than minimum length 1." in excinfo.value.messages["title"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_missing_content():
     """Tests schema when content is missing."""
     schema = BlogPostSchema()
@@ -68,6 +71,7 @@ def test_blog_post_schema_missing_content():
     assert "Missing data for required field." in excinfo.value.messages["content"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_missing_drive_file_id():
     """Tests schema when the drive file ID is missing."""
     schema = BlogPostSchema()
@@ -82,6 +86,7 @@ def test_blog_post_schema_missing_drive_file_id():
     assert "Missing data for required field." in excinfo.value.messages["drive_file_id"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_missing_slug():
     """Tests schema when the slug is missing."""
     schema = BlogPostSchema()
@@ -96,6 +101,7 @@ def test_blog_post_schema_missing_slug():
     assert "Missing data for required field." in excinfo.value.messages["slug"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_missing_title():
     """Tests schema when the title is missing."""
     schema = BlogPostSchema()
@@ -110,6 +116,7 @@ def test_blog_post_schema_missing_title():
     assert "Missing data for required field." in excinfo.value.messages["title"]
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_schema_timestamp_dumps(create_blog_post):
     """Tests schema timestamp serialization."""
     schema = BlogPostSchema()
@@ -121,6 +128,7 @@ def test_blog_post_schema_timestamp_dumps(create_blog_post):
     assert result["created_at"] == "2023-07-02 12:00:00"  # Updated format
 
 
+@pytest.mark.admin_upload_post
 @freeze_time("2024-12-04 14:18:16")
 def test_blog_post_schema_valid(create_blog_post):
     """Tests schema with valid blog post data."""

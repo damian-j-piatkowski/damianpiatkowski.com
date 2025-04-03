@@ -12,9 +12,12 @@ Tests included:
 
 from datetime import datetime, timezone
 
+import pytest
+
 from app.domain.blog_post import BlogPost
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_creation():
     """Ensures a BlogPost instance is created with expected attributes."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -36,6 +39,7 @@ def test_blog_post_creation():
     assert post.created_at.tzinfo == timezone.utc  # Ensure UTC timezone
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_drive_file_id():
     """Ensures the drive_file_id is assigned correctly."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -53,6 +57,7 @@ def test_blog_post_drive_file_id():
     assert post.created_at.tzinfo == timezone.utc  # Ensure UTC timezone
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_slug():
     """Ensures the slug is assigned correctly."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -70,6 +75,7 @@ def test_blog_post_slug():
     assert post.created_at.tzinfo == timezone.utc  # Ensure UTC timezone
 
 
+@pytest.mark.admin_upload_post
 def test_blog_post_title_and_content():
     """Ensures title and content attributes are properly set."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
