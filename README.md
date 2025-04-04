@@ -144,6 +144,53 @@ pip install pytest-random-order pytest-reverse
    ```bash
    pytest --random-order --reverse
    ```
+  
+### Coverage Measurement
+
+This project uses [`pytest-cov`](https://pypi.org/project/pytest-cov/) to measure test coverage.
+
+#### Installation
+
+Install `pytest-cov` with:
+```bash
+pip install pytest-cov
+```
+
+#### Running Coverage Reports
+
+- **Run all tests and display a coverage summary in the terminal:**
+  ```bash
+  pytest --cov=damianpiatkowski
+  ```
+- **Generate an HTML coverage report:**
+  ```bash
+  pytest --cov=damianpiatkowski --cov-report=html
+  ```
+This will create a `htmlcov/` directory containing an interactive HTML report.
+
+- **Enforce a minimum coverage threshold (e.g., 90% required to pass):**
+  ```bash
+  pytest --cov=damianpiatkowski --cov-fail-under=90
+  ```
+  
+#### Viewing the HTML Report
+
+To open the generated HTML report:
+
+- **Linux/macOS:**
+  ```bash
+  open htmlcov/index.html
+  ```
+- **Windows:**
+  ```bash
+  start htmlcov/index.html
+  ```
+This allows you to visually explore which parts of the code are covered by tests.
+
+  
+
+
+
 
 
 

@@ -12,7 +12,7 @@ The script performs the following tasks:
 
 import os
 
-from __version__ import __version__
+from app.__version__ import __version__
 from app import create_app
 from config import ENVIRONMENT_CONFIG_MAPPING, Environment
 

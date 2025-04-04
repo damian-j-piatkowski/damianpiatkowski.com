@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
-    """
-    Processes a single file: reads from Google Drive, sanitizes, and saves as a blog post.
+    """Processes a single file: reads from Google Drive, sanitizes, and saves as a blog post.
 
     Args:
         file_id (str): ID of the file to process.

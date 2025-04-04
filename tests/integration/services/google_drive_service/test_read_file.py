@@ -28,6 +28,7 @@ RESTRICTED_FILE_ID = '1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk'
 
 
 @pytest.mark.admin_upload_post
+@pytest.mark.api
 def test_read_file_not_found(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
@@ -39,6 +40,7 @@ def test_read_file_not_found(
 
 
 @pytest.mark.admin_upload_post
+@pytest.mark.api
 def test_read_file_permission_denied(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
@@ -54,6 +56,7 @@ def test_read_file_permission_denied(
 
 
 @pytest.mark.admin_upload_post
+@pytest.mark.api
 def test_read_file_success(
         google_drive_service_fixture: GoogleDriveService
 ) -> None:
