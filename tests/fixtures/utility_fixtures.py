@@ -9,6 +9,7 @@ Fixtures:
         directory before and after tests.
     - incomplete_form_data: Provides incomplete form data for testing
         validation.
+    - valid_file_data: Provides a sample file ID, title, and slug for blog post tests.
     - valid_form_data: Provides valid form data for contact form submission.
     - valid_log_data: Provides valid log data for schema validation tests.
 """
@@ -59,6 +60,22 @@ def incomplete_form_data():
         'name': '',
         'email': 'john@example.com',
         'message': 'This is a test message.'
+    }
+
+
+@pytest.fixture(scope='function')
+def valid_file_data():
+    """Fixture providing valid file data for blog post file processing tests.
+
+    This dictionary includes:
+    - A sample file_id as it would come from Google Drive
+    - A title used for the blog post
+    - A slug derived from the title
+    """
+    return {
+        'file_id': '12345',
+        'title': 'Test Blog Post',
+        'slug': 'test-blog-post'
     }
 
 

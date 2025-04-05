@@ -104,6 +104,15 @@ def real_folder_id(app) -> str:
     """
     return app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
 
+@pytest.fixture
+def real_drive_file_metadata():
+    """Returns a known Google Drive file's ID along with extracted slug and title."""
+    return {
+    "file_id": "1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo",
+    "slug": "six-essential-object-oriented-design-principles-from-matthias-nobacks-object-design-style-guide",
+    "title": "Six Essential Object Oriented Design Principles From Matthias Nobacks Object Design Style Guide",
+    }
+
 
 @pytest.fixture
 def scopes() -> list[str]:

@@ -125,7 +125,8 @@ class BlogPostRepository:
                     title=row['title'],
                     slug=row['slug'],  # Ensure slug is included
                     content=row['content'],
-                    drive_file_id=row['drive_file_id']
+                    drive_file_id=row['drive_file_id'],
+                    created_at=row['created_at']
                 )
                 for row in result
             ] if result else []
@@ -159,7 +160,8 @@ class BlogPostRepository:
                     title=row['title'],
                     slug=row['slug'],
                     content=row['content'],
-                    drive_file_id=row['drive_file_id']
+                    drive_file_id=row['drive_file_id'],
+                    created_at=row['created_at']
                 )
                 for row in result
             ] if result else []

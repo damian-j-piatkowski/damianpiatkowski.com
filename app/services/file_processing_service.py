@@ -2,7 +2,6 @@ import logging
 
 from app.exceptions import BlogPostDuplicateError
 from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError
-from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import save_blog_post
 from app.services.google_drive_service import GoogleDriveService
 from app.services.sanitization_service import sanitize_html
@@ -42,9 +41,15 @@ def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
             "drive_file_id": file_id,
         })
 
-        # Return success tuple with serialized blog post
-        success_message = f"Blog post successfully processed: {BlogPostSchema().dump(blog_post)}"
-        return True, success_message
+        preview = blog_post.content[:200].replace("\n", " ") + ("..." if len(blog_post.content) > 100 else "")
+        message = (
+            f"Successfully processed blog post: "
+            f"title='{blog_post.title}', slug='{blog_post.slug}', drive_file_id='{blog_post.drive_file_id}'. "
+            f"Preview: {preview}"
+        )
+
+        logger.info(message)
+        return True, message
 
     except BlogPostDuplicateError as e:
         logger.warning(
