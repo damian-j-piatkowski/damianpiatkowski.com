@@ -63,20 +63,7 @@ def incomplete_form_data():
     }
 
 
-@pytest.fixture(scope='function')
-def valid_file_data():
-    """Fixture providing valid file data for blog post file processing tests.
 
-    This dictionary includes:
-    - A sample file_id as it would come from Google Drive
-    - A title used for the blog post
-    - A slug derived from the title
-    """
-    return {
-        'file_id': '12345',
-        'title': 'Test Blog Post',
-        'slug': 'test-blog-post'
-    }
 
 
 @pytest.fixture(scope='function')

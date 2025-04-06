@@ -113,6 +113,39 @@ def real_drive_file_metadata():
     "title": "Six Essential Object Oriented Design Principles From Matthias Nobacks Object Design Style Guide",
     }
 
+@pytest.fixture
+def restricted_drive_file_metadata():
+    """Returns metadata for a real Google Drive file that is NOT accessible to the bot."""
+    return {
+        "file_id": "1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk",
+        "slug": "test-restricted-access",
+        "title": "Test Restricted Access",
+    }
+
+@pytest.fixture
+def another_drive_file_metadata():
+    """Fixture providing metadata for a different real Google Drive file."""
+    return {
+        "file_id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E",
+        "title": "Value Objects",
+        "slug": "value-objects",
+    }
+
+@pytest.fixture(scope='function')
+def valid_file_data():
+    """Fixture providing valid file data for blog post file processing tests.
+
+    This dictionary includes:
+    - A sample file_id as it would come from Google Drive
+    - A title used for the blog post
+    - A slug derived from the title
+    """
+    return {
+        'file_id': '12345',
+        'title': 'Test Blog Post',
+        'slug': 'test-blog-post'
+    }
+
 
 @pytest.fixture
 def scopes() -> list[str]:
