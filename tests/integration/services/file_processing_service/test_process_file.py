@@ -46,7 +46,7 @@ Fixtures:
 
 import pytest
 
-from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError
+from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError, BlogPostDuplicateError
 from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.services.file_processing_service import process_file
 
@@ -54,42 +54,33 @@ from app.services.file_processing_service import process_file
 @pytest.mark.admin_upload_post
 class TestProcessFileMockedAPI:
 
-    def tests_process_file_duplicate_error(self, mock_google_drive_service, valid_file_data, session):
+    def test_process_file_duplicate_error(self, mock_google_drive_service, valid_file_data, session):
         """Test the case where a duplicate blog post is detected."""
         process_file(valid_file_data['file_id'], valid_file_data['title'], valid_file_data['slug'])
         mock_google_drive_service.read_file.return_value = "This is a mock file content"
-        success, message = process_file(
-            valid_file_data['file_id'],
-            valid_file_data['title'],
-            valid_file_data['slug']
-        )
-        assert success is False
-        assert "Duplicate blog post: drive_file_id '12345' already exists." in message
+        with pytest.raises(BlogPostDuplicateError, match="drive_file_id.*already exists"):
+            process_file(valid_file_data['file_id'], valid_file_data['title'], valid_file_data['slug'])
 
-    def tests_process_file_file_not_found(self, mock_google_drive_service, valid_file_data):
+    def test_process_file_file_not_found(self, mock_google_drive_service, valid_file_data):
         """Test the case where the file is not found on Google Drive."""
         mock_google_drive_service.read_file.side_effect = GoogleDriveFileNotFoundError("File not found")
         with pytest.raises(ValueError, match="File not found on Google Drive"):
             process_file(valid_file_data['file_id'], valid_file_data['title'], valid_file_data['slug'])
 
-    def tests_process_file_permission_error(self, mock_google_drive_service, valid_file_data):
+    def test_process_file_permission_error(self, mock_google_drive_service, valid_file_data):
         """Test the case where there is a permission error on Google Drive."""
         mock_google_drive_service.read_file.side_effect = GoogleDrivePermissionError("Permission denied")
         with pytest.raises(PermissionError, match="Permission denied on Google Drive"):
             process_file(valid_file_data['file_id'], valid_file_data['title'], valid_file_data['slug'])
 
-    def tests_process_file_success(self, mock_google_drive_service, valid_file_data, app, session):
+    def test_process_file_success(self, mock_google_drive_service, valid_file_data, app, session):
         """Test the happy path of processing a blog post file."""
         mock_google_drive_service.read_file.return_value = "This is a mock file content"
-        success, message = process_file(
+        process_file(
             file_id=valid_file_data['file_id'],
             title=valid_file_data['title'],
             slug=valid_file_data['slug']
         )
-        assert success is True
-        expected_message = ("Successfully processed blog post: title='Test Blog Post', slug='test-blog-post', "
-                            "drive_file_id='12345'. Preview: This is a mock file content")
-        assert expected_message in message
         repo = BlogPostRepository(session)
         saved_post = repo.fetch_blog_post_by_slug(valid_file_data['slug'])
         assert saved_post is not None
@@ -118,43 +109,27 @@ class TestProcessFileRealDriveAPI:
 
     def test_duplicate_blog_post(self, app, session, real_drive_file_metadata):
         """Tests that processing the same file twice results in a duplicate error."""
-        success, _ = process_file(**real_drive_file_metadata)
-        assert success is True
-        success, message = process_file(**real_drive_file_metadata)
-        expected_message = (
-            "Duplicate blog post: drive_file_id "
-            f"'{real_drive_file_metadata['file_id']}' already exists."
-        )
-        assert success is False
-        assert message == expected_message
+        process_file(**real_drive_file_metadata)
+        with pytest.raises(BlogPostDuplicateError, match="drive_file_id.*already exists"):
+            process_file(**real_drive_file_metadata)
 
     def test_duplicate_slug_raises_duplicate_error(self, app, session, real_drive_file_metadata,
                                                    another_drive_file_metadata):
         """Tests that using the same slug with a different file raises a duplicate error."""
-        success, _ = process_file(**real_drive_file_metadata)
-        assert success is True
+        process_file(**real_drive_file_metadata)
         duplicate_slug_metadata = another_drive_file_metadata.copy()
         duplicate_slug_metadata["slug"] = real_drive_file_metadata["slug"]
-        success, message = process_file(**duplicate_slug_metadata)
-        expected = (
-            f"Duplicate blog post: slug '{real_drive_file_metadata['slug']}' already exists."
-        )
-        assert success is False
-        assert message == expected
+        with pytest.raises(BlogPostDuplicateError, match="slug.*already exists"):
+            process_file(**duplicate_slug_metadata)
 
     def test_duplicate_title_raises_duplicate_error(self, app, session, real_drive_file_metadata,
                                                     another_drive_file_metadata):
         """Tests that using the same title with a different file raises a duplicate error."""
-        success, _ = process_file(**real_drive_file_metadata)
-        assert success is True
+        process_file(**real_drive_file_metadata)
         duplicate_title_metadata = another_drive_file_metadata.copy()
         duplicate_title_metadata["title"] = real_drive_file_metadata["title"]
-        success, message = process_file(**duplicate_title_metadata)
-        expected = (
-            f"Duplicate blog post: title '{real_drive_file_metadata['title']}' already exists."
-        )
-        assert success is False
-        assert message == expected
+        with pytest.raises(BlogPostDuplicateError, match="title.*already exists"):
+            process_file(**duplicate_title_metadata)
 
     def test_file_not_found_error(self, app):
         """Tests handling of non-existent file IDs."""
@@ -172,24 +147,16 @@ class TestProcessFileRealDriveAPI:
 
     def test_process_file_real_drive_success(self, app, session, real_drive_file_metadata):
         """Tests processing a real Google Drive file via the actual API."""
-        success, message = process_file(**real_drive_file_metadata)
-        assert success is True
-        assert "Successfully processed blog post" in message
-        assert f"title='{real_drive_file_metadata['title']}'" in message
-        assert f"slug='{real_drive_file_metadata['slug']}'" in message
-        assert f"drive_file_id='{real_drive_file_metadata['file_id']}'" in message
-        assert "Preview: " in message
-        repo = BlogPostRepository(session)
-        saved_post = repo.fetch_blog_post_by_slug(real_drive_file_metadata["slug"])
-        assert saved_post.title == real_drive_file_metadata["title"]
-        assert saved_post.slug == real_drive_file_metadata["slug"]
-        assert saved_post.drive_file_id == real_drive_file_metadata["file_id"]
-        assert isinstance(saved_post.content, str)
-        assert len(saved_post.content.strip()) > 0
-        assert saved_post.created_at is not None
+        blog_post = process_file(**real_drive_file_metadata)
+        assert blog_post.title == real_drive_file_metadata["title"]
+        assert blog_post.slug == real_drive_file_metadata["slug"]
+        assert blog_post.drive_file_id == real_drive_file_metadata["file_id"]
+        assert isinstance(blog_post.content, str)
+        assert len(blog_post.content.strip()) > 0
+        assert blog_post.created_at is not None
 
-    def tests_unexpected_error_during_sanitization(self, mock_google_drive_service, real_drive_file_metadata,
-                                                   monkeypatch):
+    def test_unexpected_error_during_sanitization(self, mock_google_drive_service, real_drive_file_metadata,
+                                                  monkeypatch):
         """Test unexpected error raised from sanitize_html is wrapped in RuntimeError."""
         mock_google_drive_service.read_file.return_value = "This is a mock file content"
 

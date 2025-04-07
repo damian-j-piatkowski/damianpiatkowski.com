@@ -18,3 +18,20 @@ def convert_markdown_to_html(markdown_text: str) -> str:
     )
 
     return html_content
+
+def trim_content(content: str, max_length: int = 200) -> str:
+    """
+    Trims the content to a maximum length for preview purposes.
+
+    Args:
+        content (str): The full content to be trimmed.
+        max_length (int): The maximum number of characters to keep.
+
+    Returns:
+        str: The trimmed content with an ellipsis if truncated.
+    """
+    if not content:
+        return ""
+    if len(content) > max_length:
+        return content[:max_length].rstrip() + "..."
+    return content

@@ -1,5 +1,6 @@
 import logging
 
+from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
 from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError
 from app.services.blog_service import save_blog_post
@@ -9,8 +10,8 @@ from app.services.sanitization_service import sanitize_html
 logger = logging.getLogger(__name__)
 
 
-def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
-    """Processes a single file: reads from Google Drive, sanitizes, and saves as a blog post.
+def process_file(file_id: str, title: str, slug: str) -> BlogPost:
+    """Processes a single file: reads from Google Drive, sanitizes content, and saves as a blog post.
 
     Args:
         file_id (str): ID of the file to process.
@@ -18,8 +19,13 @@ def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
         slug (str): URL-friendly slug derived from the title.
 
     Returns:
-        tuple: (success: bool, message: str) where success indicates if the operation succeeded,
-               and message contains either the success message or error details.
+        BlogPost: The successfully created blog post domain model.
+
+    Raises:
+        BlogPostDuplicateError: If the post already exists.
+        ValueError: If the file is not found on Google Drive.
+        PermissionError: If Drive access is denied.
+        RuntimeError: For any unexpected internal error.
     """
     try:
         google_drive_service = GoogleDriveService()
@@ -36,31 +42,32 @@ def process_file(file_id: str, title: str, slug: str) -> tuple[bool, str]:
         logger.info(f"Saving blog post with title: {title}, slug: {slug}.")
         blog_post = save_blog_post({
             "title": title,
-            "slug": slug,  # Ensure slug is passed
+            "slug": slug,
             "content": sanitized_content,
             "drive_file_id": file_id,
         })
 
-        preview = blog_post.content[:200].replace("\n", " ") + ("..." if len(blog_post.content) > 100 else "")
-        message = (
+        logger.info(
             f"Successfully processed blog post: "
-            f"title='{blog_post.title}', slug='{blog_post.slug}', drive_file_id='{blog_post.drive_file_id}'. "
-            f"Preview: {preview}"
+            f"title='{blog_post.title}', slug='{blog_post.slug}', drive_file_id='{blog_post.drive_file_id}'"
         )
 
-        logger.info(message)
-        return True, message
+        return blog_post
 
     except BlogPostDuplicateError as e:
         logger.warning(
-            f"Duplicate blog post detected: {e.message} (field: {e.field_name}, value: {e.field_value})")
-        return False, f"Duplicate blog post: {e.field_name} '{e.field_value}' already exists."
+            f"Duplicate blog post detected: {e.message} (field: {e.field_name}, value: {e.field_value})"
+        )
+        raise
+
     except GoogleDriveFileNotFoundError as e:
         logger.error(f"File not found for file ID {file_id}: {str(e)}")
-        raise ValueError("File not found on Google Drive")  # Propagate meaningful error
+        raise ValueError("File not found on Google Drive")
+
     except GoogleDrivePermissionError as e:
         logger.error(f"Permission denied for file ID {file_id}: {str(e)}")
         raise PermissionError("Permission denied on Google Drive")
+
     except Exception as e:
         logger.error(f"Unexpected error for file ID {file_id}: {str(e)}")
         raise RuntimeError("Unexpected error occurred.")

@@ -16,9 +16,12 @@ from typing import List, Dict, Tuple
 
 from flask import current_app
 from flask import jsonify
+from requests import Response
+from flask import Response as FlaskResponse
 
 from app import exceptions
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
+from app.services.formatting_service import trim_content
 from app.models.data_schemas.log_schema import LogSchema
 from app.services.blog_service import fetch_all_blog_posts
 from app.services.file_processing_service import process_file
@@ -116,7 +119,6 @@ def find_unpublished_drive_articles() -> jsonify:
         return jsonify({"error": str(e)}), 500
 
 
-
 def get_logs_data():
     """Fetch logs and serialize them for JSON response."""
     try:
@@ -133,60 +135,56 @@ def get_logs_data():
         return jsonify({"error": str(e)}), 500  # Return error with status 500
 
 
-def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
-    """Uploads blog posts from Google Drive using provided file IDs and slugs.
+def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResponse, int]:
+    """Uploads blog posts from Google Drive using provided file IDs, titles, and slugs.
 
     Args:
         files (List[Dict[str, str]]): A list of dictionaries, each containing:
             - "id" (str): The Google Drive file ID.
+            - "title" (str): The title of the blog post.
             - "slug" (str): The slug to assign to the blog post.
 
     Returns:
         Tuple[Response, int]: A tuple containing:
-            - A dictionary response, formatted as:
-                - {"error": "No files provided"} if the input is invalid.
-                - {"success": [...], "errors": [...]}:
-                    - "success" contains a list of serialized blog post data for successfully
-                        processed files.
-                    - "errors" contains a list of dictionaries describing issues with individual
-                        files.
-            - An HTTP status code indicating the result:
-                - 400 if no files are provided or none are valid for processing.
-                - 201 if all blog posts are successfully created.
-                - 207 if some blog posts are successfully created and there are errors.
-                - 500 for unexpected critical errors during processing.
+            - A JSON response with:
+                - {"error": "No files provided"} if input is empty.
+                - {"success": [...], "errors": [...]} if processing is attempted:
+                    - "success": list of serialized blog posts successfully created.
+                    - "errors": list of file-specific error messages.
+            - HTTP status code:
+                - 400 if input is invalid or all posts failed.
+                - 201 if all posts succeeded.
+                - 207 if some succeeded and others failed.
+                - 500 if an unexpected critical error occurs.
 
     Raises:
-        RuntimeError: For critical failures during blog post processing.
+        RuntimeError: For unrecoverable internal issues during processing.
 
-    Examples:
-        Success Response:
-        {
-            "success": [
-                {
-                    "slug": "example-blog-post",
-                    "content": "...",
-                    "drive_file_id": "12345",
-                    "created_at": "2024-12-02T12:00:00"
-                }
-            ],
-            "errors": []
-        }
+    Example:
+        Input:
+        [
+            {
+                "id": "12345",
+                "title": "Example Title",
+                "slug": "example-title"
+            }
+        ]
 
-        Mixed Response (Success and Errors):
-        {
-            "success": [
-                {
-                    "slug": "example-blog-post",
-                    "content": "...",
-                    "drive_file_id": "12345",
-                    "created_at": "2024-12-02T12:00:00"
-                }
-            ],
-            "errors": [
-                {"file_id": "67890", "error": "File not found"}
-            ]
-        }
+        Response:
+        (
+            {
+                "success": [
+                    {
+                        "slug": "example-title",
+                        "content": "...",
+                        "drive_file_id": "12345",
+                        "created_at": "2024-12-02T12:00:00"
+                    }
+                ],
+                "errors": []
+            },
+            201
+        )
     """
     if not files:
         return jsonify({"error": "No files provided"}), 400
@@ -196,39 +194,44 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple:
 
     for file in files:
         file_id = file.get("id")
-        slug = file.get("slug")  # Using "slug" instead of "title"
+        title = file.get("title")
+        slug = file.get("slug")
 
-        if not file_id or not slug:
-            response_data["errors"].append({"file_id": file_id, "error": "Missing required fields"})
+        if not file_id or not title or not slug:
+            response_data["errors"].append({
+                "file": file,
+                "error": "Missing required fields"
+            })
             continue
 
         try:
-            blog_post = process_file(file_id, slug)  # Ensure this returns a `BlogPost` object
-
-            serialized_post = schema.dump(blog_post)  # Serialize the BlogPost object
+            blog_post = process_file(file_id, title, slug)
+            serialized_post = schema.dump(blog_post)
+            serialized_post["content"] = trim_content(serialized_post.get("content", ""))
             response_data["success"].append(serialized_post)
 
         except ValueError as ve:
             response_data["errors"].append({"file_id": file_id, "error": str(ve)})
         except PermissionError as pe:
-            response_data["errors"].append(
-                {"file_id": file_id, "error": "Permission denied on Google Drive"}
-            )
+            response_data["errors"].append({
+                "file_id": file_id,
+                "error": "Permission denied on Google Drive"
+            })
             logger.error(f"Permission error for file ID {file_id}: {pe}")
         except Exception as e:
-            response_data["errors"].append({"file_id": file_id, "error": "Unexpected error occurred."})
+            response_data["errors"].append({
+                "file_id": file_id,
+                "error": "Unexpected error occurred."
+            })
             logger.error(f"Critical exception for file ID {file_id}: {e}")
-            break  # Stop processing further files in case of a critical failure
+            break  # Critical error halts further processing
 
-    # Determine status code
-    if any(error["error"] == "Unexpected error occurred." for error in response_data["errors"]):
-        return jsonify(response_data), 500  # Critical failure
-    elif not response_data["success"] and response_data["errors"]:
-        return jsonify(response_data), 400  # All errors, no success
-    elif response_data["success"] and response_data["errors"]:
-        return jsonify(response_data), 207  # Mixed results
-    elif response_data["success"]:
-        return jsonify(response_data), 201  # All successful
-
-    return jsonify(response_data), 400  # Fallback case
-
+    # Determine response code
+    if any(err["error"] == "Unexpected error occurred." for err in response_data["errors"]):
+        return jsonify(response_data), 500
+    elif not response_data["success"]:
+        return jsonify(response_data), 400
+    elif response_data["errors"]:
+        return jsonify(response_data), 207
+    else:
+        return jsonify(response_data), 201
