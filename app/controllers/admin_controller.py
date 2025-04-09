@@ -14,17 +14,18 @@ Raises:
 import logging
 from typing import List, Dict, Tuple
 
+from flask import Response as FlaskResponse
 from flask import current_app
 from flask import jsonify
 from requests import Response
-from flask import Response as FlaskResponse
 
 from app import exceptions
+from app.exceptions import BlogPostDuplicateError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
-from app.services.formatting_service import trim_content
 from app.models.data_schemas.log_schema import LogSchema
 from app.services.blog_service import fetch_all_blog_posts
 from app.services.file_processing_service import process_file
+from app.services.formatting_service import trim_content
 from app.services.google_drive_service import GoogleDriveService
 from app.services.log_service import fetch_all_logs
 from app.services.sanitization_service import extract_slug_and_title
@@ -148,17 +149,21 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
         Tuple[Response, int]: A tuple containing:
             - A JSON response with:
                 - {"error": "No files provided"} if input is empty.
-                - {"success": [...], "errors": [...]} if processing is attempted:
-                    - "success": list of serialized blog posts successfully created.
-                    - "errors": list of file-specific error messages.
+                - {"success": [...], "errors": [...]} if processing was attempted:
+                    - "success": list of serialized blog posts that were successfully created.
+                    - "errors": list of file-specific error messages (e.g., missing file, duplicate, etc.).
             - HTTP status code:
-                - 400 if input is invalid or all posts failed.
-                - 201 if all posts succeeded.
-                - 207 if some succeeded and others failed.
-                - 500 if an unexpected critical error occurs.
+                - 400 if input is invalid or all posts failed due to non-critical errors.
+                - 201 if all posts were successfully processed.
+                - 207 if some posts succeeded and others failed.
+                - 500 if a critical error occurred and halted processing.
 
     Raises:
         RuntimeError: For unrecoverable internal issues during processing.
+
+    Notes:
+        - Critical errors (e.g. unexpected exceptions) stop further processing.
+        - Non-critical errors (e.g. missing file, permission denied) allow processing to continue.
 
     Example:
         Input:
@@ -178,7 +183,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
                         "slug": "example-title",
                         "content": "...",
                         "drive_file_id": "12345",
-                        "created_at": "2024-12-02T12:00:00"
+                        "created_at": "2025-04-09 06:54:21"
                     }
                 ],
                 "errors": []
@@ -210,6 +215,11 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
             serialized_post["content"] = trim_content(serialized_post.get("content", ""))
             response_data["success"].append(serialized_post)
 
+        except BlogPostDuplicateError as de:
+            response_data["errors"].append({
+                "file_id": file_id,
+                "error": str(de)
+            })
         except ValueError as ve:
             response_data["errors"].append({"file_id": file_id, "error": str(ve)})
         except PermissionError as pe:
@@ -219,19 +229,28 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
             })
             logger.error(f"Permission error for file ID {file_id}: {pe}")
         except Exception as e:
+            error_message = f"{type(e).__name__}: {e}"
             response_data["errors"].append({
                 "file_id": file_id,
-                "error": "Unexpected error occurred."
+                "error": f"Unexpected error occurred: {error_message}",
             })
-            logger.error(f"Critical exception for file ID {file_id}: {e}")
+            logger.exception(f"Critical exception for file ID {file_id}")  # Includes traceback
             break  # Critical error halts further processing
 
+    has_success = bool(response_data["success"])
+    has_errors = bool(response_data["errors"])
+    has_critical_error = any(
+        "Unexpected error occurred" in err["error"] for err in response_data["errors"]
+    )
+
     # Determine response code
-    if any(err["error"] == "Unexpected error occurred." for err in response_data["errors"]):
-        return jsonify(response_data), 500
-    elif not response_data["success"]:
-        return jsonify(response_data), 400
-    elif response_data["errors"]:
-        return jsonify(response_data), 207
+    if has_critical_error and not has_success:
+        return jsonify(response_data), 500  # Full failure due to critical error(s)
+    elif has_critical_error and has_success:
+        return jsonify(response_data), 207  # Mixed, but critical present — partial success
+    elif has_errors and has_success:
+        return jsonify(response_data), 207  # Mixed, only non-critical errors
+    elif has_errors and not has_success:
+        return jsonify(response_data), 400  # All errors, but non-critical
     else:
-        return jsonify(response_data), 201
+        return jsonify(response_data), 201  # All good

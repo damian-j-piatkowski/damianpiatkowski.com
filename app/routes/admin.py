@@ -88,7 +88,7 @@ def admin_upload_post():
     Flow:
     - User selects unpublished posts and submits the form at `/admin/unpublished_posts`.
     - The front-end sends a JSON payload with a list of files to this endpoint.
-    - This endpoint extracts the list and calls `upload_blog_posts_from_drive(files)`.
+    - This endpoint extracts the list and calls `upload_blog_posts_from_drive_controller(files)`.
     - The service reads the file, sanitizes content, and saves the blog post.
     - The response contains a `success` flag and a `message` explaining the result.
 
