@@ -34,9 +34,7 @@ from typing import Dict, Any
 from unittest.mock import Mock
 
 import pytest
-from dateutil.parser import parse as parse_datetime
 from flask import Flask
-from freezegun import freeze_time
 from sqlalchemy.orm import Session
 
 from app import exceptions
@@ -49,6 +47,7 @@ from tests.scenarios.upload_blog_posts_from_drive_controller import (
 )
 
 
+@pytest.mark.admin_upload_blog_posts
 class TestUploadBlogPostsMockedAPI:
     @pytest.mark.parametrize("scenario", errors_only.scenarios)
     def test_upload_blog_posts_from_drive_errors_only(
@@ -63,8 +62,9 @@ class TestUploadBlogPostsMockedAPI:
 
     def test_upload_blog_posts_from_drive_file_not_found(self, app, mock_google_drive_service):
         """Tests handling of missing file errors."""
-        files = [{"id": "non_existent_id", "title": "Non-existent Post"}]
-        mock_google_drive_service.read_file.side_effect = exceptions.GoogleDriveFileNotFoundError
+        files = [{"id": "non_existent_id", "title": "Non-existent Post", "slug": "non-existent-id"}]
+        mock_google_drive_service.read_file.side_effect = exceptions.GoogleDriveFileNotFoundError(
+            "Test error: file not found", file_id="non_existent_id"),
 
         with app.app_context():
             response, status_code = upload_blog_posts_from_drive(files=files)
@@ -80,10 +80,11 @@ class TestUploadBlogPostsMockedAPI:
         with app.app_context():
             files = [{"title": "missing_id"}]
             response, status_code = upload_blog_posts_from_drive(files)
+
             assert status_code == 400
             assert response.get_json() == {
                 "success": [],
-                "errors": [{"file": {"title": "missing_id"}, "error": "Missing required fields"}],
+                "errors": [{"file_id": "unknown", "error": "Missing required fields"}],
             }
 
     @pytest.mark.parametrize("scenario", mixed_results.scenarios)
@@ -127,19 +128,39 @@ class TestUploadBlogPostsMockedAPI:
             assert response.get_json() == {"error": "No files provided"}
 
     @pytest.mark.parametrize("scenario", successful_only.scenarios)
-    @freeze_time("2024-12-04 14:18:16")
     def test_upload_blog_posts_from_drive_success_only(
-            self, app: Flask, mock_google_drive_service: Mock, session: Session, scenario: Dict[str, Any]
+            self,
+            app: Flask,
+            mock_google_drive_service: Mock,
+            session: Session,
+            scenario: Dict[str, Any],
     ):
         """Tests the behavior of uploading blog posts with only successful results."""
         with app.app_context():
             mock_google_drive_service.read_file.side_effect = scenario["side_effects"]
             response, status_code = upload_blog_posts_from_drive(scenario["files"])
             assert status_code == scenario["expected_status"]
-            assert response == scenario["expected_response"]
+
+            response_json = response.get_json()
+
+            # Validate created_at fields and remove them before comparison
+            for success_item in response_json.get("success", []):
+                created_at = success_item.pop("created_at", None)
+                assert created_at is not None, "created_at is missing from success item"
+
+                # Parse with custom format and attach UTC timezone
+                parsed = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                assert isinstance(parsed, datetime)
+
+                # Check that it's within 1 minute of now (UTC)
+                now = datetime.now(timezone.utc)
+                delta = timedelta(minutes=1)
+                assert now - delta <= parsed <= now + delta, f"created_at too far from current time: {created_at}"
+
+            # Final comparison without created_at fields
+            assert response_json == scenario["expected_response"]
 
     @pytest.mark.parametrize("scenario", unexpected_error_included.scenarios)
-    @freeze_time("2024-12-04 14:18:16")
     def test_upload_blog_posts_from_drive_unexpected_error(
             self, app: Flask, mock_google_drive_service: Mock, session: Session, scenario: Dict[str, Any]
     ):
@@ -147,11 +168,22 @@ class TestUploadBlogPostsMockedAPI:
         with app.app_context():
             mock_google_drive_service.read_file.side_effect = scenario["side_effects"]
             response, status_code = upload_blog_posts_from_drive(scenario["files"])
+
             assert status_code == scenario["expected_status"]
-            assert response == scenario["expected_response"]
+
+            response_json = response.get_json()
+
+            # Only validate and strip created_at if there are success items
+            for success_item in response_json.get("success", []):
+                created_at = success_item.pop("created_at", None)
+                assert created_at is not None, "created_at is missing from success item"
+
+            # Final response comparison (created_at is now removed)
+            assert response_json == scenario["expected_response"]
 
 
 @pytest.mark.api
+@pytest.mark.admin_upload_blog_posts
 class TestUploadBlogPostsRealDriveAPI:
     def test_upload_blog_posts_from_drive_with_actual_api(
             self, app, google_drive_service_fixture, session, real_drive_file_metadata

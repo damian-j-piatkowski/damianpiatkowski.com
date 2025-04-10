@@ -13,19 +13,19 @@ import pytest
 from app.services.formatting_service import trim_content
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_trim_content_empty_string() -> None:
     """Returns empty string if input is empty."""
     assert trim_content("") == ""
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_trim_content_none() -> None:
     """Returns empty string if input is None."""
     assert trim_content(None) == ""  # type: ignore[arg-type]
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_trim_content_short_or_exact_length() -> None:
     """Returns content unchanged if shorter than or exactly equal to max_length."""
     assert trim_content("Short string", max_length=50) == "Short string"
@@ -33,7 +33,7 @@ def test_trim_content_short_or_exact_length() -> None:
     assert trim_content(exact, max_length=100) == exact
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 @pytest.mark.parametrize(
     "text,max_length,expected",
     [
@@ -48,7 +48,7 @@ def test_trim_content_truncation_variants(text: str, max_length: int, expected: 
     assert trim_content(text, max_length) == expected
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_trim_content_very_long_input() -> None:
     """Ensures very long input is trimmed to default 200 characters + ellipsis."""
     long_text = (

@@ -204,8 +204,8 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
 
         if not file_id or not title or not slug:
             response_data["errors"].append({
-                "file": file,
-                "error": "Missing required fields"
+                "file_id": file.get("id", "unknown"),
+                "error": "Missing required fields",
             })
             continue
 

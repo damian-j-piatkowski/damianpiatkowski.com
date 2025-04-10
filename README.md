@@ -111,9 +111,9 @@ Tests are organized into three main directories:
 Tests are categorized using `pytest` markers for selective execution.
 Markers list can be found in pytest.ini under the [pytest] markers section.
 
-**Run tests for a specific feature or route** (e.g., `/admin/upload_post` route):  
+**Run tests for a specific feature or route** (e.g., `/admin/upload_blog_posts` route):  
   ```bash
-  pytest -m admin_upload_post
+  pytest -m admin_upload_blog_posts
   ```
 
 ### Pytest Extensions for Test Execution Order

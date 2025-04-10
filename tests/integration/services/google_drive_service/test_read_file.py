@@ -27,7 +27,7 @@ DEFAULT_TEST_FILE_ID = '1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo'
 RESTRICTED_FILE_ID = '1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk'
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 @pytest.mark.api
 def test_read_file_not_found(
         google_drive_service_fixture: GoogleDriveService
@@ -39,7 +39,7 @@ def test_read_file_not_found(
         "Expected GoogleDriveFileNotFoundError for a non-existent file."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 @pytest.mark.api
 def test_read_file_permission_denied(
         google_drive_service_fixture: GoogleDriveService
@@ -55,7 +55,7 @@ def test_read_file_permission_denied(
         "Expected GoogleDriveFileNotFoundError for a file with insufficient permissions."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 @pytest.mark.api
 def test_read_file_success(
         google_drive_service_fixture: GoogleDriveService

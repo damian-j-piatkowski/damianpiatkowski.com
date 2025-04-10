@@ -27,7 +27,7 @@ from app.exceptions import BlogPostDuplicateError
 from app.models.repositories.blog_post_repository import BlogPostRepository
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_created_at(session):
     """Ensures the created_at timestamp is correctly assigned."""
     repository = BlogPostRepository(session)
@@ -47,7 +47,7 @@ def test_create_blog_post_created_at(session):
     assert post_created_at <= datetime.now(timezone.utc) + timedelta(seconds=1)
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_duplicate_drive_file_id(session):
     """Ensures an error is raised when inserting a blog post with a duplicate drive_file_id."""
     repository = BlogPostRepository(session)
@@ -61,7 +61,7 @@ def test_create_blog_post_duplicate_drive_file_id(session):
                                     drive_file_id="drive123")
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_duplicate_slug(session):
     """Ensures an error is raised when inserting a blog post with a duplicate slug."""
     repository = BlogPostRepository(session)
@@ -76,7 +76,7 @@ def test_create_blog_post_duplicate_slug(session):
                                     drive_file_id="drive456")
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_failure(session, monkeypatch):
     """Ensures a RuntimeError is raised when a database error occurs."""
     repository = BlogPostRepository(session)
@@ -93,7 +93,7 @@ def test_create_blog_post_failure(session, monkeypatch):
         )
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_long_content(session):
     """Handles very long content fields."""
     repository = BlogPostRepository(session)
@@ -108,7 +108,7 @@ def test_create_blog_post_long_content(session):
     assert post.drive_file_id == "drive789"
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_missing_content(session):
     """Ensures an IntegrityError is raised when attempting to insert a blog post without content."""
     repository = BlogPostRepository(session)
@@ -123,7 +123,7 @@ def test_create_blog_post_missing_content(session):
         )
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_special_characters(session):
     """Handles titles and content with special characters."""
     repository = BlogPostRepository(session)
@@ -137,7 +137,7 @@ def test_create_blog_post_special_characters(session):
     assert post.drive_file_id == "drive987"
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_create_blog_post_valid(session):
     """Ensures a blog post is successfully created in the database."""
     repository = BlogPostRepository(session)

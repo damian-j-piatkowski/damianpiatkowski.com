@@ -51,7 +51,7 @@ from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.services.file_processing_service import process_file
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 class TestProcessFileMockedAPI:
 
     def test_process_file_duplicate_error(self, mock_google_drive_service, valid_file_data, session):
@@ -103,7 +103,7 @@ class TestProcessFileMockedAPI:
             process_file(valid_file_data['file_id'], valid_file_data['title'], valid_file_data['slug'])
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 @pytest.mark.api
 class TestProcessFileRealDriveAPI:
 

@@ -20,7 +20,7 @@ Tests included:
 from app.services.sanitization_service import sanitize_html
 import pytest
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html() -> None:
     """Tests that HTML content is sanitized by removing dangerous tags."""
     # Arrange
@@ -33,7 +33,7 @@ def test_sanitize_html() -> None:
     assert sanitized_content == "<p><b>Hello</b>, <i>world</i>!</p>"  # Script tag should be removed
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_empty_string() -> None:
     """Tests that an empty string is handled correctly."""
     # Arrange
@@ -46,7 +46,7 @@ def test_sanitize_html_with_empty_string() -> None:
     assert sanitized_content == ""  # Should return an empty string
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_plain_text() -> None:
     """Tests that plain text is not altered."""
     # Arrange
@@ -59,7 +59,7 @@ def test_sanitize_html_with_plain_text() -> None:
     assert sanitized_content == "Hello, world!"  # Plain text should remain unchanged
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_allowed_tags() -> None:
     """Tests that allowed HTML tags are preserved."""
     # Arrange
@@ -72,7 +72,7 @@ def test_sanitize_html_with_allowed_tags() -> None:
     assert sanitized_content == "<p><b>Hello</b>, <i>world</i>!</p>"  # Tags should be preserved
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_unsafe_tags() -> None:
     """Tests that unsafe HTML tags are removed."""
     # Arrange
@@ -85,7 +85,7 @@ def test_sanitize_html_with_unsafe_tags() -> None:
     assert sanitized_content == "<p>Hello, world!</p>"  # <iframe> should be removed
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_nested_unsafe_tags() -> None:
     """Tests that nested unsafe HTML tags are sanitized."""
     # Arrange
@@ -98,7 +98,7 @@ def test_sanitize_html_with_nested_unsafe_tags() -> None:
     assert sanitized_content == "<p><b>Hello</b>, <i>world</i>!</p>"  # Script should be removed
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_invalid_html() -> None:
     """Tests that invalid HTML structures are sanitized properly."""
     # Arrange
@@ -112,7 +112,7 @@ def test_sanitize_html_with_invalid_html() -> None:
     assert sanitized_content == "<p><b>Hello <i>world!</i></b></p>"
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_extra_spaces() -> None:
     """Tests that extra spaces are handled correctly."""
     # Arrange
@@ -126,7 +126,7 @@ def test_sanitize_html_with_extra_spaces() -> None:
     assert sanitized_content == "<p><b>Hello</b>, <i>world</i>!</p>"
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_sanitize_html_with_unclosed_tags() -> None:
     """Tests that unclosed tags are handled properly."""
     # Arrange

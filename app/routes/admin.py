@@ -77,8 +77,8 @@ def admin_unpublished_posts():
     return render_template('admin_unpublished_posts.html', posts_data=posts_data)
 
 
-@admin_bp.route("/admin/upload_post", methods=["POST"])
-def admin_upload_post():
+@admin_bp.route("/admin/upload-blog-posts", methods=["POST"])
+def admin_upload_blog_posts():
     """Process unpublished blog posts from Google Drive and return a structured JSON response.
 
     This endpoint is triggered by a button in `/admin/unpublished_posts`. Instead of rendering
@@ -102,6 +102,4 @@ def admin_upload_post():
         return jsonify({"success": False, "message": "Missing 'files' data in request"}), 400
 
     files = data["files"]
-    response, status_code = upload_blog_posts_from_drive(files)
-
-    return jsonify(response), status_code
+    return upload_blog_posts_from_drive(files)

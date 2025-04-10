@@ -9,6 +9,7 @@ from app.domain.log import Log
 from app.extensions import db, mail
 from app.orm import start_mappers
 from app.routes.about_me import about_me_bp
+from app.routes.admin import admin_bp
 from app.routes.blog import blog_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
@@ -48,6 +49,7 @@ def create_app(config_class: Type[Config]) -> Flask:
 
     # Register blueprints
     flask_app.register_blueprint(about_me_bp)
+    flask_app.register_blueprint(admin_bp)
     flask_app.register_blueprint(blog_bp)
     flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(resume_bp)

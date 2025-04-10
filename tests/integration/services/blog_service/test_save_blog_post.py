@@ -26,7 +26,7 @@ from app.exceptions import BlogPostDuplicateError
 from app.services.blog_service import save_blog_post
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> None:
     """Integration test for save_blog_post service with a duplicate drive file ID.
 
@@ -62,7 +62,7 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
     assert exc_info.value.message == "A blog post with this drive_file_id already exists."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
     """Integration test for save_blog_post service with a duplicate slug.
 
@@ -98,7 +98,7 @@ def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
     assert exc_info.value.message == "A blog post with this slug already exists."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     """Integration test for save_blog_post service with a duplicate title.
 
@@ -134,7 +134,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     assert exc_info.value.message == "A blog post with this title already exists."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_save_blog_post_missing_fields(session) -> None:
     """Integration test for save_blog_post service with missing required fields.
 
@@ -157,7 +157,7 @@ def test_save_blog_post_missing_fields(session) -> None:
         "Expected KeyError for missing 'drive_file_id' field."
 
 
-@pytest.mark.admin_upload_post
+@pytest.mark.admin_upload_blog_posts
 def test_save_blog_post_success(session) -> None:
     """Integration test for save_blog_post service with valid data.
 
