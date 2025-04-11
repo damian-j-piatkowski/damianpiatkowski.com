@@ -18,6 +18,8 @@ from app.domain.blog_post import BlogPost
 
 
 @pytest.mark.admin_upload_blog_posts
+@pytest.mark.render_blog_posts
+@pytest.mark.render_single_blog_post
 def test_blog_post_creation():
     """Ensures a BlogPost instance is created with expected attributes."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -40,6 +42,8 @@ def test_blog_post_creation():
 
 
 @pytest.mark.admin_upload_blog_posts
+@pytest.mark.render_blog_posts
+@pytest.mark.render_single_blog_post
 def test_blog_post_drive_file_id():
     """Ensures the drive_file_id is assigned correctly."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -58,6 +62,8 @@ def test_blog_post_drive_file_id():
 
 
 @pytest.mark.admin_upload_blog_posts
+@pytest.mark.render_blog_posts
+@pytest.mark.render_single_blog_post
 def test_blog_post_slug():
     """Ensures the slug is assigned correctly."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)
@@ -76,6 +82,8 @@ def test_blog_post_slug():
 
 
 @pytest.mark.admin_upload_blog_posts
+@pytest.mark.render_blog_posts
+@pytest.mark.render_single_blog_post
 def test_blog_post_title_and_content():
     """Ensures title and content attributes are properly set."""
     created_at = datetime(2025, 3, 17, 12, 0, 0, tzinfo=timezone.utc)

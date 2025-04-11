@@ -18,12 +18,14 @@ Fixtures:
     - session: Provides a session object for database interactions.
 """
 
+import pytest
 from freezegun import freeze_time
 
 from app.controllers.blog_controller import get_paginated_posts
 from tests.fixtures.blog_data_fixtures import seed_blog_posts
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_custom_per_page(session, seed_blog_posts):
     """Ensures pagination works with non-default per_page values."""
     seed_blog_posts(20)
@@ -38,6 +40,7 @@ def test_get_paginated_posts_custom_per_page(session, seed_blog_posts):
     assert "slug" in json_data["posts"][0]  # Verify slug is included
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_empty(session):
     """Ensures requesting pagination when no posts exist returns a 404 response."""
     response, status_code = get_paginated_posts(page=1, per_page=10)
@@ -47,6 +50,7 @@ def test_get_paginated_posts_empty(session):
     assert json_data == {"message": "No blog posts found"}
 
 
+@pytest.mark.render_blog_posts
 @freeze_time("2024-12-04 14:18:16")
 def test_get_paginated_posts_invalid_page(session, seed_blog_posts):
     """Checks that requesting page=0 or negative page numbers defaults to page 1."""
@@ -61,6 +65,7 @@ def test_get_paginated_posts_invalid_page(session, seed_blog_posts):
     assert response_zero.get_json()["total_pages"] == 1
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_multiple_pages(session, seed_blog_posts):
     """Verifies pagination across multiple pages, ensuring correct ordering."""
     seed_blog_posts(32)
@@ -81,6 +86,7 @@ def test_get_paginated_posts_multiple_pages(session, seed_blog_posts):
     assert response_page_2.get_json()["posts"][0]["slug"] == "post-11"
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_multiple_pages_custom_per_page(session, seed_blog_posts):
     """Verifies pagination with custom per_page values."""
     seed_blog_posts(25)
@@ -98,6 +104,7 @@ def test_get_paginated_posts_multiple_pages_custom_per_page(session, seed_blog_p
     assert response_page_1.get_json()["posts"][0]["slug"] == "post-1"
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_out_of_range(session, seed_blog_posts):
     """Ensures requesting a page beyond the total available pages returns a 404."""
     seed_blog_posts(15)
@@ -110,6 +117,7 @@ def test_get_paginated_posts_out_of_range(session, seed_blog_posts):
     assert json_data == {"message": "No blog posts found"}
 
 
+@pytest.mark.render_blog_posts
 def test_get_paginated_posts_single_page(session, seed_blog_posts):
     """Verifies pagination when all posts fit within a single page."""
     seed_blog_posts(7)

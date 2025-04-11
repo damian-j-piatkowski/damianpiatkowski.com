@@ -81,21 +81,42 @@ def admin_unpublished_posts():
 def admin_upload_blog_posts():
     """Process unpublished blog posts from Google Drive and return a structured JSON response.
 
-    This endpoint is triggered by a button in `/admin/unpublished_posts`. Instead of rendering
+    This endpoint is triggered by a button in `/admin/unpublished-posts`. Instead of rendering
     a template, it processes selected unpublished blog posts from Google Drive and returns a JSON
     response indicating the outcome.
 
     Flow:
-    - User selects unpublished posts and submits the form at `/admin/unpublished_posts`.
+    - User selects unpublished posts and submits the form at `/admin/unpublished-posts`.
     - The front-end sends a JSON payload with a list of files to this endpoint.
-    - This endpoint extracts the list and calls `upload_blog_posts_from_drive_controller(files)`.
-    - The service reads the file, sanitizes content, and saves the blog post.
-    - The response contains a `success` flag and a `message` explaining the result.
+    - This endpoint extracts the list and calls `upload_blog_posts_from_drive(files)`.
+    - The service reads the files, sanitizes content, and saves the blog posts to the database.
+    - The response indicates success or failure for each file.
 
     Returns:
-        JSON response with:
-        - `success` (bool): Whether the operation was successful.
-        - `message` (str): A status message indicating success or failure.
+        Tuple (JSON, int): A JSON response and HTTP status code.
+
+        Response format varies based on the request:
+
+        - If the 'files' key is missing or the JSON is malformed:
+            {
+                "success": False,
+                "message": "Missing 'files' data in request"
+            }
+            HTTP 400
+
+        - If processing was attempted:
+            {
+                "success": [...],  # List of serialized blog posts successfully uploaded
+                "errors": [...]    # List of error messages for failed uploads
+            }
+            HTTP status codes:
+                - 201: All files uploaded successfully
+                - 207: Partial success (some failed)
+                - 400: All failed due to non-critical errors (e.g., duplicates, missing data)
+                - 500: Critical error halted processing
+
+        - If unsupported media type is sent (e.g. not application/json):
+            HTTP 415 with no JSON body
     """
     data = request.get_json()
     if not data or "files" not in data:

@@ -114,6 +114,8 @@ Markers list can be found in pytest.ini under the [pytest] markers section.
 **Run tests for a specific feature or route** (e.g., `/admin/upload_blog_posts` route):  
   ```bash
   pytest -m admin_upload_blog_posts
+  pytest -m render_blog_posts
+  pytest -m render_single_blog_post
   ```
 
 ### Pytest Extensions for Test Execution Order

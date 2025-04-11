@@ -17,12 +17,14 @@ Fixtures:
     - session: Provides a database session.
 """
 
+import pytest
 from sqlalchemy import delete
 
 from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.models.tables.blog_post import blog_posts  # Needed for deletion test
 
 
+@pytest.mark.render_blog_posts
 def test_count_total_blog_posts_empty(session):
     """Ensures count is zero when no blog posts exist."""
     repository = BlogPostRepository(session)
@@ -30,6 +32,7 @@ def test_count_total_blog_posts_empty(session):
     assert total_posts == 0
 
 
+@pytest.mark.render_blog_posts
 def test_count_total_blog_posts_with_data(session, seed_blog_posts):
     """Verifies correct counting when blog posts exist."""
     seed_blog_posts(25)  # Ensure the database is populated before checking count
@@ -39,6 +42,7 @@ def test_count_total_blog_posts_with_data(session, seed_blog_posts):
     assert total_posts == 25
 
 
+@pytest.mark.render_blog_posts
 def test_count_total_blog_posts_large_dataset(session, seed_blog_posts):
     """Ensures correct count for a large dataset."""
     seed_blog_posts(500)  # Stress test
@@ -48,6 +52,7 @@ def test_count_total_blog_posts_large_dataset(session, seed_blog_posts):
     assert total_posts == 500
 
 
+@pytest.mark.render_blog_posts
 def test_count_total_blog_posts_after_deletion(session, seed_blog_posts):
     """Ensures deleted posts do not affect the count."""
     seed_blog_posts(25)
@@ -62,6 +67,7 @@ def test_count_total_blog_posts_after_deletion(session, seed_blog_posts):
     assert total_posts == 20  # 25 - 5 = 20
 
 
+@pytest.mark.render_blog_posts
 def test_count_total_blog_posts_after_concurrent_insert(session, seed_blog_posts, create_blog_post):
     """Ensures counting reflects newly added posts."""
     seed_blog_posts(10)

@@ -22,6 +22,7 @@ from app.exceptions import BlogPostNotFoundError
 from app.models.repositories.blog_post_repository import BlogPostRepository
 
 
+@pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_long_content(session, create_blog_post):
     """Handles very long content fields."""
     long_content = "A" * 5000  # 5000 characters
@@ -35,6 +36,7 @@ def test_fetch_blog_post_by_slug_long_content(session, create_blog_post):
     assert retrieved_post.content == long_content
 
 
+@pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_not_found(session):
     """Ensures an error is raised when attempting to retrieve a non-existent blog post."""
     repository = BlogPostRepository(session)
@@ -43,6 +45,7 @@ def test_fetch_blog_post_by_slug_not_found(session):
         repository.fetch_blog_post_by_slug("non-existent-slug")
 
 
+@pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_special_characters(session, create_blog_post):
     """Handles titles and content with special characters."""
     post = create_blog_post(title="Spécîål 💡 Tîtle", slug="special-title", content="Côntênt with 🎉 emojis & symbols!")
@@ -55,6 +58,7 @@ def test_fetch_blog_post_by_slug_special_characters(session, create_blog_post):
     assert retrieved_post.content == "Côntênt with 🎉 emojis & symbols!"
 
 
+@pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_valid(session, create_blog_post):
     """Ensures a blog post can be retrieved by its slug."""
     post = create_blog_post(title="Valid Post", slug="valid-post", content="Valid Content", drive_file_id="drive123")

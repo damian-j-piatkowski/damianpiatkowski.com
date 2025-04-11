@@ -18,8 +18,9 @@ Fixtures:
 """
 
 from app.models.repositories.blog_post_repository import BlogPostRepository
+import pytest
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_basic(session, seed_blog_posts):
     """Ensures correct pagination behavior for a valid page request."""
     seed_blog_posts(25)
@@ -31,7 +32,7 @@ def test_fetch_paginated_blog_posts_basic(session, seed_blog_posts):
     assert total_pages == 3  # 25 posts, 10 per page → 3 total pages
     assert posts[0].title == "Post 1"
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_different_per_page_values(session, seed_blog_posts):
     """Verifies pagination behavior with varying per_page values, ensuring correct order."""
     seed_blog_posts(25)
@@ -60,7 +61,7 @@ def test_fetch_paginated_blog_posts_different_per_page_values(session, seed_blog
     assert [post.title for post in posts_per_12_second_page] == expected_titles_page_2
 
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_last_page(session, seed_blog_posts):
     """Ensures the last page contains the remaining posts."""
     seed_blog_posts(25)
@@ -71,7 +72,7 @@ def test_fetch_paginated_blog_posts_last_page(session, seed_blog_posts):
     assert len(posts) == 5  # Last page should have 5 posts
     assert total_pages == 3
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_negative_page(session, seed_blog_posts):
     """Ensures requesting a negative page number defaults to page 1."""
     seed_blog_posts(25)
@@ -83,7 +84,7 @@ def test_fetch_paginated_blog_posts_negative_page(session, seed_blog_posts):
     assert len(posts_neg) == len(posts_page_1)
     assert total_pages_neg == total_pages_1
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_out_of_range(session, seed_blog_posts):
     """Ensures requesting a page beyond the total available pages returns an empty list."""
     seed_blog_posts(25)
@@ -94,7 +95,7 @@ def test_fetch_paginated_blog_posts_out_of_range(session, seed_blog_posts):
     assert len(posts) == 0
     assert total_pages == 3
 
-
+@pytest.mark.render_blog_posts
 def test_fetch_paginated_blog_posts_page_zero(session, seed_blog_posts):
     """Ensures requesting page 0 defaults to page 1."""
     seed_blog_posts(25)
