@@ -1,6 +1,6 @@
-"""Integration tests for the fetch_paginated_blog_posts repository method.
+"""Unit tests for the fetch_paginated_blog_posts repository method.
 
-This module contains integration tests for the fetch_paginated_blog_posts method of
+This module contains unit tests for the fetch_paginated_blog_posts method of
 the BlogPostRepository class, verifying its behavior in retrieving paginated blog
 posts from the database under various conditions.
 

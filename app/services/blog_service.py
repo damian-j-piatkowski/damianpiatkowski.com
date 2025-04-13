@@ -54,7 +54,7 @@ def fetch_all_blog_posts():
     session = db.session
     try:
         logger.info("Fetching all blog posts from the database.")
-        posts = BlogPostRepository(session).fetch_all_blog_posts()
+        posts = BlogPostRepository(session).fetch_all_post_identifiers()
         logger.info("Successfully fetched blog posts.")
         return posts  # List[BlogPost]
     except RuntimeError as e:

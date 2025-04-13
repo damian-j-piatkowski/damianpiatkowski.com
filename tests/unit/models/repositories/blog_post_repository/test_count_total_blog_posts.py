@@ -1,6 +1,6 @@
-"""Integration tests for the count_total_blog_posts repository method.
+"""Unit tests for the count_total_blog_posts repository method.
 
-This module contains integration tests for the count_total_blog_posts method of
+This module contains unit tests for the count_total_blog_posts method of
 the BlogPostRepository class, verifying its behavior in counting the total number
 of blog posts in the database.
 

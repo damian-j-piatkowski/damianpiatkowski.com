@@ -107,31 +107,32 @@ class BlogPostRepository:
             # Catch any other database-related errors
             raise RuntimeError("Failed to create blog post in the database.") from e
 
-    def fetch_all_blog_posts(self) -> List[BlogPost]:
-        """Fetch all blog posts from the database.
+
+    def fetch_all_post_identifiers(self) -> List[dict]:
+        """Fetch slugs and other identifiers of all blog posts from the database.
 
         Returns:
-            List[BlogPost]: A list of BlogPost instances.
-
-        Raises:
-            RuntimeError: If a database error occurs.
+            List[dict]: A list of dicts with 'slug', 'title', and 'drive_file_id'.
         """
         try:
-            query = select(blog_posts)
+            query = select(
+                blog_posts.c.slug,
+                blog_posts.c.title,
+                blog_posts.c.drive_file_id
+            )
             result = self.session.execute(query).mappings().all()
 
             return [
-                BlogPost(
-                    title=row['title'],
-                    slug=row['slug'],  # Ensure slug is included
-                    content=row['content'],
-                    drive_file_id=row['drive_file_id'],
-                    created_at=row['created_at']
-                )
+                {
+                    "slug": row["slug"],
+                    "title": row["title"],
+                    "drive_file_id": row["drive_file_id"]
+                }
                 for row in result
             ] if result else []
+
         except SQLAlchemyError as e:
-            raise RuntimeError("Failed to fetch blog posts from the database.") from e
+            raise RuntimeError("Failed to fetch blog post identifiers from the database.") from e
 
     def fetch_paginated_blog_posts(self, page: int, per_page: int) -> tuple[List[BlogPost], int]:
         """Retrieve paginated blog posts from the database.

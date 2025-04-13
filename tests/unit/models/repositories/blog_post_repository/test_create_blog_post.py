@@ -1,6 +1,6 @@
-"""Integration tests for the create_blog_post repository method.
+"""Unit tests for the create_blog_post repository method.
 
-This module contains integration tests for the create_blog_post method of
+This module contains unit tests for the create_blog_post method of
 the BlogPostRepository class, verifying its behavior in inserting new
 blog posts into the database.
 

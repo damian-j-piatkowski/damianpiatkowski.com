@@ -1,6 +1,6 @@
-"""Integration tests for the fetch_blog_post_by_slug repository method.
+"""Unit tests for the fetch_blog_post_by_slug repository method.
 
-This module contains integration tests for the fetch_blog_post_by_slug method of
+This module contains unit tests for the fetch_blog_post_by_slug method of
 the BlogPostRepository class, verifying its behavior in retrieving individual
 blog posts from the database.
 
