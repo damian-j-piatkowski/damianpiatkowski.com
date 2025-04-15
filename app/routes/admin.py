@@ -12,11 +12,10 @@ Routes:
     - /admin/upload_post: Handles uploading blog posts from Google Drive.
 """
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, flash
 
 from app.controllers.admin_controller import (
     find_unpublished_drive_articles,
-    get_logs_data,
     upload_blog_posts_from_drive,
     # get_published_blog_posts,
     # delete_blog_posts
@@ -39,18 +38,6 @@ admin_bp = Blueprint('admin', __name__)
 #     result, status_code = delete_blog_posts(post_ids)
 #     return jsonify(result), status_code
 
-@admin_bp.route('/admin/logs', methods=['GET'])
-def admin_logs():
-    """Renders the admin logs page.
-
-    Fetches log data from the system and renders it in an HTML template.
-
-    Returns:
-        Response: Rendered HTML template with log data.
-    """
-    log_data = get_logs_data()
-    return render_template('admin_logs.html', log_data=log_data)
-
 
 # @admin_bp.route('/admin/published_posts', methods=['GET'])
 # def admin_published_posts():
@@ -64,17 +51,39 @@ def admin_logs():
 #     published_posts_data = get_published_blog_posts()
 #     return render_template('admin_published_posts.html', published_posts_data=published_posts_data)
 
-@admin_bp.route('/admin/unpublished_posts', methods=['GET'])
+@admin_bp.route('/admin/unpublished-posts', methods=['GET'])
 def admin_unpublished_posts():
-    """Renders the admin unpublished posts page.
+    """Render the Unpublished Blog Posts admin page.
 
-    Fetches unpublished blog posts from Google Drive and renders them in an HTML template.
+    This page lists blog post files stored on Google Drive that have not yet been published
+    to the database. It provides an interface for admins to preview and select files
+    for upload.
+
+    Flow:
+    - User visits `/admin/unpublished-posts` from the admin sidebar.
+    - This route triggers a call to `admin_controller.find_unpublished_drive_articles()`.
+    - The controller fetches:
+        - Published blog post metadata from the database via the `blog_post_repository`.
+        - All files in the configured Google Drive folder via `google_drive_service`.
+    - The controller returns a list of files that are on Google Drive but not yet in the database.
+    - Each item includes: title, slug, and Drive file ID.
+    - The data is passed to the `admin_unpublished_posts.html` template for rendering.
+
+    JavaScript on the front-end:
+    - Allows selecting files for upload.
+    - Sends an AJAX request to `/admin/upload-blog-posts` with selected file metadata.
+    - Updates the UI dynamically upon success/failure.
 
     Returns:
-        Response: Rendered HTML template with unpublished blog post data.
+        Response: Rendered HTML template with a list of unpublished blog posts.
     """
-    posts_data = find_unpublished_drive_articles()
-    return render_template('admin_unpublished_posts.html', posts_data=posts_data)
+    posts_data, status_code = find_unpublished_drive_articles()
+
+    if status_code != 200:
+        flash("Failed to fetch unpublished posts from Google Drive.", "danger")
+        posts_data = []
+
+    return render_template("admin_unpublished_posts.html", posts_data=posts_data)
 
 
 @admin_bp.route("/admin/upload-blog-posts", methods=["POST"])

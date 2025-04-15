@@ -35,7 +35,15 @@ from app.exceptions import GoogleDrivePermissionError
 from app.services.google_drive_service import GoogleDriveService
 
 
+@pytest.mark.admin_unpublished_posts
 class TestListFolderContentsMockedAPI:
+    """Unit tests for list_folder_contents() using a mocked Google Drive service.
+
+    These tests simulate various Google Drive API responses and error conditions
+    using mock objects. The goal is to validate how the GoogleDriveService class
+    handles successful folder listings, permission errors, missing folders, and
+    other unexpected API errors, without making actual network calls.
+    """
 
     def test_list_folder_contents_403_error(self, mocker):
         """Tests that a 403 HttpError raises GoogleDrivePermissionError."""
@@ -109,9 +117,16 @@ class TestListFolderContentsMockedAPI:
             fields="files(id, name)"
         )
 
-
+@pytest.mark.admin_unpublished_posts
 @pytest.mark.api
 class TestListFolderContentsRealAPI:
+    """Unit tests for list_folder_contents() using the real Google Drive API.
+
+    These tests perform real API calls to a Google Drive folder using valid
+    service account credentials and configuration. They verify correct behavior
+    when accessing existing folders, handling missing folders, and ensuring
+    expected file naming conventions and content visibility are enforced.
+    """
 
     def test_list_folder_contents_not_found(self, google_drive_service_fixture: GoogleDriveService) -> None:
         """Tests that listing contents of a non-existent folder raises an error."""

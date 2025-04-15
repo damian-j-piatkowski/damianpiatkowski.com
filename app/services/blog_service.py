@@ -49,17 +49,30 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
         raise RuntimeError("Failed to retrieve blog posts") from e
 
 
-def fetch_all_blog_posts():
-    """Service function to fetch all blog posts."""
+def get_all_blog_post_identifiers() -> list[dict]:
+    """Get all blog post identifiers via the repository.
+
+    This function delegates to the BlogPostRepository to retrieve a list of blog post
+    identifiers from the database. Each identifier includes the slug, title, and
+    drive file ID. This is typically used for comparing against external sources
+    like Google Drive to determine which posts are unpublished.
+
+    Returns:
+        list[dict]: A list of dictionaries containing 'slug', 'title', and 'drive_file_id'.
+
+    Raises:
+        RuntimeError: If the repository fails to retrieve the data.
+    """
     session = db.session
     try:
-        logger.info("Fetching all blog posts from the database.")
-        posts = BlogPostRepository(session).fetch_all_post_identifiers()
-        logger.info("Successfully fetched blog posts.")
-        return posts  # List[BlogPost]
+        logger.info("Fetching blog post identifiers from the repository.")
+        identifiers = BlogPostRepository(session).fetch_all_post_identifiers()
+
+        logger.info(f"Successfully fetched {len(identifiers)} blog post identifiers.")
+        return identifiers
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
-        raise RuntimeError("Failed to retrieve blog posts") from e
+        raise RuntimeError("Failed to retrieve blog post identifiers") from e
 
 
 def save_blog_post(validated_data) -> BlogPost:

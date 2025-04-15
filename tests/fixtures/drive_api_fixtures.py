@@ -5,6 +5,15 @@ tests of the GoogleDriveService class. It includes fixtures for mocking the
 Google Drive service, environment variables, service account credentials,
 common Google Drive scopes, and retrieving real configuration values such as
 the folder ID for blog posts.
+
+Fixtures:
+    - google_drive_service_fixture
+    - mock_env
+    - mock_google_drive_service
+    - mock_service_account_creds
+    - real_folder_id
+    - test_drive_file_metadata_map
+    - scopes
 """
 
 from unittest import mock
@@ -100,48 +109,34 @@ def real_folder_id(app) -> str:
 
 
 @pytest.fixture
-def real_drive_file_metadata():
-    """Returns a known Google Drive file's ID along with extracted slug and title."""
+def test_drive_file_metadata_map():
+    """Returns a dict of test Google Drive file metadata keyed by human-readable aliases."""
     return {
-        "file_id": "1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo",
-        "slug": "six-essential-object-oriented-design-principles-from-matthias-nobacks-object-design-style-guide",
-        "title": "Six Essential Object Oriented Design Principles From Matthias Nobacks Object Design Style Guide",
-    }
-
-
-@pytest.fixture
-def restricted_drive_file_metadata():
-    """Returns metadata for a real Google Drive file that is NOT accessible to the bot."""
-    return {
-        "file_id": "1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk",
-        "slug": "test-restricted-access",
-        "title": "Test Restricted Access",
-    }
-
-
-@pytest.fixture
-def another_drive_file_metadata():
-    """Fixture providing metadata for a different real Google Drive file."""
-    return {
-        "file_id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E",
-        "title": "Value Objects",
-        "slug": "value-objects",
-    }
-
-
-@pytest.fixture(scope='function')
-def valid_file_data():
-    """Fixture providing valid file data for blog post file processing tests.
-
-    This dictionary includes:
-    - A sample file_id as it would come from Google Drive
-    - A title used for the blog post
-    - A slug derived from the title
-    """
-    return {
-        'file_id': '12345',
-        'title': 'Test Blog Post',
-        'slug': 'test-blog-post'
+        "design_principles": {
+            "file_id": "1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo",
+            "slug": "six-essential-object-oriented-design-principles-from-matthias-nobacks-object-design-style-guide",
+            "title": "Six Essential Object Oriented Design Principles From Matthias Nobacks Object Design Style Guide",
+        },
+        "value_objects": {
+            "file_id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E",
+            "slug": "value-objects",
+            "title": "Value Objects",
+        },
+        "value_objects_test": {
+            "file_id": "1e8CUUM6S3ZXRXIhoE0oxM_4O5eqH1mr5YyoiWzjpWxI",
+            "slug": "value-objects-test",
+            "title": "Value Objects Test",
+        },
+        "markdown_to_html": {
+            "file_id": "1zZM1zY6qmOIuXh2Fb-6oQ3lZ_ETRvEnlnl75Pw3WecE",
+            "slug": "markdown-to-html-test",
+            "title": "Markdown To Html Test",
+        },
+        "restricted": {
+            "file_id": "1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk",
+            "slug": "test-restricted-access",
+            "title": "Test Restricted Access",
+        },
     }
 
 
@@ -153,12 +148,3 @@ def scopes() -> list[str]:
         list[str]: A list of Google Drive OAuth2 scopes.
     """
     return ['https://www.googleapis.com/auth/drive']
-
-@pytest.fixture
-def valid_file_dict(real_drive_file_metadata):
-    """Transform metadata to match the expected dict format used in requests."""
-    return {
-        "id": real_drive_file_metadata["file_id"],
-        "title": real_drive_file_metadata["title"],
-        "slug": real_drive_file_metadata["slug"]
-    }

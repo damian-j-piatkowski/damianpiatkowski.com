@@ -21,8 +21,8 @@ Test Classes and Functions:
 Fixtures:
     - mock_google_drive_service: Mocks the Google Drive service interactions.
     - google_drive_service_fixture: Provides an instance of the real GoogleDriveService.
-    - real_drive_file_metadata: Provides metadata for a known real file on Google Drive.
-    - restricted_drive_file_metadata: Provides metadata for an inaccessible Drive file.
+    - test_drive_file_metadata_map: Provides a mapping of human-readable aliases to real Google Drive file metadata
+        for use in integration tests. Each entry is a dictionary containing 'file_id', 'slug', and 'title'.
 """
 
 from unittest.mock import Mock
@@ -107,23 +107,33 @@ class TestReadFileRealAPI:
     def test_read_file_permission_denied(
             self,
             google_drive_service_fixture: GoogleDriveService,
-            restricted_drive_file_metadata: dict
+            test_drive_file_metadata_map: dict
     ) -> None:
         """Tests that insufficient permissions raise a GoogleDriveFileNotFoundError.
 
         Google Drive API returns a 404 'File not found' error even when the file exists
         but is inaccessible due to insufficient permissions.
         """
+        # Leverage the 'restricted' file metadata from the fixture
+        restricted_file_metadata = test_drive_file_metadata_map["restricted"]
+        file_id = restricted_file_metadata["file_id"]
+
         with pytest.raises(exceptions.GoogleDriveFileNotFoundError) as exc_info:
-            google_drive_service_fixture.read_file(restricted_drive_file_metadata["file_id"])
+            google_drive_service_fixture.read_file(file_id)
+
         assert "Resource not found" in str(exc_info.value)
 
     def test_read_file_success(
             self,
             google_drive_service_fixture: GoogleDriveService,
-            real_drive_file_metadata: dict
+            test_drive_file_metadata_map: dict
     ) -> None:
         """Tests reading the contents of a file with a valid file ID."""
-        file_content = google_drive_service_fixture.read_file(real_drive_file_metadata["file_id"])
+        # Leverage the real_drive_file_metadata from the fixture
+        file_metadata = test_drive_file_metadata_map["design_principles"]
+
+        file_content = google_drive_service_fixture.read_file(file_metadata["file_id"])
+
         assert isinstance(file_content, str), "Expected file content to be a string."
         assert len(file_content) > 0, "File content should not be empty."
+

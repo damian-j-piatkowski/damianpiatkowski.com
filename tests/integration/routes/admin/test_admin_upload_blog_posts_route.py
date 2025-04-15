@@ -16,7 +16,7 @@ Fixtures:
     - app: Provides the Flask application context for testing.
     - client: A Flask test client to simulate HTTP requests.
     - google_drive_service_fixture: Provides real access to Google Drive.
-    - real_drive_file_metadata: Metadata for a real file used in the upload process.
+    - file_metadata: Metadata for a real file used in the upload process.
     - session: SQLAlchemy database session for verifying persistence.
 """
 
@@ -53,13 +53,15 @@ def test_upload_blog_posts_malformed_json(client):
 @pytest.mark.api
 @pytest.mark.admin_upload_blog_posts
 def test_upload_blog_posts_route_with_actual_api(
-        app, client, google_drive_service_fixture, session, real_drive_file_metadata
+        app, client, google_drive_service_fixture, session, test_drive_file_metadata_map
 ):
     """Tests the /admin/upload-blog-posts route with real Google Drive API and database."""
     with app.app_context():
-        file_id = real_drive_file_metadata["file_id"]
-        title = real_drive_file_metadata["title"]
-        slug = real_drive_file_metadata["slug"]
+        # Leverage the file_metadata from the fixture
+        file_metadata = test_drive_file_metadata_map["design_principles"]
+        file_id = file_metadata["file_id"]
+        title = file_metadata["title"]
+        slug = file_metadata["slug"]
 
         payload = {
             "files": [{"id": file_id, "title": title, "slug": slug}]

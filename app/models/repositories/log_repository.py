@@ -10,9 +10,7 @@ Methods:
 - fetch_all_logs: Retrieves all log entries as Log domain objects.
 """
 
-from typing import List
-
-from sqlalchemy import insert, select
+from sqlalchemy import insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -57,26 +55,3 @@ class LogRepository:
         except SQLAlchemyError as e:
             self.session.rollback()
             raise RuntimeError("Failed to create log in the database.") from e
-
-    def fetch_all_logs(self) -> List[Log]:
-        """
-        Retrieves all log entries as Log domain objects.
-
-        Returns:
-            A list of Log objects representing all log entries.
-        """
-        try:
-            query = select(logs)  # SQLAlchemy select statement
-            result = self.session.execute(query).mappings().all()  # Dict-like rows
-
-            return [
-                Log(
-                    log_id=row['id'],
-                    level=row['level'],
-                    message=row['message'],
-                    timestamp=row['timestamp'],  # Assume DB timestamps are UTC
-                )
-                for row in result
-            ] if result else []
-        except SQLAlchemyError as e:
-            raise RuntimeError("Failed to fetch logs from the database.") from e

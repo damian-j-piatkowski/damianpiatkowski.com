@@ -24,37 +24,43 @@ Fixtures:
     - create_blog_post: Fixture to create blog posts in the database.
     - mocker: Provides mocking utilities for mocking external services.
     - session: Provides a session object for database interactions.
+    - test_drive_file_metadata_map: Provides a mapping of human-readable aliases to real Google Drive file metadata
+        for use in integration tests. Each entry is a dictionary containing 'file_id', 'slug', and 'title'.
 """
 
+import pytest
 from flask import current_app
 
 from app import exceptions
 from app.controllers.admin_controller import find_unpublished_drive_articles
 
 
-def test_find_unpublished_drive_articles_all_articles_published(app, session, create_blog_post):
-    """Test when all Google Drive articles are already published in the database."""
+@pytest.mark.admin_unpublished_posts
+@pytest.mark.api
+def test_find_unpublished_drive_articles_all_articles_published(
+        app,
+        session,
+        create_blog_post,
+        test_drive_file_metadata_map
+):
+    """Test that when all Drive articles are already in the database, none are returned as unpublished."""
     with app.app_context():
-        # Insert both articles that are in Google Drive folder into the database
-        create_blog_post(
-            title="01_six_essential_object_oriented_design_principles_from_matthias_"
-                  "nobacks_object_design_style_guide",
-            content="Content about design principles",
-        )
-        create_blog_post(
-            title="02_value_objects",
-            content="Content about value objects",
-        )
+        for metadata in test_drive_file_metadata_map.values():
+            create_blog_post(
+                title=metadata["title"],
+                slug=metadata["slug"],
+                content=f"Content for {metadata['slug']}",
+                drive_file_id=metadata["file_id"],
+            )
         session.commit()
 
-        # Call the function, expecting no missing articles as all are published
         response, status_code = find_unpublished_drive_articles()
 
-        # Expecting 200 with an empty list since all articles are published
         assert status_code == 200
         assert response.json == []
 
 
+@pytest.mark.admin_unpublished_posts
 def test_find_unpublished_drive_articles_empty_database_and_folder(app, session, mocker):
     """Test with no blog posts in the database and no files in Google Drive."""
     with app.app_context():
@@ -69,6 +75,7 @@ def test_find_unpublished_drive_articles_empty_database_and_folder(app, session,
         assert response.json == []
 
 
+@pytest.mark.admin_unpublished_posts
 def test_find_unpublished_drive_articles_google_drive_api_error(app, session, mocker):
     """Test handling of a general Google Drive API error."""
     with app.app_context():
@@ -84,6 +91,7 @@ def test_find_unpublished_drive_articles_google_drive_api_error(app, session, mo
         assert response.json == {'error': 'Google Drive API error'}
 
 
+@pytest.mark.admin_unpublished_posts
 def test_find_unpublished_drive_articles_no_folder_id(app, session):
     """Test the case where Google Drive folder ID is missing in the config."""
     with app.app_context():
@@ -101,6 +109,7 @@ def test_find_unpublished_drive_articles_no_folder_id(app, session):
                 'DRIVE_BLOG_POSTS_FOLDER_ID'] = original_config  # Restore original config.
 
 
+@pytest.mark.admin_unpublished_posts
 def test_find_unpublished_drive_articles_permission_error(app, session, mocker):
     """Test handling of a Google Drive permission error."""
     with app.app_context():
@@ -117,40 +126,49 @@ def test_find_unpublished_drive_articles_permission_error(app, session, mocker):
         assert response.json == {'error': 'Insufficient permissions for Google Drive access'}
 
 
-def test_find_unpublished_drive_articles_success(app, session, create_blog_post):
-    """Test finding missing articles when some are unpublished in Google Drive."""
-    with app.app_context():
-        # Insert a published article into the database with normalized title
-        #
-        # Google Drive Test Folder Contents:
-        # - "01_six_essential_object_oriented_design_principles_from_matthias_"
-        #    "nobacks_object_design_style_guide"
-        # - "02_value_objects"
-        #
-        # After normalization:
-        # - "six_essential_object_oriented_design_principles_from_matthias_"
-        #    "nobacks_object_design_style_guide"
-        # - "value_objects"
-        #
-        # In this test, we simulate that only the first article is published
-        # in the database, so we expect the response to contain only the
-        # normalized title of the second article.
+@pytest.mark.admin_unpublished_posts
+@pytest.mark.api
+def test_find_unpublished_drive_articles_success(app, session, create_blog_post, test_drive_file_metadata_map):
+    """
+    Test finding missing articles:
+    - Stage 1: Insert one article, expect the other in the response.
+    - Stage 2: Insert both, expect neither in the response.
+    Ignore unrelated entries on Google Drive.
+    """
+    real_metadata = test_drive_file_metadata_map["design_principles"]
+    another_metadata = test_drive_file_metadata_map["value_objects"]
 
+    with app.app_context():
+        # Stage 1: Insert only the first article into the DB
         create_blog_post(
-            title="01_six_essential_object_oriented_design_principles_from_matthias_"
-                  "nobacks_object_design_style_guide",
-            content="Content about design principles",
-            url="post-1"
+            title=real_metadata["title"],
+            slug=real_metadata["slug"],
+            content="Sample content for design principles article.",
+            drive_file_id=real_metadata["file_id"],
         )
         session.commit()
 
-        # Call the actual find_unpublished_drive_articles controller function
         response, status_code = find_unpublished_drive_articles()
-
-        # Expected output with exact id and title match
-        expected_response = [
-            {"id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E", "title": "value_objects"}
-        ]
-
         assert status_code == 200
-        assert response.json == expected_response
+
+        returned_slugs = [item["slug"] for item in response.json]
+
+        assert another_metadata["slug"] in returned_slugs
+        assert real_metadata["slug"] not in returned_slugs
+
+        # Stage 2: Insert the second article too
+        create_blog_post(
+            title=another_metadata["title"],
+            slug=another_metadata["slug"],
+            content="Sample content for value objects article.",
+            drive_file_id=another_metadata["file_id"],
+        )
+        session.commit()
+
+        response, status_code = find_unpublished_drive_articles()
+        assert status_code == 200
+
+        returned_slugs = [item["slug"] for item in response.json]
+
+        assert real_metadata["slug"] not in returned_slugs
+        assert another_metadata["slug"] not in returned_slugs

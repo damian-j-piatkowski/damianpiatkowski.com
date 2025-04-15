@@ -22,12 +22,10 @@ from requests import Response
 from app import exceptions
 from app.exceptions import BlogPostDuplicateError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
-from app.models.data_schemas.log_schema import LogSchema
-from app.services.blog_service import fetch_all_blog_posts
+from app.services.blog_service import get_all_blog_post_identifiers
 from app.services.file_processing_service import process_file
 from app.services.formatting_service import trim_content
 from app.services.google_drive_service import GoogleDriveService
-from app.services.log_service import fetch_all_logs
 from app.services.sanitization_service import extract_slug_and_title
 
 logger = logging.getLogger(__name__)
@@ -73,8 +71,8 @@ def find_unpublished_drive_articles() -> jsonify:
     """
     try:
         # Fetch blog posts from the database and normalize their slugs
-        db_posts = fetch_all_blog_posts()
-        db_slugs = {post.slug for post in db_posts}  # Now comparing SLUGS, not titles
+        db_posts = get_all_blog_post_identifiers()
+        db_slugs = {post["slug"] for post in db_posts}
 
         # Fetch folder ID from the app configuration
         folder_id = current_app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
@@ -118,22 +116,6 @@ def find_unpublished_drive_articles() -> jsonify:
     except RuntimeError as e:
         current_app.logger.error(f"Error in finding unpublished articles: {e}")
         return jsonify({"error": str(e)}), 500
-
-
-def get_logs_data():
-    """Fetch logs and serialize them for JSON response."""
-    try:
-        logs = fetch_all_logs()  # List[Log]
-        if not logs:
-            current_app.logger.info("No logs found.")
-            return jsonify({"message": "No logs found"}), 404
-
-        schema = LogSchema(many=True)  # Instantiate schema for multiple logs
-        serialized_logs = schema.dump(logs)  # Serialize the domain objects
-        return jsonify(serialized_logs), 200  # Return serialized data with status 200
-    except RuntimeError as e:
-        current_app.logger.error(f"Failed to retrieve logs: {e}")
-        return jsonify({"error": str(e)}), 500  # Return error with status 500
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResponse, int]:

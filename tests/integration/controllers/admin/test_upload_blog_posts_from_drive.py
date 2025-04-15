@@ -24,8 +24,8 @@ Fixtures:
     - app: Provides the Flask application context for testing.
     - mock_google_drive_service: Mocks the Google Drive service interactions.
     - session: Manages the database session for test data verification.
-    - real_drive_file_metadata: Provides metadata for a real file on Google Drive.
-    - another_drive_file_metadata: Provides metadata for another real file on Google Drive.
+    - test_drive_file_metadata_map: Provides a mapping of human-readable aliases to real Google Drive file metadata
+        for use in integration tests. Each entry is a dictionary containing 'file_id', 'slug', and 'title'.
 """
 
 import json
@@ -49,6 +49,14 @@ from tests.scenarios.upload_blog_posts_from_drive_controller import (
 
 @pytest.mark.admin_upload_blog_posts
 class TestUploadBlogPostsMockedAPI:
+    """Integration tests for uploading blog posts using a mocked Google Drive API.
+
+    These tests simulate the interaction with the Google Drive API by mocking the
+    API responses. The goal is to validate the handling of blog post uploads without
+    relying on an actual Google Drive instance. The tests verify that the system
+    behaves as expected when interacting with mocked API responses.
+    """
+
     @pytest.mark.parametrize("scenario", errors_only.scenarios)
     def test_upload_blog_posts_from_drive_errors_only(
             self, app: Flask, mock_google_drive_service: Mock, session: Session, scenario: Dict[str, Any]
@@ -185,14 +193,24 @@ class TestUploadBlogPostsMockedAPI:
 @pytest.mark.api
 @pytest.mark.admin_upload_blog_posts
 class TestUploadBlogPostsRealDriveAPI:
+    """Integration tests for uploading blog posts using the real Google Drive API.
+
+    These tests validate that blog post files retrieved from Google Drive are correctly
+    processed, sanitized, stored in the database, and returned in the expected response
+    format. Each test exercises the end-to-end flow using actual Drive files configured
+    via the test metadata fixture.
+    """
+
     def test_upload_blog_posts_from_drive_with_actual_api(
-            self, app, google_drive_service_fixture, session, real_drive_file_metadata
+            self, app, google_drive_service_fixture, session, test_drive_file_metadata_map
     ):
-        """Tests uploading blog posts using the actual Google Drive API."""
+        """Tests uploading a single blog post using the actual Google Drive API."""
+        metadata = test_drive_file_metadata_map["design_principles"]
+
         with app.app_context():
-            file_id = real_drive_file_metadata["file_id"]
-            title = real_drive_file_metadata["title"]
-            slug = real_drive_file_metadata["slug"]
+            file_id = metadata["file_id"]
+            title = metadata["title"]
+            slug = metadata["slug"]
 
             files = [{"id": file_id, "title": title, "slug": slug}]
             response, status_code = upload_blog_posts_from_drive(files)
@@ -215,21 +233,16 @@ class TestUploadBlogPostsRealDriveAPI:
             assert saved_post.content
 
     def test_upload_multiple_blog_posts_with_actual_api(
-            self, app, google_drive_service_fixture, session, real_drive_file_metadata, another_drive_file_metadata
+            self, app, google_drive_service_fixture, session, test_drive_file_metadata_map
     ):
         """Tests uploading two blog posts using the actual Google Drive API."""
+        metadata_1 = test_drive_file_metadata_map["design_principles"]
+        metadata_2 = test_drive_file_metadata_map["value_objects"]
+
         with app.app_context():
             files = [
-                {
-                    "id": real_drive_file_metadata["file_id"],
-                    "title": real_drive_file_metadata["title"],
-                    "slug": real_drive_file_metadata["slug"],
-                },
-                {
-                    "id": another_drive_file_metadata["file_id"],
-                    "title": another_drive_file_metadata["title"],
-                    "slug": another_drive_file_metadata["slug"],
-                },
+                {"id": metadata_1["file_id"], "title": metadata_1["title"], "slug": metadata_1["slug"]},
+                {"id": metadata_2["file_id"], "title": metadata_2["title"], "slug": metadata_2["slug"]},
             ]
 
             response, status_code = upload_blog_posts_from_drive(files)
@@ -247,11 +260,11 @@ class TestUploadBlogPostsRealDriveAPI:
                 assert uploaded_post["content"].endswith("...") or len(uploaded_post["content"]) <= max_trimmed_length
 
             uploaded_slugs = {post["slug"] for post in response_data["success"]}
-            assert real_drive_file_metadata["slug"] in uploaded_slugs
-            assert another_drive_file_metadata["slug"] in uploaded_slugs
+            assert metadata_1["slug"] in uploaded_slugs
+            assert metadata_2["slug"] in uploaded_slugs
 
             from app.models.tables.blog_post import blog_posts
-            for metadata in [real_drive_file_metadata, another_drive_file_metadata]:
+            for metadata in [metadata_1, metadata_2]:
                 saved_post = session.query(blog_posts).filter_by(drive_file_id=metadata["file_id"]).one_or_none()
                 assert saved_post is not None
                 assert saved_post.title == metadata["title"]
