@@ -22,6 +22,7 @@ import pytest
 from app.services.sanitization_service import extract_slug_and_title
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_double_extension() -> None:
     """Tests a file name with multiple extensions to ensure only the last one is removed."""
     # Arrange
@@ -35,6 +36,7 @@ def test_extract_slug_and_title_double_extension() -> None:
     assert title == "My Post.Tar"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_exemplary_case() -> None:
     """Tests a file name that is already correctly formatted."""
     # Arrange
@@ -48,6 +50,7 @@ def test_extract_slug_and_title_exemplary_case() -> None:
     assert title == "Exemplary Post"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_extra_spaces() -> None:
     """Tests extraction from a file name with extra spaces before and after words."""
     # Arrange
@@ -61,6 +64,7 @@ def test_extract_slug_and_title_extra_spaces() -> None:
     assert title == "Messy File Name"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_mixed_case() -> None:
     """Tests a file name with mixed case to ensure slug is lowercased."""
     # Arrange
@@ -74,6 +78,7 @@ def test_extract_slug_and_title_mixed_case() -> None:
     assert title == "Mixed Case"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_multiple_underscores() -> None:
     """Tests extraction from a file name with multiple underscores after the prefix."""
     # Arrange
@@ -87,6 +92,7 @@ def test_extract_slug_and_title_multiple_underscores() -> None:
     assert title == "This Is A Test"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_no_extension() -> None:
     """Tests extraction from a file name that has no extension."""
     # Arrange
@@ -100,6 +106,7 @@ def test_extract_slug_and_title_no_extension() -> None:
     assert title == "A Title Without Extension"
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_no_prefix_number() -> None:
     """Tests that an exception is raised when there is no numeric prefix before `_`."""
     # Arrange
@@ -111,6 +118,7 @@ def test_extract_slug_and_title_no_prefix_number() -> None:
         extract_slug_and_title(file_name)
 
 
+@pytest.mark.admin_unpublished_posts
 def test_extract_slug_and_title_numbers_in_title() -> None:
     """Tests a title that contains numbers after the prefix."""
     # Arrange

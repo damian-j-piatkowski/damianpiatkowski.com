@@ -77,13 +77,9 @@ def admin_unpublished_posts():
     Returns:
         Response: Rendered HTML template with a list of unpublished blog posts.
     """
-    posts_data, status_code = find_unpublished_drive_articles()
+    # TODO: replace this with `render_template("admin_unpublished_posts.html", posts_data=posts_data)`
+    return find_unpublished_drive_articles()
 
-    if status_code != 200:
-        flash("Failed to fetch unpublished posts from Google Drive.", "danger")
-        posts_data = []
-
-    return render_template("admin_unpublished_posts.html", posts_data=posts_data)
 
 
 @admin_bp.route("/admin/upload-blog-posts", methods=["POST"])
