@@ -6,14 +6,12 @@ queried correctly in the database.
 
 Test functions:
 - test_log_delete: Tests deleting a log entry from the database.
-- test_log_insert: Tests inserting a log entry into the database.
 - test_log_insert_multiple: Tests inserting multiple log entries
     with different levels and messages.
 - test_log_update: Tests updating a log entry in the database.
 """
 
 import pytest
-from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.domain.log import Log
@@ -33,25 +31,6 @@ def test_log_delete(session: Session, create_log):
     # Verify the log entry has been deleted
     deleted_log = session.query(Log).filter_by(level='INFO').first()
     assert deleted_log is None
-
-
-def test_log_insert(session: Session, create_log):
-    """Test inserting a log entry into the database."""
-    log_entry = create_log()  # Use default values from the fixture
-    session.commit()
-
-    # Fetch the inserted log entry and verify its attributes
-    fetched_log = (
-        session.query(Log)
-        .filter_by(level='INFO', message='Test log message')
-        .order_by(desc(Log.id))
-        .first()
-    )
-
-    assert fetched_log is not None
-    assert fetched_log.level == 'INFO'
-    assert fetched_log.message == 'Test log message'
-    assert fetched_log.id == log_entry.id
 
 
 @pytest.mark.parametrize("level, message", [

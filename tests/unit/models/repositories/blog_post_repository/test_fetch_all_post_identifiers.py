@@ -23,6 +23,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.models.repositories.blog_post_repository import BlogPostRepository
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_fetch_all_post_identifiers_empty_db(session):
     """Ensures an empty list is returned when no blog posts exist."""
@@ -31,6 +32,7 @@ def test_fetch_all_post_identifiers_empty_db(session):
     assert identifiers == []
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_fetch_all_post_identifiers_error_handling():
     """Simulates a SQLAlchemy error to verify proper exception handling."""
@@ -43,6 +45,7 @@ def test_fetch_all_post_identifiers_error_handling():
         repository.fetch_all_post_identifiers()
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_fetch_all_post_identifiers_matches_seeded_posts(session, seed_blog_posts):
     """Ensures the identifiers match the expected values based on seeded blog posts."""
@@ -59,6 +62,7 @@ def test_fetch_all_post_identifiers_matches_seeded_posts(session, seed_blog_post
     assert sorted(identifiers, key=lambda x: x["slug"]) == sorted(expected, key=lambda x: x["slug"])
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_fetch_all_post_identifiers_returns_expected_structure(session, seed_blog_posts):
     """Verifies that the returned list contains dicts with slug, title, and drive_file_id."""

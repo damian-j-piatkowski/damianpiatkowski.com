@@ -1,17 +1,25 @@
-"""Admin controller for managing unpublished blog posts stored in Google Drive.
+"""Admin controller for managing blog posts sourced from Google Drive and stored in the database.
 
-This module defines endpoints used by the admin interface to manage blog content sourced from Google Drive.
-It facilitates two main operations:
+This module defines endpoints used by the admin interface to manage blog content, including operations
+for detecting unpublished drafts in Google Drive, uploading them to the database, and listing already
+published posts.
+
+It facilitates three main operations:
 
 1. Detecting Unpublished Drive Files:
     - Lists files in the configured Google Drive folder and extracts blog slugs and titles.
     - Compares those slugs to blog posts already stored in the database.
     - Returns metadata about files that have not yet been uploaded as blog posts.
 
-2. Uploading New Blog Posts:
+2. Listing Published Blog Posts:
+    - Retrieves all blog posts already stored in the database.
+    - Returns structured JSON for display in the admin panel.
+
+3. Uploading New Blog Posts:
     - Accepts a list of Google Drive file metadata (ID, title, slug) selected for upload.
     - Downloads each file, sanitizes and validates the content, and stores it in the database.
     - Provides detailed feedback indicating which uploads were successful, which failed, and why.
+
 
 Raises:
     RuntimeError: For internal server errors not specific to Google Drive or blog post validation.
@@ -25,6 +33,7 @@ Notes:
     - It assumes a configured Drive folder ID via `DRIVE_BLOG_POSTS_FOLDER_ID` in app config.
     - Drive files must follow naming conventions compatible with slug and title extraction.
 """
+
 
 import logging
 from typing import List, Dict, Tuple
@@ -111,6 +120,53 @@ def find_unpublished_drive_articles() -> Tuple[FlaskResponse, int]:
     except RuntimeError as e:
         logger.error(f"Error in finding unpublished articles: {e}")
         return jsonify({"error": str(e)}), 500
+
+def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
+    """Fetches minimal metadata for published blog posts from the database.
+
+    This function retrieves all published blog posts from the database and returns
+    a list of dictionaries containing only the title, slug, and associated Google Drive file ID.
+
+    Returns:
+        Tuple[FlaskResponse, int]: A tuple containing:
+            - A JSON response with a list of published blog posts, where each item includes:
+                - `title` (str): The title of the blog post.
+                - `slug` (str): The unique slug used in the URL.
+                - `id` (str): The associated Google Drive file ID.
+            - An HTTP status code.
+
+    Raises:
+        Exception: For any error encountered during data retrieval.
+
+    Example Response:
+        [
+            {
+                "slug": "hello-world",
+                "title": "Hello World",
+                "id": "12345abc"
+            },
+            ...
+        ]
+    """
+    try:
+        # Retrieve all identifiers for published blog posts from the repository
+        db_posts = get_all_blog_post_identifiers()
+
+        # Directly return the minimal metadata in the response
+        published_posts = [
+            {
+                "slug": post['slug'],
+                "title": post['title'],
+                "id": post['drive_file_id']
+            }
+            for post in db_posts
+        ]
+        return jsonify(published_posts), 200
+
+    except Exception as e:
+        logger.error(f"Error fetching published blog posts: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResponse, int]:

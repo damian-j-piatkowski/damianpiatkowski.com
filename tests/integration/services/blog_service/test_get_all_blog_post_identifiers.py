@@ -20,6 +20,7 @@ import pytest
 from app.services.blog_service import get_all_blog_post_identifiers
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_returns_all_blog_post_identifiers(session, create_blog_post, caplog) -> None:
     """Should return identifiers for multiple blog posts and log appropriately."""
@@ -47,6 +48,7 @@ def test_returns_all_blog_post_identifiers(session, create_blog_post, caplog) ->
     assert "Successfully fetched 2 blog post identifiers." in caplog.text
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_raises_exception_on_database_error(mocker, caplog) -> None:
     """Should raise RuntimeError when database access fails and log the error."""
@@ -62,6 +64,7 @@ def test_raises_exception_on_database_error(mocker, caplog) -> None:
     assert "Error in BlogPostService: DB error" in caplog.text
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_returns_empty_list_when_no_posts_exist(session, caplog) -> None:
     """Should return an empty list when no blog posts are in the database."""
@@ -73,6 +76,7 @@ def test_returns_empty_list_when_no_posts_exist(session, caplog) -> None:
     assert "Successfully fetched 0 blog post identifiers." in caplog.text
 
 
+@pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_handles_large_number_of_posts(session, seed_blog_posts, caplog) -> None:
     """Should return all identifiers correctly when many blog posts are present."""
