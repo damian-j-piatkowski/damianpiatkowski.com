@@ -1,6 +1,15 @@
-"""Service layer for handling blog post business logic.
+"""BlogPostService for handling blog post business logic.
 
-This module provides functions to fetch paginated blog posts from the database.
+This module defines functions responsible for the business logic layer of blog post operations.
+It acts as an intermediary between the controller layer and the BlogPostRepository, coordinating
+database access, validation, logging, and error handling.
+
+Methods:
+- get_all_blog_post_identifiers: Retrieves all blog post identifiers (slug, title, drive_file_id).
+- get_blog_post: Retrieves a blog post by its slug.
+- get_paginated_blog_posts: Retrieves paginated blog posts based on page and per-page limits.
+- remove_blog_post_by_slug: Deletes a blog post from the database by its slug.
+- save_blog_post: Validates and saves a new blog post to the database.
 """
 
 import logging
@@ -11,6 +20,65 @@ from app.extensions import db
 from app.models.repositories.blog_post_repository import BlogPostRepository
 
 logger = logging.getLogger(__name__)
+
+
+def get_all_blog_post_identifiers() -> list[dict]:
+    """Get all blog post identifiers via the repository.
+
+    This function delegates to the BlogPostRepository to retrieve a list of blog post
+    identifiers from the database. Each identifier includes the slug, title, and
+    drive file ID. This is typically used for comparing against external sources
+    like Google Drive to determine which posts are unpublished.
+
+    Returns:
+        list[dict]: A list of dictionaries containing 'slug', 'title', and 'drive_file_id'.
+
+    Raises:
+        RuntimeError: If the repository fails to retrieve the data.
+    """
+    session = db.session
+    try:
+        logger.info("Fetching blog post identifiers from the repository.")
+        identifiers = BlogPostRepository(session).fetch_all_post_identifiers()
+
+        logger.info(f"Successfully fetched {len(identifiers)} blog post identifiers.")
+        return identifiers
+    except RuntimeError as e:
+        logger.error(f"Error in BlogPostService: {e}")
+        raise RuntimeError("Failed to retrieve blog post identifiers") from e
+
+
+def get_blog_post(slug: str):
+    """Fetches a single blog post by slug via the repository.
+
+    This function retrieves a blog post based on its unique slug. It delegates
+    the actual database retrieval to the BlogPostRepository.
+
+    Args:
+        slug (str): The slug of the blog post to retrieve.
+
+    Returns:
+        BlogPost: The retrieved blog post instance.
+
+    Raises:
+        RuntimeError: If retrieving the blog post fails.
+    """
+    session = db.session
+    try:
+        logger.info(f"Fetching blog post with slug: {slug}")
+        repository = BlogPostRepository(session)
+        blog_post = repository.fetch_blog_post_by_slug(slug)
+
+        if not blog_post:
+            logger.warning(f"No blog post found for slug: {slug}")
+            return None  # Allows the controller to handle a 404 case
+
+        logger.info(f"Successfully retrieved blog post: {blog_post.title}")
+        return blog_post
+
+    except RuntimeError as e:
+        logger.error(f"Error retrieving blog post: {e}")
+        raise RuntimeError("Failed to retrieve blog post") from e
 
 
 def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
@@ -49,30 +117,26 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
         raise RuntimeError("Failed to retrieve blog posts") from e
 
 
-def get_all_blog_post_identifiers() -> list[dict]:
-    """Get all blog post identifiers via the repository.
+def remove_blog_post_by_slug(slug: str) -> None:
+    """Removes a blog post from the database by slug.
 
-    This function delegates to the BlogPostRepository to retrieve a list of blog post
-    identifiers from the database. Each identifier includes the slug, title, and
-    drive file ID. This is typically used for comparing against external sources
-    like Google Drive to determine which posts are unpublished.
+    This function delegates to the BlogPostRepository to delete a blog post by
+    its unique slug. It logs the result of the operation.
 
-    Returns:
-        list[dict]: A list of dictionaries containing 'slug', 'title', and 'drive_file_id'.
+    Args:
+        slug (str): The slug of the blog post to delete.
 
     Raises:
-        RuntimeError: If the repository fails to retrieve the data.
+        RuntimeError: If the repository fails to delete the blog post.
     """
     session = db.session
     try:
-        logger.info("Fetching blog post identifiers from the repository.")
-        identifiers = BlogPostRepository(session).fetch_all_post_identifiers()
-
-        logger.info(f"Successfully fetched {len(identifiers)} blog post identifiers.")
-        return identifiers
+        logger.info(f"Attempting to remove blog post with slug: {slug}")
+        BlogPostRepository(session).delete_blog_post_by_slug(slug)
+        logger.info(f"Successfully removed blog post with slug: {slug}")
     except RuntimeError as e:
-        logger.error(f"Error in BlogPostService: {e}")
-        raise RuntimeError("Failed to retrieve blog post identifiers") from e
+        logger.error(f"Failed to remove blog post: {e}")
+        raise RuntimeError("Failed to delete blog post") from e
 
 
 def save_blog_post(validated_data) -> BlogPost:
@@ -125,36 +189,3 @@ def save_blog_post(validated_data) -> BlogPost:
     except Exception as e:
         logger.error(f"Unexpected error during blog post creation: {str(e)}")
         raise RuntimeError("Failed to save blog post due to an unexpected error.") from e
-
-
-def get_blog_post(slug: str):
-    """Fetches a single blog post by slug via the repository.
-
-    This function retrieves a blog post based on its unique slug. It delegates
-    the actual database retrieval to the BlogPostRepository.
-
-    Args:
-        slug (str): The slug of the blog post to retrieve.
-
-    Returns:
-        BlogPost: The retrieved blog post instance.
-
-    Raises:
-        RuntimeError: If retrieving the blog post fails.
-    """
-    session = db.session
-    try:
-        logger.info(f"Fetching blog post with slug: {slug}")
-        repository = BlogPostRepository(session)
-        blog_post = repository.fetch_blog_post_by_slug(slug)
-
-        if not blog_post:
-            logger.warning(f"No blog post found for slug: {slug}")
-            return None  # Allows the controller to handle a 404 case
-
-        logger.info(f"Successfully retrieved blog post: {blog_post.title}")
-        return blog_post
-
-    except RuntimeError as e:
-        logger.error(f"Error retrieving blog post: {e}")
-        raise RuntimeError("Failed to retrieve blog post") from e

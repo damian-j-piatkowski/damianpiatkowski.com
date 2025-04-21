@@ -1,21 +1,26 @@
 """Admin controller for managing blog posts sourced from Google Drive and stored in the database.
 
 This module defines endpoints used by the admin interface to manage blog content, including operations
-for detecting unpublished drafts in Google Drive, uploading them to the database, and listing already
-published posts.
+for detecting unpublished drafts in Google Drive, uploading them to the database, listing published posts,
+and deleting selected posts.
 
-It facilitates three main operations:
+It facilitates four main operations:
 
-1. Detecting Unpublished Drive Files:
+1. Deleting Blog Posts:
+    - Accepts a list of slugs representing blog posts selected for deletion.
+    - Attempts to delete each post from the database and returns a structured JSON response.
+    - Supports AJAX-based updates, enabling dynamic UI changes without a full-page reload.
+
+2. Detecting Unpublished Drive Files:
     - Lists files in the configured Google Drive folder and extracts blog slugs and titles.
     - Compares those slugs to blog posts already stored in the database.
     - Returns metadata about files that have not yet been uploaded as blog posts.
 
-2. Listing Published Blog Posts:
+3. Listing Published Blog Posts:
     - Retrieves all blog posts already stored in the database.
     - Returns structured JSON for display in the admin panel.
 
-3. Uploading New Blog Posts:
+4. Uploading New Blog Posts:
     - Accepts a list of Google Drive file metadata (ID, title, slug) selected for upload.
     - Downloads each file, sanitizes and validates the content, and stores it in the database.
     - Provides detailed feedback indicating which uploads were successful, which failed, and why.
@@ -34,7 +39,6 @@ Notes:
     - Drive files must follow naming conventions compatible with slug and title extraction.
 """
 
-
 import logging
 from typing import List, Dict, Tuple
 
@@ -44,13 +48,81 @@ from flask import current_app, jsonify
 from app import exceptions
 from app.exceptions import BlogPostDuplicateError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
-from app.services.blog_service import get_all_blog_post_identifiers
+from app.services.blog_service import get_all_blog_post_identifiers, remove_blog_post_by_slug
 from app.services.file_processing_service import process_file
 from app.services.formatting_service import trim_content
 from app.services.google_drive_service import GoogleDriveService
 from app.services.sanitization_service import extract_slug_and_title
 
 logger = logging.getLogger(__name__)
+
+
+def delete_blog_posts(slugs: List[str]) -> Tuple[FlaskResponse, int]:
+    """Deletes blog posts from the database using the provided slugs.
+
+    This function receives a list of blog post slugs and attempts to delete each post from the database.
+    It returns a structured JSON response indicating which deletions were successful and which failed.
+
+    Args:
+        slugs (List[str]): A list of blog post slugs to delete.
+
+    Returns:
+        Tuple[FlaskResponse, int]: A tuple containing:
+            - A JSON response with:
+                - "deleted" (List[str]): Slugs of successfully deleted posts.
+                - "errors" (List[Dict[str, str]]): List of errors for posts that could not be deleted.
+            - An HTTP status code:
+                - 200 if all posts were successfully deleted.
+                - 207 if some deletions failed.
+                - 400 if no valid slugs were provided.
+                - 500 if a critical error occurred and halted processing.
+
+    Raises:
+        RuntimeError: For unrecoverable internal issues during deletion.
+
+    Notes:
+        - This is a backend API endpoint used by the admin panel to delete blog posts.
+        - It does not perform a redirect or flash message; responses are handled via JavaScript.
+    """
+    if not slugs:
+        return jsonify({"error": "No slugs provided for deletion"}), 400
+
+    deleted = []
+    errors = []
+
+    try:
+        for slug in slugs:
+            try:
+                remove_blog_post_by_slug(slug)
+                deleted.append(slug)
+            except ValueError as ve:
+                errors.append({"slug": slug, "error": str(ve)})
+            except Exception as e:
+                logger.exception(f"Unexpected error while deleting blog post '{slug}'")
+                errors.append({
+                    "slug": slug,
+                    "error": f"Unexpected error: {type(e).__name__}: {e}"
+                })
+
+        response_data = {"deleted": deleted, "errors": errors}
+        has_success = bool(deleted)
+        has_errors = bool(errors)
+        has_critical_error = any("Unexpected error" in err["error"] for err in errors)
+
+        if has_critical_error and not has_success:
+            return jsonify(response_data), 500
+        elif has_critical_error and has_success:
+            return jsonify(response_data), 207
+        elif has_errors and has_success:
+            return jsonify(response_data), 207
+        elif has_errors and not has_success:
+            return jsonify(response_data), 400
+        else:
+            return jsonify(response_data), 200
+
+    except RuntimeError as e:
+        logger.error(f"Critical error while deleting blog posts: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 def find_unpublished_drive_articles() -> Tuple[FlaskResponse, int]:
@@ -121,6 +193,7 @@ def find_unpublished_drive_articles() -> Tuple[FlaskResponse, int]:
         logger.error(f"Error in finding unpublished articles: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
     """Fetches minimal metadata for published blog posts from the database.
 
@@ -166,7 +239,6 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
     except Exception as e:
         logger.error(f"Error fetching published blog posts: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResponse, int]:
