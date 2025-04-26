@@ -46,7 +46,7 @@ from flask import Response as FlaskResponse
 from flask import current_app, jsonify
 
 from app import exceptions
-from app.exceptions import BlogPostDuplicateError
+from app.exceptions import BlogPostDuplicateError, BlogPostNotFoundError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_all_blog_post_identifiers, remove_blog_post_by_slug
 from app.services.file_processing_service import process_file
@@ -95,8 +95,8 @@ def delete_blog_posts(slugs: List[str]) -> Tuple[FlaskResponse, int]:
             try:
                 remove_blog_post_by_slug(slug)
                 deleted.append(slug)
-            except ValueError as ve:
-                errors.append({"slug": slug, "error": str(ve)})
+            except BlogPostNotFoundError as bnfe:
+                errors.append({"slug": slug, "error": str(bnfe)})
             except Exception as e:
                 logger.exception(f"Unexpected error while deleting blog post '{slug}'")
                 errors.append({
