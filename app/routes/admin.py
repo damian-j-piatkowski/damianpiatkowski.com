@@ -1,42 +1,77 @@
-"""Admin routes for the Flask application.
+"""Admin routes for the web application.
 
-This module defines routes for the admin panel, including viewing logs,
-managing unpublished and published blog posts, uploading posts from Google Drive,
-and deleting published posts.
+This module defines routes for the admin panel managing unpublished and published blog posts,
+uploading posts from Google Drive, and deleting published posts.
 
 Routes:
-    - /admin/delete_post: Handles deleting published blog posts.
-    - /admin/logs: Displays log data in the admin panel.
+    - /admin/delete_blog_posts: Handles deleting published blog posts.
     - /admin/published_posts: Displays published blog posts.
     - /admin/unpublished_posts: Displays unpublished blog posts.
     - /admin/upload_post: Handles uploading blog posts from Google Drive.
 """
 
-from flask import Blueprint, render_template, jsonify, request, flash
+from flask import Blueprint, jsonify, request
 
 from app.controllers.admin_controller import (
+    delete_blog_posts,
     find_unpublished_drive_articles,
     upload_blog_posts_from_drive,
     get_published_blog_posts,
-    # delete_blog_posts
 )
 
 admin_bp = Blueprint('admin', __name__)
 
 
-# @admin_bp.route('/admin/delete_post', methods=['DELETE'])
-# def admin_delete_post():
-#     """Handles deletion of published blog posts.
-#
-#     Extracts the list of selected blog post IDs from the JSON request body
-#     and delegates the deletion operation to the controller.
-#
-#     Returns:
-#         Response: JSON response with the deletion result and HTTP status code.
-#     """
-#     post_ids = request.get_json().get("post_ids", [])
-#     result, status_code = delete_blog_posts(post_ids)
-#     return jsonify(result), status_code
+@admin_bp.route("/admin/delete-blog-posts", methods=["DELETE"])
+def admin_delete_blog_posts():
+    """Process deletion of selected blog posts and return a structured JSON response.
+
+    This endpoint is triggered by a button in `/admin/published-posts`. Instead of rendering
+    a template, it processes selected published blog posts and returns a JSON response
+    indicating the outcome.
+
+    Flow:
+    - User selects multiple blog posts and submits the form at `/admin/published-posts`.
+    - The front-end sends a JSON payload with a list of slugs to this endpoint.
+    - This endpoint extracts the list and calls `delete_blog_posts(slugs)`.
+    - The service deletes each corresponding blog post from the database.
+    - The response indicates success or failure for each deletion.
+
+    Returns:
+        Tuple (JSON, int): A JSON response and HTTP status code.
+        Response format varies based on the request:
+        - If the 'slugs' key is missing or the JSON is malformed:
+            {
+                "success": False,
+                "message": "Missing 'slugs' data in request"
+            }
+            HTTP 400
+
+        - If processing was attempted:
+            {
+                "deleted": [...],  # List of successfully deleted slugs
+                "errors": [...]     # List of error details for failed deletions
+            }
+            HTTP status codes:
+                - 200: All posts deleted successfully
+                - 207: Partial success (some deletions failed)
+                - 400: All deletions failed due to non-critical errors
+                - 500: Critical error halted processing
+
+        - If unsupported media type is sent (e.g., not application/json):
+            HTTP 415 with no JSON body.
+
+    Notes:
+        - This is a backend API endpoint used by the admin panel.
+        - Responses are handled asynchronously via JavaScript.
+        - JavaScript dynamically updates the UI by removing deleted posts
+          and displaying success or error messages.
+    """
+    data = request.get_json()
+    if not data or "slugs" not in data:
+        return jsonify({"success": False, "message": "Missing 'slugs' data in request"}), 400
+    slugs = data["slugs"]
+    return delete_blog_posts(slugs)
 
 
 @admin_bp.route('/admin/published-posts', methods=['GET'])
@@ -66,6 +101,7 @@ def admin_published_posts():
     # TODO: replace this with `render_template("admin_published_posts.html", published_posts_data=published_posts_data)`
     return get_published_blog_posts()
 
+
 @admin_bp.route('/admin/unpublished-posts', methods=['GET'])
 def admin_unpublished_posts():
     """Render the Unpublished Blog Posts admin page.
@@ -94,7 +130,6 @@ def admin_unpublished_posts():
     """
     # TODO: replace this with `render_template("admin_unpublished_posts.html", posts_data=posts_data)`
     return find_unpublished_drive_articles()
-
 
 
 @admin_bp.route("/admin/upload-blog-posts", methods=["POST"])
