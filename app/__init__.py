@@ -13,11 +13,11 @@ from app.routes.admin import admin_bp
 from app.routes.blog import blog_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
-from config import Config
-from config import configure_logging
+from app.config import BaseConfig
+from app.logging_config import configure_logging
 
 
-def create_app(config_class: Type[Config]) -> Flask:
+def create_app(config_class: Type[BaseConfig]) -> Flask:
     """Creates and configures the Flask application.
 
         Args:

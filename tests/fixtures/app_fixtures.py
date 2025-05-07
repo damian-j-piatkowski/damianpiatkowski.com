@@ -19,7 +19,7 @@ from flask.testing import FlaskClient, FlaskCliRunner
 from pytest_mock import MockerFixture
 
 from app import create_app
-from config import TestingConfig
+from app.config import TestingConfig
 
 
 @pytest.fixture(scope='session')

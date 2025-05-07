@@ -14,12 +14,12 @@ import os
 
 from app.__version__ import __version__
 from app import create_app
-from config import ENVIRONMENT_CONFIG_MAPPING, Environment
+from app.environments import CONFIG_MAP, Environment
 
 # Determine the environment and configuration
 flask_env = os.getenv('FLASK_ENV', Environment.DEVELOPMENT.value)
 environment = Environment(flask_env)  # Enum validation happens here
-config_class = ENVIRONMENT_CONFIG_MAPPING[environment]
+config_class = CONFIG_MAP[environment]
 
 # Validate the configuration
 config_instance = config_class()

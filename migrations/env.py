@@ -8,7 +8,7 @@ from sqlalchemy import MetaData
 from app.models.tables.blog_post import blog_posts
 from app.models.tables.log import logs
 from app.orm import start_mappers
-from config import config as app_config  # Import the config dictionary
+from app.config import BaseConfig as app_config  # Import the config dictionary
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
