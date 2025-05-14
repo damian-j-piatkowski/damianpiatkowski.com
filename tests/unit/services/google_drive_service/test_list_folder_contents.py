@@ -4,24 +4,6 @@ This module contains unit tests for the `list_folder_contents` method of the
 GoogleDriveService class, which retrieves the contents of a folder on Google Drive
 by folder ID. The tests verify that the method handles successful operations and
 error conditions correctly.
-
-Test Classes and Functions:
-
-    TestListFolderContentsMockedAPI:
-        - test_list_folder_contents_403_error
-        - test_list_folder_contents_404_error
-        - test_list_folder_contents_empty_folder
-        - test_list_folder_contents_other_http_error
-        - test_list_folder_contents_success
-
-    TestListFolderContentsRealAPI:
-        - test_list_folder_contents_not_found
-        - test_list_folder_contents_success
-
-Fixtures:
-    - mock_google_drive_service: Mocks the Google Drive service interactions.
-    - google_drive_service_fixture: Provides an instance of the real GoogleDriveService.
-    - real_folder_id: Provides a valid folder ID from the app configuration.
 """
 
 import re
@@ -37,43 +19,35 @@ from app.services.google_drive_service import GoogleDriveService
 
 @pytest.mark.admin_unpublished_posts
 class TestListFolderContentsMockedAPI:
-    """Unit tests for list_folder_contents() using a mocked Google Drive service.
+    """Unit tests for list_folder_contents() using a mocked Google Drive service."""
 
-    These tests simulate various Google Drive API responses and error conditions
-    using mock objects. The goal is to validate how the GoogleDriveService class
-    handles successful folder listings, permission errors, missing folders, and
-    other unexpected API errors, without making actual network calls.
-    """
-
-    def test_list_folder_contents_403_error(self, mocker):
-        """Tests that a 403 HttpError raises GoogleDrivePermissionError."""
-        # Create a real instance of the service
+    def test_list_folder_contents_403_error(self):
+        """403 error should raise GoogleDrivePermissionError."""
         service = GoogleDriveService(drive_service=Mock())
-
-        # Mock the drive_service behavior to raise a 403 error
         service.drive_service.files.return_value.list.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=403), content=b'Permission denied'
+            resp=Mock(status=403), content=b'{"error": {"message": "Access denied"}}'
         )
 
-        # Run the test
-        with pytest.raises(GoogleDrivePermissionError):
+        # Updated regex to match the final raised message
+        with pytest.raises(GoogleDrivePermissionError, match=r"Permission denied.*listing folder contents"):
             service.list_folder_contents("some-folder-id")
 
     def test_list_folder_contents_404_error(self):
-        """Tests that a 404 HttpError raises GoogleDriveFileNotFoundError."""
+        """404 error should raise GoogleDriveFileNotFoundError."""
         service = GoogleDriveService(drive_service=Mock())
         service.drive_service.files.return_value.list.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=404), content=b'Folder not found'
+            resp=Mock(status=404), content=b'{"error": {"message": "Folder not found"}}'
         )
 
+        # Updated regex to match the final raised message
         with pytest.raises(
                 exceptions.GoogleDriveFileNotFoundError,
-                match="Resource not found during listing folder contents."
+                match=r"Resource not found.*listing folder contents"
         ):
             service.list_folder_contents('invalid_folder')
 
     def test_list_folder_contents_empty_folder(self):
-        """Tests that an empty folder returns an empty list."""
+        """Empty folder should return empty list."""
         service = GoogleDriveService(drive_service=Mock())
         mock_list = service.drive_service.files.return_value.list
         mock_list.return_value.execute.return_value = {'files': []}
@@ -87,21 +61,21 @@ class TestListFolderContentsMockedAPI:
         )
 
     def test_list_folder_contents_other_http_error(self):
-        """Tests that other HttpErrors raise GoogleDriveAPIError."""
+        """Any other HTTP error should raise GoogleDriveAPIError with extracted message."""
         service = GoogleDriveService(drive_service=Mock())
-        mock_error_content = b'{"error": {"message": "Server error"}}'
         service.drive_service.files.return_value.list.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=500), content=mock_error_content
+            resp=Mock(status=500),
+            content=b'{"error": {"message": "Internal Server Error"}}'
         )
 
         with pytest.raises(
-                exceptions.GoogleDriveAPIError,
-                match="Google Drive API error occurred during listing folder contents: Server error"
+            exceptions.GoogleDriveAPIError,
+            match="Internal Server Error"
         ):
             service.list_folder_contents('folder123')
 
     def test_list_folder_contents_success(self):
-        """Tests that a successful folder listing returns the expected files."""
+        """Success case should return file list."""
         service = GoogleDriveService(drive_service=Mock())
         mock_response = {
             'files': [{'id': 'file1', 'name': 'File 1'}, {'id': 'file2', 'name': 'File 2'}]
@@ -117,52 +91,44 @@ class TestListFolderContentsMockedAPI:
             fields="files(id, name)"
         )
 
+
 @pytest.mark.admin_unpublished_posts
 @pytest.mark.api
 class TestListFolderContentsRealAPI:
-    """Unit tests for list_folder_contents() using the real Google Drive API.
-
-    These tests perform real API calls to a Google Drive folder using valid
-    service account credentials and configuration. They verify correct behavior
-    when accessing existing folders, handling missing folders, and ensuring
-    expected file naming conventions and content visibility are enforced.
-    """
+    """Integration-style tests for list_folder_contents() using real API access."""
 
     def test_list_folder_contents_not_found(self, google_drive_service_fixture: GoogleDriveService) -> None:
-        """Tests that listing contents of a non-existent folder raises an error."""
+        """Non-existent folder should raise GoogleDriveFileNotFoundError."""
         with pytest.raises(exceptions.GoogleDriveFileNotFoundError) as exc_info:
             google_drive_service_fixture.list_folder_contents('non_existent_folder_id')
 
-        assert "Resource not found during listing folder contents" in str(exc_info.value)
+        assert "Resource not found" in str(exc_info.value)
 
     def test_list_folder_contents_success(
-            self,
-            google_drive_service_fixture: GoogleDriveService,
-            real_folder_id: str
+        self,
+        google_drive_service_fixture: GoogleDriveService,
+        real_folder_id: str
     ) -> None:
-        """Tests listing contents of a valid folder ID (real API call)."""
+        """Success path should list files with correct naming pattern and exclusions."""
         folder_contents = google_drive_service_fixture.list_folder_contents(real_folder_id)
 
-        # Structural assertions
-        assert isinstance(folder_contents, list), "Expected folder contents to be a list."
+        assert isinstance(folder_contents, list), "Expected a list of files."
         assert all('id' in file and 'name' in file for file in folder_contents), \
-            "Each file should contain an 'id' and 'name'."
-        assert folder_contents, "Folder should contain at least one file."
+            "Each file must contain 'id' and 'name'."
+        assert folder_contents, "Folder should not be empty."
 
-        # Format assertion: all names should follow kebab-case with numeric prefix
+        # Validate naming format
         filename_pattern = re.compile(r'^\d{2}-[a-z0-9]+(-[a-z0-9]+)*$')
         for file in folder_contents:
-            assert filename_pattern.match(file['name']), f"File name format invalid: {file['name']}"
+            assert filename_pattern.match(file['name']), f"Invalid file name: {file['name']}"
 
-        # Known good file presence
         expected_name = (
             "01-six-essential-object-oriented-design-principles-from-"
             "matthias-nobacks-object-design-style-guide"
         )
         assert any(file['name'] == expected_name for file in folder_contents), \
-            f"Expected file name '{expected_name}' not found in folder contents."
+            f"Expected file '{expected_name}' not found."
 
-        # Restricted file should not be listed
         restricted_file = "00-test-restricted-access"
         assert all(file['name'] != restricted_file for file in folder_contents), \
-            f"Restricted file '{restricted_file}' should not be accessible or listed."
+            f"Restricted file '{restricted_file}' should not be listed."

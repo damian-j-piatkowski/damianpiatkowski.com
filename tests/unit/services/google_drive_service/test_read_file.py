@@ -19,10 +19,8 @@ Test Classes and Functions:
         - test_read_file_success
 
 Fixtures:
-    - mock_google_drive_service: Mocks the Google Drive service interactions.
-    - google_drive_service_fixture: Provides an instance of the real GoogleDriveService.
-    - test_drive_file_metadata_map: Provides a mapping of human-readable aliases to real Google Drive file metadata
-        for use in integration tests. Each entry is a dictionary containing 'file_id', 'slug', and 'title'.
+    - google_drive_service_fixture: Real GoogleDriveService instance with credentials.
+    - test_drive_file_metadata_map: Mapping of test file metadata including ID, slug, and title.
 """
 
 from unittest.mock import Mock
@@ -36,72 +34,81 @@ from app.services.google_drive_service import GoogleDriveService
 
 @pytest.mark.admin_upload_blog_posts
 class TestReadFileMockedAPI:
+    """Unit tests for read_file() using a mocked Google Drive API."""
 
     def test_read_file_403_error(self) -> None:
-        """Tests that a 403 HttpError raises GoogleDrivePermissionError."""
-        service = GoogleDriveService(drive_service=Mock())
-        service.drive_service.files.return_value.export.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=403),
-            content=b'Permission denied'
-        )
+        """Raises GoogleDrivePermissionError on a 403 error."""
+        mock_execute = Mock()
+        mock_execute.execute.side_effect = HttpError(resp=Mock(status=403), content=b'Permission denied')
+        mock_export = Mock(return_value=mock_execute)
+        mock_files = Mock()
+        mock_files.export = mock_export
+        mock_drive_service = Mock()
+        mock_drive_service.files.return_value = mock_files
+        service = GoogleDriveService(drive_service=mock_drive_service)
 
-        with pytest.raises(
-                exceptions.GoogleDrivePermissionError,
-                match="Permission denied during reading file."
-        ):
+        with pytest.raises(exceptions.GoogleDrivePermissionError, match="Permission denied during reading file."):
             service.read_file('restricted_file')
 
     def test_read_file_404_error(self) -> None:
-        """Tests that a 404 HttpError raises GoogleDriveFileNotFoundError."""
-        service = GoogleDriveService(drive_service=Mock())
-        service.drive_service.files.return_value.export.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=404),
-            content=b'File not found'
-        )
+        """Raises GoogleDriveFileNotFoundError on a 404 error."""
+        mock_execute = Mock()
+        mock_execute.execute.side_effect = HttpError(resp=Mock(status=404), content=b'File not found')
+        mock_export = Mock(return_value=mock_execute)
+        mock_files = Mock()
+        mock_files.export = mock_export
+        mock_drive_service = Mock()
+        mock_drive_service.files.return_value = mock_files
+        service = GoogleDriveService(drive_service=mock_drive_service)
 
-        with pytest.raises(
-                exceptions.GoogleDriveFileNotFoundError,
-                match="Resource not found during reading file."
-        ):
+        with pytest.raises(exceptions.GoogleDriveFileNotFoundError, match="Resource not found during reading file."):
             service.read_file('invalid_file')
 
     def test_read_file_other_http_error(self) -> None:
-        """Tests that other HttpErrors raise GoogleDriveAPIError."""
-        service = GoogleDriveService(drive_service=Mock())
-        mock_error_content = b'{"error": {"message": "Server error"}}'
-        service.drive_service.files.return_value.export.return_value.execute.side_effect = HttpError(
-            resp=Mock(status=500),
-            content=mock_error_content
-        )
+        """Raises GoogleDriveAPIError on unexpected server errors."""
+        error_json = b'{"error": {"message": "Server error"}}'
+        mock_execute = Mock()
+        mock_execute.execute.side_effect = HttpError(resp=Mock(status=500), content=error_json)
+        mock_export = Mock(return_value=mock_execute)
+        mock_files = Mock()
+        mock_files.export = mock_export
+        mock_drive_service = Mock()
+        mock_drive_service.files.return_value = mock_files
+        service = GoogleDriveService(drive_service=mock_drive_service)
 
         with pytest.raises(
-                exceptions.GoogleDriveAPIError,
-                match="Google Drive API error occurred during reading file: Server error"
+            exceptions.GoogleDriveAPIError,
+            match="Google Drive API error occurred during reading file: Server error"
         ):
             service.read_file('file123')
 
     def test_read_file_success(self) -> None:
-        """Tests that a successful file read returns the file content."""
-        service = GoogleDriveService(drive_service=Mock())
-        service.drive_service.files.return_value.export.return_value.execute.return_value = b'File content'
+        """Returns decoded content when file read is successful."""
+        mock_execute = Mock()
+        mock_execute.execute.return_value = b'File content'
+        mock_export = Mock(return_value=mock_execute)
+        mock_files = Mock()
+        mock_files.export = mock_export
+        mock_drive_service = Mock()
+        mock_drive_service.files.return_value = mock_files
+        service = GoogleDriveService(drive_service=mock_drive_service)
 
         result = service.read_file('file123')
 
         assert result == 'File content'
-        service.drive_service.files.return_value.export.assert_called_once_with(
-            fileId='file123',
-            mimeType='text/plain'
-        )
+        mock_export.assert_called_once_with(fileId='file123', mimeType='text/plain')
 
 
 @pytest.mark.api
 @pytest.mark.admin_upload_blog_posts
 class TestReadFileRealAPI:
+    """Integration tests for read_file() using real Google Drive API."""
 
     def test_read_file_not_found(self, google_drive_service_fixture: GoogleDriveService) -> None:
-        """Tests that reading a non-existent file raises an error."""
+        """Raises GoogleDriveFileNotFoundError when file does not exist."""
         with pytest.raises(exceptions.GoogleDriveFileNotFoundError) as exc_info:
             google_drive_service_fixture.read_file('non_existent_file_id')
+
         assert "Resource not found" in str(exc_info.value)
 
     def test_read_file_permission_denied(
@@ -109,17 +116,11 @@ class TestReadFileRealAPI:
             google_drive_service_fixture: GoogleDriveService,
             test_drive_file_metadata_map: dict
     ) -> None:
-        """Tests that insufficient permissions raise a GoogleDriveFileNotFoundError.
-
-        Google Drive API returns a 404 'File not found' error even when the file exists
-        but is inaccessible due to insufficient permissions.
-        """
-        # Leverage the 'restricted' file metadata from the fixture
-        restricted_file_metadata = test_drive_file_metadata_map["restricted"]
-        file_id = restricted_file_metadata["file_id"]
+        """Raises GoogleDriveFileNotFoundError if file is restricted (API returns 404)."""
+        restricted_file_id = test_drive_file_metadata_map["restricted"]["file_id"]
 
         with pytest.raises(exceptions.GoogleDriveFileNotFoundError) as exc_info:
-            google_drive_service_fixture.read_file(file_id)
+            google_drive_service_fixture.read_file(restricted_file_id)
 
         assert "Resource not found" in str(exc_info.value)
 
@@ -128,12 +129,10 @@ class TestReadFileRealAPI:
             google_drive_service_fixture: GoogleDriveService,
             test_drive_file_metadata_map: dict
     ) -> None:
-        """Tests reading the contents of a file with a valid file ID."""
-        # Leverage the real_drive_file_metadata from the fixture
-        file_metadata = test_drive_file_metadata_map["design_principles"]
+        """Reads content of a file given a valid file ID."""
+        file_id = test_drive_file_metadata_map["design_principles"]["file_id"]
 
-        file_content = google_drive_service_fixture.read_file(file_metadata["file_id"])
+        content = google_drive_service_fixture.read_file(file_id)
 
-        assert isinstance(file_content, str), "Expected file content to be a string."
-        assert len(file_content) > 0, "File content should not be empty."
-
+        assert isinstance(content, str), "Expected file content to be a string."
+        assert len(content.strip()) > 0, "File content should not be empty."

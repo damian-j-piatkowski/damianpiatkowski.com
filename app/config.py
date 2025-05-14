@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()  # Load from .env if not already in environment
 
@@ -17,7 +18,8 @@ class BaseConfig:
 
     # Google Drive API
     DRIVE_BLOG_POSTS_FOLDER_ID = os.environ.get('DRIVE_BLOG_POSTS_FOLDER_ID')
-    GOOGLE_SERVICE_ACCOUNT_JSON = os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+    GOOGLE_DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+    GOOGLE_SERVICE_ACCOUNT_JSON = json.loads(os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON'))
 
     # App-specific
     BASE_THUMBNAIL_PATH = os.environ.get('BASE_THUMBNAIL_PATH', '')

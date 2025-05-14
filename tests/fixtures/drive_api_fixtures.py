@@ -1,23 +1,8 @@
-"""Fixtures for testing Google Drive service functionality.
+"""Pytest fixtures for Google Drive service tests."""
 
-This module provides various pytest fixtures to support both unit and integration
-tests of the GoogleDriveService class. It includes fixtures for mocking the
-Google Drive service, environment variables, service account credentials,
-common Google Drive scopes, and retrieving real configuration values such as
-the folder ID for blog posts.
-
-Fixtures:
-    - google_drive_service_fixture
-    - mock_env
-    - mock_google_drive_service
-    - mock_service_account_creds
-    - real_folder_id
-    - test_drive_file_metadata_map
-    - scopes
-"""
-
+import json
 from unittest import mock
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
@@ -27,80 +12,49 @@ from app.services.google_drive_service import GoogleDriveService
 
 @pytest.fixture
 def google_drive_service_fixture(app) -> GoogleDriveService:
-    """Provides an instance of GoogleDriveService for integration testing.
-
-    Args:
-        app: The Flask app fixture.
-
-    Returns:
-        GoogleDriveService: An instance of the GoogleDriveService class.
-    """
+    """Provides a GoogleDriveService instance with fake service account config."""
     return GoogleDriveService()
 
 
 @pytest.fixture
-def mock_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Mocks environment variables used in the method.
-
-    Args:
-        monkeypatch: pytest's monkeypatch fixture to mock environment variables.
-    """
-    monkeypatch.setenv('GOOGLE_CREDENTIALS_FILE', '/fake/credentials.json')
-
-
-@pytest.fixture
 def mock_google_drive_service(mocker, request) -> MagicMock:
-    """Creates a mock Google Drive service instance with configurable patch target and override options."""
+    """Creates a configurable mock Google Drive service."""
     param = getattr(request, "param", {}) if hasattr(request, "param") else {}
     target_path = param.get("patch_target", "app.services.file_processing_service.GoogleDriveService")
 
-    mock_google_drive_service = mocker.Mock(spec=GoogleDriveService)
-    mocker.patch(target_path, return_value=mock_google_drive_service)
+    mock_service = mocker.Mock(spec=GoogleDriveService)
+    mocker.patch(target_path, return_value=mock_service)
 
-    # Default return values
-    mock_google_drive_service.list_folder_contents.return_value = [
+    mock_service.list_folder_contents.return_value = [
         {"id": "1", "name": "Mock File", "mimeType": "application/vnd.google-apps.document"}
     ]
-    mock_google_drive_service.read_file.return_value = "Mock file content"
+    mock_service.read_file.return_value = "Mock file content"
 
-    # Optional test-specific overrides
     if "read_file_side_effect" in param:
-        mock_google_drive_service.read_file.side_effect = param["read_file_side_effect"]
-
+        mock_service.read_file.side_effect = param["read_file_side_effect"]
     if "list_folder_contents_side_effect" in param:
-        mock_google_drive_service.list_folder_contents.side_effect = param["list_folder_contents_side_effect"]
+        mock_service.list_folder_contents.side_effect = param["list_folder_contents_side_effect"]
     elif "list_folder_contents_return" in param:
-        mock_google_drive_service.list_folder_contents.return_value = param["list_folder_contents_return"]
+        mock_service.list_folder_contents.return_value = param["list_folder_contents_return"]
 
-    return mock_google_drive_service
+    return mock_service
 
 
 @pytest.fixture
-def mock_service_account_creds() -> Mock:
-    """Mocks the service account credentials object.
-
-    Returns:
-        Mock: A mock object representing service account credentials.
-    """
+def mock_service_account_creds() -> mock.Mock:
+    """Mocks service account credentials."""
     return mock.create_autospec(ServiceAccountCredentials)
 
 
 @pytest.fixture
 def real_folder_id(app) -> str:
-    """Retrieves the real folder ID from the app configuration.
-
-    Args:
-        app: The Flask app fixture.
-
-    Returns:
-        str: The folder ID for storing blog posts.
-    """
+    """Returns the real folder ID from app config."""
     return app.config.get('DRIVE_BLOG_POSTS_FOLDER_ID')
 
 
 @pytest.fixture
 def test_drive_file_metadata_map():
-    """Returns a dict of test Google Drive file metadata keyed by human-readable aliases."""
+    """Test Google Drive file metadata map."""
     return {
         "design_principles": {
             "file_id": "1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo",
@@ -132,9 +86,29 @@ def test_drive_file_metadata_map():
 
 @pytest.fixture
 def scopes() -> list[str]:
-    """Fixture for the common Google Drive scopes.
-
-    Returns:
-        list[str]: A list of Google Drive OAuth2 scopes.
-    """
+    """Common Google Drive OAuth2 scopes."""
     return ['https://www.googleapis.com/auth/drive']
+
+
+@pytest.fixture
+def fake_service_account_credentials_json():
+    return json.loads("""
+    {
+        "type": "service_account",
+        "project_id": "fake-project",
+        "private_key_id": "fake-key-id",
+        "private_key": "-----BEGIN PRIVATE KEY-----\\n...",
+        "client_email": "fake@example.com",
+        "client_id": "fake-client-id",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fake"
+    }
+    """)
+
+
+@pytest.fixture(autouse=True)
+def clear_drive_service_cache():
+    """Fixture to clear the drive service cache before each test."""
+    GoogleDriveService._cached_drive_service = None

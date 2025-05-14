@@ -41,7 +41,7 @@ def app_context_with_mocked_config(mocker: MockerFixture, client: FlaskClient) -
 
     This fixture sets up the application context, ensuring it's available for
     testing, and mocks the common configuration settings such as mail username,
-    recipient, and debug mode.
+    recipient, debug mode, and Google Drive credentials.
 
     Args:
         mocker (MockerFixture): The pytest-mock fixture to mock objects or methods.
@@ -52,7 +52,6 @@ def app_context_with_mocked_config(mocker: MockerFixture, client: FlaskClient) -
         function proceeds.
     """
     with client.application.app_context():
-        # Mock configuration values
         mocker.patch.object(
             current_app,
             'config',
@@ -64,11 +63,13 @@ def app_context_with_mocked_config(mocker: MockerFixture, client: FlaskClient) -
                 'SERVER_NAME': 'localhost',
                 'APPLICATION_ROOT': '/',
                 'PREFERRED_URL_SCHEME': 'http',
-                'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
+                'WTF_CSRF_ENABLED': False,
+                'GOOGLE_SERVICE_ACCOUNT_JSON': '{"type": "service_account", "project_id": "test"}',
+                'GOOGLE_API_SCOPES': ['https://www.googleapis.com/auth/drive'],
             }
         )
-
         yield
+
 
 
 @pytest.fixture(scope='function')
