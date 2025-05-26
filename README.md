@@ -35,63 +35,97 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 
 This project is a personal website and blog engine powered by Flask, deployed with Docker on an EC2 instance, and uses GitHub Actions for CI/CD. Blog content is sourced from Google Drive and persisted into a file-based MySQL database.
 
-![App Architecture](docs/architecture/app_architecture_flow.png)
+***
 
-### Components
+### Layered Architecture
 
-* **Nginx** as a reverse proxy
-* **Flask** app container
-* **MySQL** file-based container
-* **Google Drive** for syncing drafts
-* **GitHub Actions** for CI/CD
-* **EC2** instance running everything via Docker Compose
+The Flask application follows a layered architecture inspired by the book *Architecture Patterns with Python: Enabling Test-Driven Development, Domain-Driven Design, and Event-Driven Microservices* by Bob Gregory and Harry Percival. This approach promotes clear separation of concerns, making the system easier to test, maintain, and extend.
 
----
+```
+Flask App
+├── Routes
+│   └── Handles incoming HTTP requests and maps them to controllers
+├── Controllers
+│   └── Orchestrate request handling, call services
+├── Services
+│   └── Contain business logic, call repositories or external APIs (e.g. Google Drive)
+├── Repositories
+│   └── Interact with the MySQL database using SQLAlchemy
+```
 
-## Routes & Admin Panel
+***
 
-### Home
+### High-level Architecture Diagram
 
-* `GET /` → `index.html`
-* `POST /submit-contact` → Handles form submission
-* `GET /privacy` → `privacy.html`
+A visual overview of the system's high-level architecture is provided below in an ASCII art diagram. This text-based representation ensures it's easily viewable across all platforms and keeps the documentation directly editable and version-control friendly.
 
-### Resume
+```
++--------------------------------------------------------------------------------------------------+
+|                                        AWS EC2 Instance                                          |
+|  +--------------------------------------------------------------------------------------------+  |
+|  |                                  Docker (Engine / Host)                                    |  |
+|  |                                                                                            |  |
+|  |  +-------------------+        +---------------------------------------------------------+  |  |
+|  |  |   Nginx Container   |        |                 Flask App Container                   |  |  |
+|  |  | (Reverse Proxy)     |        |                                                         |  |  |
+|  |  +---------+-----------+        |  +-----------------+      +-----------------+          |  |  |
+|  |            |  (Public Traffic)  |  |  Public Routes  |      |  Admin Routes   |<----+    |  |  |
+|  |            +------------------->|  +--------+--------+      +--------+--------+      |    |  |  |
+|  |            |                    |           |                        |              Token |    |  |
+|  |            |  (Admin Traffic)   |           |                        |           Verification|  |  |
+|  |            +------------------->|           | Function Calls         | Function Calls|      |  |  |
+|  |                                |           V                        V               |      |  |  |
+|  |                                |  +-----------------+      +-----------------+      |    |  |  |
+|  |                                |  |   Controllers   |      |   Controllers   |<-----+    |  |  |
+|  |                                |  +--------+--------+      +--------+--------+          |  |  |
+|  |                                |           |                                             |  |  |
+|  |                                |           | Function Calls                              |  |  |
+|  |                                |           V                                             |  |  |
+|  |                                |  +-----------------+                                     |  |  |
+|  |                                |  |    Services     |------------------------------------->| (To Google Drive API, SMTP)
+|  |                                |  +--------+--------+                                     |  |  |
+|  |                                |           |                                             |  |  |
+|  |                                |           | Function Calls (Data Access)                |  |  |
+|  |                                |           V                                             |  |  |
+|  |                                |  +-----------------+                                     |  |  |
+|  |                                |  |  Repositories   |-------------------------------------+  |  |
+|  |                                |  +-----------------+                                     |  |  |
+|  |                                +---------------------------------------------------------+  |  |
+|  |                                                                                            |  |
+|  |  +-----------------------+                                                                 |  |
+|  |  |    MySQL Container    |<---------------------------------------------------------------+  |
+|  |  |                       |           (SQL queries)                                          |  |
+|  |  +-----------+-----------+                                                                 |  |
+|  |              |                                                                             |  |
+|  |              | File-based I/O (Persistent Data)                                            |  |
+|  |              V                                                                             |  |
+|  |  +-----------------------+                                                                 |  |
+|  |  |     DB Volume         |                                                                 |  |
+|  |  | (Persistent Storage)  |                                                                 |  |
+|  |  +-----------------------+                                                                 |  |
+|  +--------------------------------------------------------------------------------------------+  |
++--------------------------------------------------------------------------------------------------+
+     ^                       ^
+     | HTTP/HTTPS            | HTTP/HTTPS
+     | (Public Traffic)      | (Admin Login OAuth Flow)
++------------------------------------+
+|        Browser/User Client         |
++------------------------------------+
+```
 
-* `GET /resume` → `resume.html`
+***
 
-### About Me
+### Diagram Explanation
 
-* `GET /about-me` → `about-me.html`
-* Route: `routes/about_me.about_me`
+This diagram illustrates the main components and data flows within the system:
 
-### Blog
-
-* `GET /blog` → Paginated blog posts (`blog.html`)
-* `GET /blog/<slug>` → Individual post (`single_blog_post.html`)
-
-### Admin Panel
-
-#### Published Posts
-
-* `GET /admin/published-posts` → `admin_published_posts.html`
-
-  * Renders all DB blog posts
-  * AJAX deletion via:
-* `DELETE /admin/delete-blog-posts`
-
-  * JSON-based batch deletion by slug
-
-#### Unpublished Posts
-
-* `GET /admin/unpublished-posts` → `admin_posts.html`
-
-  * Fetches unposted Google Drive docs
-  * Compares normalized slugs to DB
-* `POST /admin/upload-blog-posts`
-
-  * Batch upload to DB
-  * HTML is sanitized, slugs normalized, and posts inserted
+* **User Interaction**: The **Browser/User Client** initiates all requests. Standard website traffic routes through **Nginx** to the **Public Routes** in the Flask app. Access to the administrative panel also goes via Nginx, but specifically targets the **Admin Routes**.
+* **Authentication**: The **Admin Routes** are uniquely responsible for handling the **Google OAuth flow**, connecting with **Google Authentication** to verify your identity. Public routes don't require any authentication.
+* **Internal Flask Flow**: Both **Public Routes** and **Admin Routes** delegate logic to **Controllers**, which then orchestrate requests by interacting with **Services**. Services encapsulate the core business logic.
+* **Data Persistence**: **Services** communicate with **Repositories** for all data access operations. The Repositories then interact with the **MySQL Container** by sending SQL queries.
+* **Persistent Storage**: The **MySQL Container** stores its data persistently on a dedicated **DB Volume** (a file-based volume on the EC2 instance).
+* **External APIs**: **Services** also manage interactions with external APIs, such as the **Google Drive API** (for fetching blog content) and an **SMTP Server** (e.g., Gmail) for sending emails.
+* **Deployment & CI/CD**: **GitHub Actions** handles the continuous integration and deployment process, securely pushing updates to the **AWS EC2 Instance**.
 
 ---
 

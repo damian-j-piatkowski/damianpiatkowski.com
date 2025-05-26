@@ -1,0 +1,39 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.5 Chrome/134.0.6998.205 Electron/35.3.0 Safari/537.36" version="27.0.5">
+  <diagram name="Page-1" id="J4AoYXffWq4IyxMzOvb4">
+    <mxGraphModel dx="2210" dy="843" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-1" value="AWS EC2 Instance" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-230" y="110" width="1310" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-2" value="Docker (Engine / Host)" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-190" y="190" width="1110" height="570" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="SLi8cbnZq9TiXcvpq9ef-2" source="SLi8cbnZq9TiXcvpq9ef-3" target="SLi8cbnZq9TiXcvpq9ef-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-9" value="HTTP/HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SLi8cbnZq9TiXcvpq9ef-7">
+          <mxGeometry x="0.4545" y="-3" relative="1" as="geometry">
+            <mxPoint x="-61" y="-43" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="SLi8cbnZq9TiXcvpq9ef-2" source="SLi8cbnZq9TiXcvpq9ef-3" target="SLi8cbnZq9TiXcvpq9ef-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-3" value="Nginx Container&lt;div&gt;(Reverse Proxy)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="SLi8cbnZq9TiXcvpq9ef-2">
+          <mxGeometry x="10" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-4" value="Flask App" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="SLi8cbnZq9TiXcvpq9ef-2">
+          <mxGeometry x="230" y="40" width="730" height="450" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-5" value="Public Routes" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="SLi8cbnZq9TiXcvpq9ef-4">
+          <mxGeometry x="40" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="SLi8cbnZq9TiXcvpq9ef-6" value="Admin Routes" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="SLi8cbnZq9TiXcvpq9ef-4">
+          <mxGeometry x="40" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
