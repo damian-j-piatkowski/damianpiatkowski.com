@@ -4,13 +4,16 @@ A Flask-powered personal website with a blog component, live at [damianpiatkowsk
 
 This project is public not just as a portfolio piece, but also to serve as a learning resource for others interested in building a personal website or Flask-based app with CI/CD, Google Drive API integration, and MySQL-backed content management.
 
+***
+
+**For detailed information on project diagrams, refer to [Draw.io Diagramming Guide](docs/DRAWIO_GUIDE.md).**
+
 ---
 
 ## Table of Contents
 
 * [Features](#features)
 * [Architecture Overview](#architecture-overview)
-* [Routes & Admin Panel](#routes--admin-panel)
 * [Technology Stack](#technology-stack)
 * [Setup & Development](#setup--development)
 * [Deployment](#deployment)
@@ -57,63 +60,11 @@ Flask App
 
 ### High-level Architecture Diagram
 
-A visual overview of the system's high-level architecture is provided below in an ASCII art diagram. This text-based representation ensures it's easily viewable across all platforms and keeps the documentation directly editable and version-control friendly.
+A visual overview of the system's high-level architecture is provided below. This diagram offers a clear, scalable representation of the application's components and their interactions, designed to be easily viewable across all platforms.
 
-```
-+--------------------------------------------------------------------------------------------------+
-|                                        AWS EC2 Instance                                          |
-|  +--------------------------------------------------------------------------------------------+  |
-|  |                                  Docker (Engine / Host)                                    |  |
-|  |                                                                                            |  |
-|  |  +-------------------+        +---------------------------------------------------------+  |  |
-|  |  |   Nginx Container   |        |                 Flask App Container                   |  |  |
-|  |  | (Reverse Proxy)     |        |                                                         |  |  |
-|  |  +---------+-----------+        |  +-----------------+      +-----------------+          |  |  |
-|  |            |  (Public Traffic)  |  |  Public Routes  |      |  Admin Routes   |<----+    |  |  |
-|  |            +------------------->|  +--------+--------+      +--------+--------+      |    |  |  |
-|  |            |                    |           |                        |              Token |    |  |
-|  |            |  (Admin Traffic)   |           |                        |           Verification|  |  |
-|  |            +------------------->|           | Function Calls         | Function Calls|      |  |  |
-|  |                                |           V                        V               |      |  |  |
-|  |                                |  +-----------------+      +-----------------+      |    |  |  |
-|  |                                |  |   Controllers   |      |   Controllers   |<-----+    |  |  |
-|  |                                |  +--------+--------+      +--------+--------+          |  |  |
-|  |                                |           |                                             |  |  |
-|  |                                |           | Function Calls                              |  |  |
-|  |                                |           V                                             |  |  |
-|  |                                |  +-----------------+                                     |  |  |
-|  |                                |  |    Services     |------------------------------------->| (To Google Drive API, SMTP)
-|  |                                |  +--------+--------+                                     |  |  |
-|  |                                |           |                                             |  |  |
-|  |                                |           | Function Calls (Data Access)                |  |  |
-|  |                                |           V                                             |  |  |
-|  |                                |  +-----------------+                                     |  |  |
-|  |                                |  |  Repositories   |-------------------------------------+  |  |
-|  |                                |  +-----------------+                                     |  |  |
-|  |                                +---------------------------------------------------------+  |  |
-|  |                                                                                            |  |
-|  |  +-----------------------+                                                                 |  |
-|  |  |    MySQL Container    |<---------------------------------------------------------------+  |
-|  |  |                       |           (SQL queries)                                          |  |
-|  |  +-----------+-----------+                                                                 |  |
-|  |              |                                                                             |  |
-|  |              | File-based I/O (Persistent Data)                                            |  |
-|  |              V                                                                             |  |
-|  |  +-----------------------+                                                                 |  |
-|  |  |     DB Volume         |                                                                 |  |
-|  |  | (Persistent Storage)  |                                                                 |  |
-|  |  +-----------------------+                                                                 |  |
-|  +--------------------------------------------------------------------------------------------+  |
-+--------------------------------------------------------------------------------------------------+
-     ^                       ^
-     | HTTP/HTTPS            | HTTP/HTTPS
-     | (Public Traffic)      | (Admin Login OAuth Flow)
-+------------------------------------+
-|        Browser/User Client         |
-+------------------------------------+
-```
+![High-level Architecture Diagram](docs/architecture/high_level_architecture.svg)
 
-***
+---
 
 ### Diagram Explanation
 
