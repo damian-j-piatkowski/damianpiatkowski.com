@@ -1,5 +1,4 @@
-"""
-Tests for the Contact Controller.
+"""Tests for the Contact Controller.
 
 This module contains tests for the Contact Controller, verifying the behavior of
 the `handle_contact_form_submission` function when handling different types of
@@ -24,23 +23,15 @@ from app.controllers.contact_form_controller import handle_contact_form_submissi
 
 
 def test_handle_contact_form_submission_email_failure(
-        mocker: MockerFixture,
-        valid_form_data: Dict[str, str],
-        client: FlaskClient,
-        app_context_with_mocked_config: None  # Using the fixture here
+    mocker: MockerFixture,
+    valid_form_data: Dict[str, str],
+    client: FlaskClient
 ) -> None:
-    """Test the controller function handling email sending failure.
-
-    This test mocks both `current_app` and `mail.send` to simulate an email
-    sending failure and ensure the function responds correctly.
-    """
+    """Should return failure if email sending fails."""
     with client.application.app_context():
-        # Mock the mail sending function to raise an exception
-        mocker.patch('app.extensions.mail.send',
-                     side_effect=Exception("SMTP error"))
+        mocker.patch('app.extensions.mail.send', side_effect=Exception("SMTP error"))
 
-        success, flash_message, flash_category = handle_contact_form_submission(
-            valid_form_data)
+        success, flash_message, flash_category = handle_contact_form_submission(valid_form_data)
 
         assert success is False
         assert flash_message == 'An error occurred while sending your message.'
@@ -49,42 +40,27 @@ def test_handle_contact_form_submission_email_failure(
 
 def test_handle_contact_form_submission_with_incomplete_data(
     incomplete_form_data: Dict[str, str],
-    app_context_with_mocked_config: None,
-    client: FlaskClient,
+    client: FlaskClient
 ) -> None:
-    """Test the controller function with incomplete form data.
-
-    This test ensures that when any required form field is missing, the function
-    responds with an appropriate failure message and a 'danger' flash category.
-    """
+    """Should return failure if required fields are missing."""
     with client.application.app_context():
-        success, flash_message, flash_category = handle_contact_form_submission(
-            incomplete_form_data
-        )
+        success, flash_message, flash_category = handle_contact_form_submission(incomplete_form_data)
 
         assert success is False
-        # Updated expected message to match the actual output
         assert flash_message == "Validation error(s): name: This field is required."
         assert flash_category == 'danger'
 
 
 def test_handle_contact_form_submission_with_valid_data(
-        mocker: MockerFixture,
-        valid_form_data: Dict[str, str],
-        client: FlaskClient,
-        app_context_with_mocked_config: None  # Using the fixture here
+    mocker: MockerFixture,
+    valid_form_data: Dict[str, str],
+    client: FlaskClient
 ) -> None:
-    """Test the controller function with valid form data.
-
-    This test mocks both `current_app` and `mail.send` to ensure that the
-    function processes valid form data correctly.
-    """
+    """Should return success if form data is valid and email is sent."""
     with client.application.app_context():
-        # Mock the mail sending function
         mocker.patch('app.extensions.mail.send')
 
-        success, flash_message, flash_category = handle_contact_form_submission(
-            valid_form_data)
+        success, flash_message, flash_category = handle_contact_form_submission(valid_form_data)
 
         assert success is True
         assert flash_message == 'Message sent successfully!'

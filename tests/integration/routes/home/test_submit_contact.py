@@ -16,46 +16,24 @@ Test Functions:
 """
 
 from flask.testing import FlaskClient
-
 from app.extensions import mail
 
 
 def test_email_not_sent_when_form_is_incomplete(client: FlaskClient) -> None:
-    """Test that an email is not sent when the contact form is incomplete.
-
-    This function submits a contact form with missing information through the
-    Flask client and verifies that no email is sent.
-
-    It also checks that the response status code is 302, indicating a redirect
-    due to missing form data.
-
-    Args:
-        client: The Flask test client used to simulate HTTP requests
-            and responses.
-    """
+    """Test that an email is not sent when the contact form is incomplete."""
     with mail.record_messages() as outbox:
         response = client.post('/submit_contact', data={
             'name': 'John Doe',
-            'email': '',
+            'email': '',  # Missing email
             'message': 'This is a test message.'
-        })
+        }, follow_redirects=True)
 
-        assert response.status_code == 302  # Check for redirect status
-        assert len(outbox) == 0  # No email should be sent
+        assert response.status_code == 200
+        assert len(outbox) == 0
 
 
 def test_email_sending(client: FlaskClient) -> None:
-    """Test the email sending functionality for the contact form submission.
-
-    This function submits a contact form through the Flask client and
-    verifies that an email is sent with the correct subject and body content.
-
-    It also checks that the response status code is 200.
-
-    Args:
-        client: The Flask test client used to simulate HTTP requests
-            and responses.
-    """
+    """Test that an email is sent when the contact form is complete."""
     with mail.record_messages() as outbox:
         response = client.post('/submit_contact', data={
             'name': 'John Doe',
@@ -72,20 +50,7 @@ def test_email_sending(client: FlaskClient) -> None:
 
 
 def test_email_sending_failure_handling(client: FlaskClient, mocker) -> None:
-    """Test the app's handling of email sending failure.
-
-    This function mocks the email sending process to raise an exception,
-    simulating a failure scenario. It verifies that the app handles the
-    exception gracefully and displays an appropriate error message.
-
-    It also checks that the response status code is 200.
-
-    Args:
-        client: The Flask test client used to simulate HTTP requests
-            and responses.
-        mocker: The mocker fixture used to mock objects and methods.
-    """
-    # Mock the mail.send function to raise an exception
+    """Test that the app handles email sending failures gracefully."""
     mocker.patch('app.extensions.mail.send',
                  side_effect=Exception("SMTP error"))
 
@@ -95,7 +60,6 @@ def test_email_sending_failure_handling(client: FlaskClient, mocker) -> None:
         'message': 'This is another test message.'
     }, follow_redirects=True)
 
-    # Status should be 200 OK after handling the error
     assert response.status_code == 200
-    # Check for the error message
     assert b"An error occurred while sending your message." in response.data
+

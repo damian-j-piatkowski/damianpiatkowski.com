@@ -14,9 +14,18 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 
 * [Features](#features)
 * [Architecture Overview](#architecture-overview)
+    * [Layered Architecture](#layered-architecture)
+    * [High-level Architecture Diagram](#high-level-architecture-diagram)
+    * [Diagram Explanation](#diagram-explanation)
 * [Technology Stack](#technology-stack)
-* [Setup & Development](#setup--development)
+* [Containerization Setup](#containerization-setup)
+    * [Docker Installation & Setup](#docker-installation--setup)
+        * [Linux](#linux)
+        * [Windows](#windows)
+    * [Running the Docker Containers](#running-the-docker-containers)
 * [Deployment](#deployment)
+    * [Strategy](#strategy)
+    * [CI/CD (GitHub Actions)](#cicd-github-actions)
 * [License](#license)
 
 ---
@@ -92,36 +101,115 @@ This diagram illustrates the main components and data flows within the system:
 
 ---
 
-## Setup & Development
+## Containerization Setup
 
-### 1. Clone the Repository
+This project leverages Docker for containerization, which offers significant benefits for both development and deployment.
 
-```bash
-git clone https://github.com/yourusername/yourrepo.git
-cd yourrepo
-```
+**What is Docker?** Docker is a platform that allows you to automate the deployment, scaling, and management of applications using containers. Containers are lightweight, standalone, executable packages of software that include everything needed to run an application: code, runtime, system tools, system libraries, and settings.
 
-### 2. Configure Environment
+**Why use Docker?**
+* **Environment Consistency:** Ensures that the development, testing, and production environments are identical, eliminating "it works on my machine" issues.
+* **Isolation:** Applications and their dependencies are isolated from each other and from the host system, preventing conflicts.
+* **Easy Setup:** Simplifies the process of setting up a development environment, as all dependencies are pre-packaged.
+* **Portability:** Containers can run consistently across different operating systems and cloud providers.
 
-Create a `.env` file for your local environment:
+***
 
-```env
-FLASK_ENV=development
-MYSQL_DATABASE=your_db
-MYSQL_USER=root
-MYSQL_PASSWORD=your_password
-GOOGLE_DRIVE_FOLDER_ID=your_folder_id
-```
+### Docker Installation & Setup
 
-Add your Google service account JSON as `google_service_account_details.json` in the root.
+Before running the project, ensure Docker Desktop (for Windows/macOS) or Docker Engine (for Linux) is installed and running on your machine.
 
-### 3. Build & Run via Docker Compose
+***
 
-```bash
-docker-compose up --build
-```
+#### Linux
 
-This starts the app, MySQL (file-based), and Nginx (if configured).
+If you're on a Linux system, Docker runs as a service. You'll need `sudo` privileges to manage it.
+
+1.  **Check Docker Status:**
+    First, verify if the Docker daemon is running:
+    ```bash
+    sudo systemctl status docker
+    ```
+    You should see `Active: active (running)`. If it's not running, or if you get an error, proceed to the next step.
+
+2.  **Start Docker (if needed):**
+    If Docker is not running, start the service:
+    ```bash
+    sudo systemctl start docker
+    ```
+
+3.  **Enable Docker on Boot (Recommended):**
+    To ensure Docker starts automatically every time your system boots, enable the service:
+    ```bash
+    sudo systemctl enable docker
+    ```
+
+***
+
+#### Windows
+
+*(This section is a placeholder. Add detailed steps for installing Docker Desktop on Windows here, including enabling WSL2 if necessary, and ensuring it's running.)*
+
+---
+
+### Running the Docker Containers
+
+Once Docker is installed and running, you can start the project's services (your Flask application and MySQL database) using Docker Compose.
+
+1.  **Prepare your Environment File:**
+    Ensure you have a `.env` file in the same directory as your `docker-compose.yml` file. This file will contain crucial environment variables for your database and application. An example `.env` file looks like this:
+    ```
+    # === General ===
+    FLASK_ENV=development
+    # Flask secret key for sessions and CSRF
+    SECRET_KEY=example
+    
+    # === Admin Panel Google OAuth (frontend-based OAuth login for the admin panel) ===
+    ADMIN_PANEL_ALLOWED_USERS=example
+    ADMIN_PANEL_GOOGLE_CLIENT_ID=example
+    ADMIN_PANEL_GOOGLE_CLIENT_SECRET=example
+    ADMIN_PANEL_GOOGLE_REDIRECT_URI=http://localhost:5000/login/authorized
+    
+    # === Google Drive API ===
+    DRIVE_BLOG_POSTS_FOLDER_ID=example
+    DRIVE_BLOG_POSTS_FOLDER_ID_TEST=example
+    ```
+    *Replace the placeholder values with your desired credentials.*
+
+2.  **Navigate to the Project Directory:**
+    Open your terminal or command prompt and navigate to the root directory of this project, where the `docker-compose.yml` file is located.
+
+    ```bash
+    cd /path/to/your/flask_project
+    ```
+    *(Replace `/path/to/your/flask_project` with the actual path to your project.)*
+
+3.  **Start the Containers:**
+    Execute the following command to build (if necessary) and start all services defined in your `docker-compose.yml` file in detached mode (meaning they will run in the background).
+
+    ```bash
+    docker compose up -d
+    ```
+
+    **Explanation of the command:**
+    * `docker compose`: This is the main command for interacting with Docker Compose projects.
+    * `up`: This subcommand builds, (re)creates, starts, and attaches to containers for a service.
+    * `-d`: This flag stands for "detached mode." It starts the containers in the background, allowing you to continue using your terminal. If you omit `-d`, the logs from your containers will be displayed in your terminal, and you'll need to press `Ctrl+C` to stop them (which will also stop the containers).
+
+4.  **Verify Running Containers:**
+    To confirm that your containers are running correctly, you can use the `docker ps` command:
+
+    ```bash
+    docker ps
+    ```
+    You should see output listing containers for your `web` (Flask app) and `db` (MySQL) services, with a `Status` of `Up`.
+
+5.  **Access Your Application:**
+    Once the containers are up and running, your Flask application should be accessible in your web browser at:
+
+    `http://localhost:5000`
+
+    *(Note: If you changed `FLASK_RUN_PORT` in your `.env` file, use that port instead of 5000.)*
 
 ---
 
@@ -146,4 +234,4 @@ This starts the app, MySQL (file-based), and Nginx (if configured).
 
 ## License
 
-MIT License © Damian Piatkowski
+This project is open-sourced under the [MIT License](LICENSE) © Damian Piatkowski.
