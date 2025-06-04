@@ -21,8 +21,11 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 * [Containerization Setup](#containerization-setup)
     * [Docker Installation & Setup](#docker-installation--setup)
         * [Linux](#linux)
+            * [Troubleshooting Docker Permissions on Linux](#troubleshooting-docker-permissions-on-linux)
         * [Windows](#windows)
     * [Running the Docker Containers](#running-the-docker-containers)
+    * [Database Initialization & Migrations](#database-initialization--migrations)
+    * [Troubleshooting: Application Not Accessible (Web Container Exited)](#troubleshooting-application-not-accessible-web-container-exited)
 * [Deployment](#deployment)
     * [Strategy](#strategy)
     * [CI/CD (GitHub Actions)](#cicd-github-actions)
@@ -146,6 +149,33 @@ If you're on a Linux system, Docker runs as a service. You'll need `sudo` privil
 
 ***
 
+##### Troubleshooting Docker Permissions on Linux
+
+If you encounter "permission denied" errors when trying to run Docker commands (e.g., `unable to connect to the Docker daemon socket`), this is almost always because your user is not part of the `docker` Linux group.
+
+1.  **Add your user to the `docker` group:**
+    Open a terminal and run:
+    ```bash
+    sudo usermod -aG docker $USER
+    ```
+    * `sudo`: Grants temporary root privileges.
+    * `usermod`: User modification utility.
+    * `-aG`: Appends (`-a`) the user to the specified supplementary group (`-G`).
+    * `docker`: The group that has permissions to interact with the Docker daemon socket.
+    * `$USER`: Automatically substitutes your current username.
+
+2.  **Crucial Step: Apply the group change.**
+    Simply running the `usermod` command isn't enough. Your current session won't immediately recognize the new group membership. **You must reboot your machine** to ensure a fresh login with updated group information.
+
+3.  **Verify your group membership (optional):**
+    After rebooting, open a terminal and run:
+    ```bash
+    groups $USER
+    ```
+    You should now see `docker` listed among your groups (e.g., `damian : damian adm cdrom sudo dip plugdev lpadmin lxd sambashare **docker**`).
+
+***
+
 #### Windows
 
 *(This section is a placeholder. Add detailed steps for installing Docker Desktop on Windows here, including enabling WSL2 if necessary, and ensuring it's running.)*
@@ -210,6 +240,162 @@ Once Docker is installed and running, you can start the project's services (your
     `http://localhost:5000`
 
     *(Note: If you changed `FLASK_RUN_PORT` in your `.env` file, use that port instead of 5000.)*
+
+***
+
+### Database Initialization & Migrations
+
+When setting up the project for the first time, or after significant database schema changes, you'll need to ensure your MySQL database is properly initialized and updated with the latest schema. The Flask application includes a custom SQLAlchemy logger that attempts to write logs to the database from startup. If the `logs` table (or other application tables) doesn't exist yet, this will cause your application to crash immediately upon launch.
+
+Follow these steps to initialize your database tables:
+
+1.  **Temporarily Disable Database Logging:**
+    To allow the database migration tool (Alembic) to run without your application's logger immediately failing, you need to temporarily disable logging to the database.
+
+    * Open `app/config.py`.
+    * In the `DevelopmentConfig` class (or the relevant configuration class for your `FLASK_ENV`), locate the `LOG_TO_DB` setting and change it to `False`:
+
+        ```python
+        # In app/config.py
+        class DevelopmentConfig(BaseConfig):
+            # ... other settings ...
+            LOG_TO_DB = False # Temporarily set to False for migrations
+            # ...
+        ```
+    * Save the file.
+
+2.  **Run Database Migrations:**
+    This command will execute the Alembic migration scripts to create your `alembic_version`, `blog_posts`, and `logs` tables in your MySQL database.
+
+    ```bash
+    docker compose down              # Stop all services to ensure a clean state
+    docker compose up -d db          # Start only the database service
+    docker compose run --rm web flask db upgrade
+    ```
+    You should see output similar to `INFO [alembic.runtime.migration] Running upgrade ... Initial migration.` If this command completes without errors or a traceback, your tables have been created!
+
+3.  **Verify Table Creation (Optional but Recommended):**
+    You can confirm that the tables exist by connecting directly to your MySQL container and listing the tables.
+
+    ```bash
+    docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
+    ```
+    *(**Important:** Replace `dbuser`, `dbpassword`, and `dbname` with the actual values from your project's `.env` file.)*
+
+    Once at the `mysql>` prompt, run:
+    ```sql
+    SHOW TABLES;
+    ```
+    You should see `alembic_version`, `blog_posts`, and `logs` listed. Type `exit;` to leave the MySQL prompt.
+
+4.  **Re-enable Database Logging:**
+    Now that your `logs` table exists, you can re-enable logging to the database.
+
+    * Open `app/config.py` again.
+    * Change `LOG_TO_DB` back to `True` (or revert it to its original state if you're using environment variables to control it):
+
+        ```python
+        # In app/config.py
+        class DevelopmentConfig(BaseConfig):
+            # ... other settings ...
+            LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true' # Revert to True
+            # ...
+        ```
+    * Save the file.
+
+5.  **Start Your Full Application:**
+    Finally, bring up all your services. Your application should now start and log to the database without issues.
+
+    ```bash
+    docker compose down              # Stop all services to pick up the config change
+    docker compose up -d             # Start all services in detached mode
+    ```
+    You can check your application's logs (`docker compose logs web`) to confirm it's running cleanly.
+
+***
+
+### Troubleshooting: Application Not Accessible (Web Container Exited)
+
+If you run `docker compose up -d` and then find that your application is not accessible at `http://localhost:5000`, a common reason is that the `web` container started but then immediately exited.
+
+**How to Diagnose:**
+
+1.  **Check Container Status:**
+    Use `docker ps -a` to list all Docker containers, including those that have exited.
+    ```bash
+    docker ps -a
+    ```
+    Look for your `damianpiatkowskicom-web-1` container in the output. If its `STATUS` is `Exited (...)` (e.g., `Exited (126) 11 seconds ago`), while your `db` container is `Up`, it indicates a problem with your web service's startup command.
+
+    **Example of problematic output:**
+    ```
+    CONTAINER ID   IMAGE                     COMMAND                   CREATED         STATUS                     PORTS          NAMES
+    cadc9cd40472   damianpiatkowskicom-web   "sh -c 'mkdir -p /lo…"   12 seconds ago  Exited (126) 11 seconds ago                  damianpiatkowskicom-web-1
+    590a923cbe46   mysql:latest              "docker-entrypoint.s…"   12 seconds ago  Up 12 seconds              0.0.0.0:3306->3306/tcp   damianpiatkowskicom-db-1
+    ```
+    The `Exited (126)` status for the `web` container is the key indicator. This often means the command Docker tried to execute inside the container was not found or lacked necessary permissions.
+
+2.  **Getting Detailed Container Logs:**
+    The most crucial step to debug an exited container is to inspect its logs. Docker collects all `stdout` and `stderr` output from the running processes inside the container.
+
+    * **View logs for a specific service:**
+        To see the output that your `web` container printed before it exited, use the `docker compose logs` command, specifying the service name:
+        ```bash
+        docker compose logs web
+        ```
+        This will display all the historical logs from your `damianpiatkowskicom-web-1` container. Look for error messages, stack traces, or any output that indicates why your Flask application or its startup script (`wait-for-it.sh`) failed.
+
+    * **View only the most recent logs (useful for verbose outputs):**
+        If the logs are very long, you can limit the output to the last N lines:
+        ```bash
+        docker compose logs web --tail 50
+        ```
+        (Replace `50` with any number of lines you want to see from the end.)
+
+      * **Run the service in foreground (for real-time debugging):**
+          If you want to see the logs as they happen and interact directly with the container's startup, you can run `docker compose up` without the `-d` (detached) flag, focusing on the service that's failing.
+
+          First, ensure your services are stopped:
+          ```bash
+          docker compose down
+          ```
+          Then, bring up only the `web` service (and its dependencies, like `db`, will also start) in the foreground:
+          ```bash
+          docker compose up web
+          ```
+          The output will stream directly to your terminal. This is often the quickest way to catch the exact error message that causes the container to exit. Once you see the error and diagnose it, you can press `Ctrl+C` to stop the foreground process (which will also stop the containers), then resolve the issue, and finally run `docker compose up -d --build` again.
+
+    By examining the logs, you'll get detailed information about why your Flask application container (`web`) is exiting with status code 1, allowing you to pinpoint the specific error or misconfiguration.
+
+**How to Fix:**
+
+The most common cause for `Exited (126)` in this setup is that the `wait-for-it.sh` script (or another script executed by your `command`) does not have executable permissions inside the container.
+
+1.  **Stop and remove the currently running containers:**
+    ```bash
+    docker compose down
+    ```
+
+2.  **Make the script executable on your host machine:**
+    Navigate to your project's root directory and run:
+    ```bash
+    chmod +x scripts/wait-for-it.sh
+    ```
+    This command adds execute permissions to the script.
+
+3.  **Rebuild the `web` image and start all services:**
+    Since the file permissions change needs to be incorporated into the Docker image itself, you must force a rebuild of the `web` service's image.
+    ```bash
+    docker compose up -d --build
+    ```
+    This will stop any containers, rebuild your `web` image (incorporating the new permissions), and then start all services again.
+
+4.  **Verify Running Containers (Again):**
+    After running the `--build` command, use `docker ps` again:
+    ```bash
+    docker ps
+    ```
+    Both `damianpiatkowskicom-web-1` and `damianpiatkowskicom-db-1` should now show `Status: Up ...`. Your application should now be accessible.
 
 ---
 
