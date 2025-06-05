@@ -1,0 +1,95 @@
+/* Hero Section for Blog Page */
+.blog-hero {
+    background-image: url('../images/home_blog.jpg'); /* Using the same background as index, adjust as needed */
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 80px 0; /* Adjust padding to suit your design */
+    margin-bottom: 3rem; /* Space below the hero section */
+}
+
+.blog-hero h1,
+.blog-hero p {
+    margin: 0;
+    font-weight: 700;
+}
+
+.blog-hero p {
+    font-size: 1.25rem;
+}
+
+/* Blog Post Cards */
+.blog-posts-section {
+    padding-bottom: 5rem; /* Ensure space above the footer */
+    background-color: #ECEFF4; /* ADDED: Light grey background from resume.css */
+}
+
+.blog-post-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    background-color: #FFF; /* Ensure card background is white, distinct from section */
+}
+
+.blog-post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.blog-thumbnail {
+    width: 100%;
+    height: 200px; /* Fixed height for consistent thumbnail size */
+    object-fit: cover; /* Ensures image covers the area without distortion */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.blog-post-card .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-post-card .card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.blog-post-card .blog-summary {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1rem;
+    flex-grow: 1; /* Allows the summary to take up available space */
+}
+
+/* Pagination Styling */
+.pagination .page-item .page-link {
+    color: #333; /* Default text color for page numbers */
+    border: 1px solid #dee2e6;
+    margin: 0 2px;
+    border-radius: 5px; /* Slightly rounded corners */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #D0F0C0; /* Your custom green for active page */
+    border-color: #D0F0C0;
+    color: #000; /* Text color for active page */
+    z-index: 1; /* Ensure it's above other links */
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #a0d08c; /* Hover color for pagination links */
+    border-color: #a0d08c;
+    color: #fff; /* Text color on hover */
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
