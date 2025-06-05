@@ -6,6 +6,7 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 
 ***
 
+**For database setup and management details, refer to [Database Management Guide](docs/DATABASE.md).**
 **For detailed information on project diagrams, refer to [Draw.io Diagramming Guide](docs/DRAWIO_GUIDE.md).**
 
 ---
@@ -24,7 +25,6 @@ This project is public not just as a portfolio piece, but also to serve as a lea
             * [Troubleshooting Docker Permissions on Linux](#troubleshooting-docker-permissions-on-linux)
         * [Windows](#windows)
     * [Running the Docker Containers](#running-the-docker-containers)
-    * [Database Initialization & Migrations](#database-initialization--migrations)
     * [Troubleshooting: Application Not Accessible (Web Container Exited)](#troubleshooting-application-not-accessible-web-container-exited)
 * [Deployment](#deployment)
     * [Strategy](#strategy)
@@ -243,77 +243,6 @@ Once Docker is installed and running, you can start the project's services (your
 
 ***
 
-### Database Initialization & Migrations
-
-When setting up the project for the first time, or after significant database schema changes, you'll need to ensure your MySQL database is properly initialized and updated with the latest schema. The Flask application includes a custom SQLAlchemy logger that attempts to write logs to the database from startup. If the `logs` table (or other application tables) doesn't exist yet, this will cause your application to crash immediately upon launch.
-
-Follow these steps to initialize your database tables:
-
-1.  **Temporarily Disable Database Logging:**
-    To allow the database migration tool (Alembic) to run without your application's logger immediately failing, you need to temporarily disable logging to the database.
-
-    * Open `app/config.py`.
-    * In the `DevelopmentConfig` class (or the relevant configuration class for your `FLASK_ENV`), locate the `LOG_TO_DB` setting and change it to `False`:
-
-        ```python
-        # In app/config.py
-        class DevelopmentConfig(BaseConfig):
-            # ... other settings ...
-            LOG_TO_DB = False # Temporarily set to False for migrations
-            # ...
-        ```
-    * Save the file.
-
-2.  **Run Database Migrations:**
-    This command will execute the Alembic migration scripts to create your `alembic_version`, `blog_posts`, and `logs` tables in your MySQL database.
-
-    ```bash
-    docker compose down              # Stop all services to ensure a clean state
-    docker compose up -d db          # Start only the database service
-    docker compose run --rm web flask db upgrade
-    ```
-    You should see output similar to `INFO [alembic.runtime.migration] Running upgrade ... Initial migration.` If this command completes without errors or a traceback, your tables have been created!
-
-3.  **Verify Table Creation (Optional but Recommended):**
-    You can confirm that the tables exist by connecting directly to your MySQL container and listing the tables.
-
-    ```bash
-    docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
-    ```
-    *(**Important:** Replace `dbuser`, `dbpassword`, and `dbname` with the actual values from your project's `.env` file.)*
-
-    Once at the `mysql>` prompt, run:
-    ```sql
-    SHOW TABLES;
-    ```
-    You should see `alembic_version`, `blog_posts`, and `logs` listed. Type `exit;` to leave the MySQL prompt.
-
-4.  **Re-enable Database Logging:**
-    Now that your `logs` table exists, you can re-enable logging to the database.
-
-    * Open `app/config.py` again.
-    * Change `LOG_TO_DB` back to `True` (or revert it to its original state if you're using environment variables to control it):
-
-        ```python
-        # In app/config.py
-        class DevelopmentConfig(BaseConfig):
-            # ... other settings ...
-            LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true' # Revert to True
-            # ...
-        ```
-    * Save the file.
-
-5.  **Start Your Full Application:**
-    Finally, bring up all your services. Your application should now start and log to the database without issues.
-
-    ```bash
-    docker compose down              # Stop all services to pick up the config change
-    docker compose up -d             # Start all services in detached mode
-    ```
-    You can check your application's logs (`docker compose logs web`) to confirm it's running cleanly.
-
-***
-
 ### Troubleshooting: Application Not Accessible (Web Container Exited)
 
 If you run `docker compose up -d` and then find that your application is not accessible at `http://localhost:5000`, a common reason is that the `web` container started but then immediately exited.
@@ -401,6 +330,8 @@ The most common cause for `Exited (126)` in this setup is that the `wait-for-it.
 
 ## Deployment
 
+**to be completed later**
+
 ### Strategy
 
 * **Dual-Stage Deploy**: `staging` & `production`
@@ -420,4 +351,6 @@ The most common cause for `Exited (126)` in this setup is that the `wait-for-it.
 
 ## License
 
-This project is open-sourced under the [MIT License](LICENSE) © Damian Piatkowski.
+This project is open-sourced and distributed under the terms of the **[MIT License](LICENSE)**.
+
+Copyright © 2024-Present Damian Piatkowski.

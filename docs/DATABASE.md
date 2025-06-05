@@ -7,10 +7,12 @@ This guide provides essential information and commands for managing the MySQL da
 ## Table of Contents
 
 * [1. Database Overview](#1-database-overview)
-* [2. Accessing the Database via Command Line](#2-accessing-the-database-via-command-line)
-* [3. Verifying Table Creation](#3-verifying-table-creation)
-* [4. Retrieving Data from Tables](#4-retrieving-data-from-tables)
-* [5. (Optional) Advanced Database Tasks](#5-optional-advanced-database-tasks)
+* [2. Verifying Persistent Storage Volume](#2-verifying-persistent-storage-volume)
+* [3. Accessing the Database via Command Line](#3-accessing-the-database-via-command-line)
+* [4. Database Initialization & Migrations](#4-database-initialization--migrations)
+* [5. Verifying Table Creation](#5-verifying-table-creation)
+* [6. Retrieving Data from Tables](#6-retrieving-data-from-tables)
+* [7. (Optional) Advanced Database Tasks](#7-optional-advanced-database-tasks)
 
 ---
 
@@ -23,11 +25,62 @@ This project uses a MySQL database, which is containerized using Docker and conf
 * **Data Persistence:** Managed via Docker Volumes
 * **Configuration:** Database credentials (username, password, database name) are managed through your `.env` file.
 
-## 2. Accessing the Database via Command Line
+---
+
+## 2. Verifying Persistent Storage Volume
+
+To confirm that your MySQL database data is being stored persistently on a dedicated Docker volume outside the container, you can inspect the volume created by Docker Compose.
+
+1.  **Ensure your `db` service has run at least once:**
+    Docker automatically creates named volumes when a service that references them is successfully started for the first time. If your database container has never been brought up, the volume might not exist yet. You can run `docker compose up -d db` to ensure it's created.
+
+2.  **Inspect the Docker Volume:**
+    Your `docker-compose.yml` uses a named volume called `mysql_data` for the database files. Docker Compose prefixes named volumes with your project's directory name (e.g., `damianpiatkowskicom`).
+
+    Use the following command to get details about your database's data volume:
+    ```bash
+    docker volume inspect damianpiatkowskicom_mysql_data
+    ```
+
+    The output will be a JSON object, similar to this:
+    ```json
+    [
+        {
+            "CreatedAt": "2025-06-01T13:14:02+07:00",
+            "Driver": "local",
+            "Labels": {
+                "com.docker.compose.config-hash": "63c07c86f95c20e5f0782d704109afb4e8f89aac718f1e33b35103c015a5d2a0",
+                "com.docker.compose.project": "damianpiatkowskicom",
+                "com.docker.compose.version": "2.36.2",
+                "com.docker.compose.volume": "mysql_data"
+            },
+            "Mountpoint": "/var/lib/docker/volumes/damianpiatkowskicom_mysql_data/_data",
+            "Name": "damianpiatkowskicom_mysql_data",
+            "Options": null,
+            "Scope": "local"
+        }
+    ]
+    ```
+
+3.  **Identify the `Mountpoint`:**
+    From the JSON output, locate the `"Mountpoint"` field. This path indicates the exact directory on your host system where Docker stores the volume's data. In the example above, it's:
+    `/var/lib/docker/volumes/damianpiatkowskicom_mysql_data/_data`
+
+4.  **Verify the Files on Your Host System:**
+    Navigate to this `Mountpoint` directory on your machine to see the actual database files.
+    ```bash
+    sudo ls -l /var/lib/docker/volumes/damianpiatkowskicom_mysql_data/_data
+    ```
+    You should see various MySQL data files and directories (e.g., `ibdata1`, `ib_logfile0`, `ib_logfile1`, and subfolders representing your databases). The presence of these files confirms that your database data is indeed being stored persistently on a Docker volume outside the container.
+
+---
+
+## 3. Accessing the Database via Command Line
 
 You can connect directly to your running MySQL database container using `docker exec` to run the `mysql` client. This allows you to execute SQL queries directly against your database.
 
 Before attempting to connect, ensure your `db` container is running:
+
 ```bash
 docker compose ps # Verify 'db' service status is 'Up'
 ````
@@ -41,25 +94,121 @@ docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
 **Important Notes:**
 
   * Replace `damianpiatkowskicom-db-1` with the actual name of your running database container if it differs (you can find this with `docker ps`).
+
   * Replace `dbuser`, `dbpassword`, and `dbname` with the exact values configured in your project's `.env` file.
+
   * The `mysql: [Warning] Using a password on the command line interface can be insecure.` warning is standard when providing the password directly in the command. For a more secure, interactive login (where you are prompted for the password), you can omit `-pdbpassword`:
+
     ```bash
     docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -p dbname
     ```
+
     You will then be prompted to enter the password.
 
 Once successfully connected, you will see the `mysql>` prompt.
 
-## 3\. Verifying Table Creation
+-----
 
-After running database migrations (e.g., `flask db upgrade`), you can verify that the expected tables have been created in your database.
+## 4\. Database Initialization & Migrations
 
-1.  Connect to the MySQL prompt as described in [Accessing the Database via Command Line](https://www.google.com/search?q=%232-accessing-the-database-via-command-line).
-2.  At the `mysql>` prompt, run the following command:
+When setting up the project for the first time, or after significant database schema changes, you'll need to ensure your MySQL database is properly initialized and updated with the latest schema. The Flask application includes a custom SQLAlchemy logger that attempts to write logs to the database from startup. If the `logs` table (or other application tables) doesn't exist yet, this will cause your application to crash immediately upon launch.
+
+Follow these steps to initialize your database tables:
+
+1.  **Temporarily Disable Database Logging:**
+    To allow the database migration tool (Alembic) to run without your application's logger immediately failing, you need to temporarily disable logging to the database.
+
+      * Open `app/config.py`.
+
+      * In the `DevelopmentConfig` class (or the relevant configuration class for your `FLASK_ENV`), locate the `LOG_TO_DB` setting and change it to `False`:
+
+        ```python
+        # In app/config.py
+        from app.config import BaseConfig
+
+        class DevelopmentConfig(BaseConfig):
+            # ... other settings ...
+            LOG_TO_DB = False # Temporarily set to False for migrations
+            # ...
+        ```
+
+      * Save the file.
+
+2.  **Run Database Migrations:**
+    This command will execute the Alembic migration scripts to create your `alembic_version`, `blog_posts`, and `logs` tables in your MySQL database.
+
+    ```bash
+    docker compose down              # Stop all services to ensure a clean state
+    docker compose up -d db          # Start only the database service
+    docker compose run --rm web flask db upgrade
+    ```
+
+    You should see output similar to `INFO [alembic.runtime.migration] Running upgrade ... Initial migration.` If this command completes without errors or a traceback, your tables have been created\!
+
+3.  **Verify Table Creation (Optional but Recommended):**
+    You can confirm that the tables exist by connecting directly to your MySQL container and listing the tables.
+
+    ```bash
+    docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
+    ```
+
+    *(**Important:** Replace `dbuser`, `dbpassword`, and `dbname` with the actual values from your project's `.env` file.)*
+
+    Once at the `mysql>` prompt, run:
+
     ```sql
     SHOW TABLES;
     ```
+
+    You should see `alembic_version`, `blog_posts`, and `logs` listed. Type `exit;` to leave the MySQL prompt.
+
+4.  **Re-enable Database Logging:**
+    Now that your `logs` table exists, you can re-enable logging to the database.
+
+      * Open `app/config.py` again.
+
+      * Change `LOG_TO_DB` back to `True` (or revert it to its original state if you're using environment variables to control it):
+
+        ```python
+        # In app/config.py
+        import os
+
+        from app.config import BaseConfig
+
+        class DevelopmentConfig(BaseConfig):
+            # ... other settings ...
+            LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true' # Revert to True
+            # ...
+        ```
+
+      * Save the file.
+
+5.  **Start Your Full Application:**
+    Finally, bring up all your services. Your application should now start and log to the database without issues.
+
+    ```bash
+    docker compose down              # Stop all services to pick up the config change
+    docker compose up -d             # Start all services in detached mode
+    ```
+
+    You can check your application's logs (`docker compose logs web`) to confirm it's running cleanly.
+
+-----
+
+## 5\. Verifying Table Creation
+
+After running database migrations (e.g., `flask db upgrade`), you can verify that the expected tables have been created in your database.
+
+1.  Connect to the MySQL prompt as described in [Accessing the Database via Command Line](https://www.google.com/search?q=%233-accessing-the-database-via-command-line).
+
+2.  At the `mysql>` prompt, run the following command:
+
+    ```sql
+    SHOW TABLES;
+    ```
+
     You should see a list of tables similar to this (depending on your migrations):
+
     ```
     +------------------+
     | Tables_in_dbname |
@@ -69,13 +218,14 @@ After running database migrations (e.g., `flask db upgrade`), you can verify tha
     | logs             |
     +------------------+
     ```
+
     The `alembic_version` table is used by the migration tool itself, while `blog_posts` and `logs` are your application's tables.
 
-## 4\. Retrieving Data from Tables
+## 6\. Retrieving Data from Tables
 
 Once tables exist and your application has been running (potentially inserting data), you can query them to retrieve records.
 
-1.  Connect to the MySQL prompt as described in [Accessing the Database via Command Line](https://www.google.com/search?q=%232-accessing-the-database-via-command-line).
+1.  Connect to the MySQL prompt as described in [Accessing the Database via Command Line](https://www.google.com/search?q=%233-accessing-the-database-via-command-line).
 
 2.  Use `SELECT` statements to fetch data. Remember to end each SQL query with a semicolon (`;`).
 
@@ -109,7 +259,7 @@ Once tables exist and your application has been running (potentially inserting d
         SELECT * FROM logs WHERE level = 'ERROR' ORDER BY timestamp DESC LIMIT 5;
         ```
 
-## 5\. (Optional) Advanced Database Tasks
+## 7\. (Optional) Advanced Database Tasks
 
 This section can be expanded in the future to include more advanced database management topics such as:
 
@@ -117,5 +267,3 @@ This section can be expanded in the future to include more advanced database man
   * Creating/Managing Database Users
   * Troubleshooting Database Connection Issues
   * Database Backups and Restoration Strategies
-
------
