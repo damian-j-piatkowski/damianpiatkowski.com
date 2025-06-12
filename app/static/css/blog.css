@@ -1,11 +1,10 @@
 /* Hero Section for Blog Page */
 .blog-hero {
-    background-image: url('../images/home_blog.jpg'); /* Using the same background as index, adjust as needed */
+    background-image: url('../images/home_blog.jpg');
     background-size: cover;
     background-position: center;
     color: white;
-    padding: 80px 0; /* Adjust padding to suit your design */
-    margin-bottom: 3rem; /* Space below the hero section */
+    padding: 80px 0;
 }
 
 .blog-hero h1,
@@ -18,12 +17,35 @@
     font-size: 1.25rem;
 }
 
-/* Blog Post Cards */
+/* Blog Post Cards / Main Content Section */
 .blog-posts-section {
-    padding-bottom: 5rem; /* Ensure space above the footer */
-    background-color: #ECEFF4; /* ADDED: Light grey background from resume.css */
+    background-color: #ECEFF4; /* Light grey background from resume.css */
+    flex-grow: 1; /* ALLOWS THIS SECTION TO GROW AND FILL AVAILABLE SPACE */
+    display: flex; /* Makes it a flex container */
+    flex-direction: column; /* Stacks its children vertically */
+    padding-top: 3rem; /* Add top padding to create space from the hero */
+    padding-bottom: 5rem; /* Existing padding to ensure space above footer content */
 }
 
+/* Ensure container inside blog-posts-section also centers content if it's the alert */
+.blog-posts-section .container {
+    flex-grow: 1; /* Allows the container itself to grow within the section */
+    display: flex;
+    flex-direction: column; /* Stacks content vertically */
+    justify-content: center; /* Vertically center content if there's extra space */
+    align-items: center; /* Horizontally center content (useful for the alert) */
+    text-align: center; /* Ensures text inside is centered too */
+}
+
+/* Adjust the alert box to be vertically centered within its flex container */
+.blog-posts-section .container .alert {
+    max-width: 600px; /* Limit the width of the alert for better readability */
+    width: 100%;
+    margin: auto; /* Auto margins will center it horizontally */
+}
+
+
+/* Existing styles for cards and pagination below */
 .blog-post-card {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -40,8 +62,8 @@
 
 .blog-thumbnail {
     width: 100%;
-    height: 200px; /* Fixed height for consistent thumbnail size */
-    object-fit: cover; /* Ensures image covers the area without distortion */
+    height: 200px;
+    object-fit: cover;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -62,29 +84,33 @@
     font-size: 0.95rem;
     color: #555;
     margin-bottom: 1rem;
-    flex-grow: 1; /* Allows the summary to take up available space */
+    flex-grow: 1;
 }
 
 /* Pagination Styling */
+.pagination {
+    margin-top: 3rem; /* Add consistent margin for pagination */
+}
+
 .pagination .page-item .page-link {
-    color: #333; /* Default text color for page numbers */
+    color: #333;
     border: 1px solid #dee2e6;
     margin: 0 2px;
-    border-radius: 5px; /* Slightly rounded corners */
+    border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #D0F0C0; /* Your custom green for active page */
+    background-color: #D0F0C0;
     border-color: #D0F0C0;
-    color: #000; /* Text color for active page */
-    z-index: 1; /* Ensure it's above other links */
+    color: #000;
+    z-index: 1;
 }
 
 .pagination .page-item .page-link:hover {
-    background-color: #a0d08c; /* Hover color for pagination links */
+    background-color: #a0d08c;
     border-color: #a0d08c;
-    color: #fff; /* Text color on hover */
+    color: #fff;
 }
 
 .pagination .page-item.disabled .page-link {

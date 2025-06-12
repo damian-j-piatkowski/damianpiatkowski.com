@@ -2,40 +2,42 @@
 .about-section {
     position: relative;
     overflow: hidden;
-    min-height: 100vh; /* Ensure section takes at least full viewport height */
+    flex: 1; /* Make it a flex item that grows to fill its parent */
+    height: 100%; /* Explicitly set height to 100% of its flex parent */
 }
 
 .about-section .container-fluid {
     padding: 0;
     height: 100%;
     display: flex;
-    flex-direction: column; /* Ensure it takes full height */
+    flex-direction: column;
 }
 
 .about-section .row.no-gutters {
     margin: 0;
     width: 100%;
-    height: 100%;
+    height: 100%; /* This will now be 100% of its flex parent (.container-fluid) */
     display: flex;
-    flex: 1; /* Allow the row to grow and take available space */
-    flex-direction: column; /* Ensure stacking by default */
+    flex-direction: column; /* Default to column stacking for mobile-first */
+    position: relative; /* Make row the positioning context for absolute children */
 }
 
+/* Styles for the image column - Common adjustments */
 .about-section picture,
 .about-section img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: 100%; /* Default height for image within its container */
+    object-fit: contain; /* Default object-fit (can be overridden) */
     display: block;
 }
 
 .about-content-overlay {
-    position: relative;
+    position: relative; /* Default relative for stacked layout */
     width: 100%;
-    height: 100%;
+    height: 100%; /* Default height for stacked layout */
     padding: 2rem;
     display: flex;
-    flex: 1; /* Allow the overlay to grow and take available space */
+    flex: 1; /* Allow content to grow within overlay */
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -44,140 +46,207 @@
 }
 
 .about-content {
-    color: inherit; /* Inherit color from overlay */
+    color: inherit;
     text-align: center;
     max-width: 600px;
     padding: 10%;
-    flex: 1; /* Allow the content to grow and take available space */
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-/* Adjusting the positioning and layout for large screens */
-@media (min-width: 1200px) {
-    .about-content {
-        text-align: right;
-        padding: 0;
-        background: transparent;
-        padding-right: 2rem;
-    }
+---
 
-    .about-content-overlay {
-        position: absolute;
+### **Desktop Layout (Laptops/Monitors: `min-width: 1200px`)**
+
+```css
+@media (min-width: 1200px) {
+    /* For desktop, both col-lg-6 containers should effectively fill the row and stack with Z-index. */
+    .about-section .col-lg-6 {
+        position: absolute; /* Both columns become absolutely positioned */
         top: 0;
         left: 0;
-        height: 100%;
-        justify-content: flex-end;
+        width: 100% !important; /* FORCE full width, overriding Bootstrap's col-lg-6 width */
+        height: 100% !important; /* FORCE full height, overriding Bootstrap's col-lg-6 height or flex:none */
+        display: flex; /* Keep flex properties */
+        flex-direction: column; /* Ensure vertical alignment within the absolute container */
+        justify-content: center; /* Center content vertically */
         align-items: flex-end; /* Align content to the right */
-        background: none;
-        color: #fff; /* White text for better readability on images */
+        flex: 1; /* Allow it to grow in its new absolute context if needed */
     }
 
-    .about-section .row.no-gutters {
-        flex-direction: row;
+    /* For the image column specifically on desktop, ensure it fills the absolute container */
+    .about-section .col-lg-6:first-child {
+        z-index: 1; /* Place image layer below text */
+        flex: 1; /* Allow it to take full space within its absolute container */
+    }
+
+    .about-section .col-lg-6:last-child { /* Content Column */
+        z-index: 2; /* Place text layer above image */
+        padding-right: 5%; /* Add some padding from the right edge of the screen */
+        padding-left: 5%; /* Add some padding from the left edge for max-width content */
+        box-sizing: border-box; /* Include padding in width/height calculation */
+    }
+
+    .about-section picture,
+    .about-section img {
+        object-fit: cover; /* Image covers the entire background area */
+        height: 100%;
+        width: 100%;
+    }
+
+    .about-content-overlay {
+        position: relative; /* Content overlay is now relative to its col-lg-6 parent */
+        width: 100%;
+        height: 100%; /* Fills its parent */
+        background: none; /* No background */
+        color: #fff; /* White text */
+        display: flex; /* Keep flex properties */
+        align-items: flex-end; /* Align content to bottom-right */
+        justify-content: flex-end;
+        padding: 0; /* No padding on overlay, handled by col-lg-6 parent */
+    }
+
+    .about-content {
+        text-align: right; /* Text aligns to the right */
+        max-width: 500px; /* Constrain text width */
+        margin: 0; /* Remove auto margin */
+        padding: 0; /* No padding */
     }
 }
 
-/* Adjusting the positioning and layout for tablets */
 @media (min-width: 768px) and (max-width: 1199px) {
-    .about-content {
-        text-align: center;
-        padding: 10%;
+    .about-section .row.no-gutters {
+        flex-direction: column !important; /* Ensure column stacking for these resolutions */
+        height: 100%; /* Take full available height, now relative to flex: 1 on about-section */
+        flex: 1; /* Allow row to grow to fill parent */
+    }
+
+    /* Apply forced width/height for col-lg-6 elements in this range (e.g., Nest Hub 1024x600) */
+    .about-section .col-lg-6 {
+        position: relative;
+        width: 100% !important; /* Force full width for stacking */
+        height: 50% !important; /* Force half height for stacking */
+        display: flex;
+        flex-direction: column; /* Ensure content within column stacks */
+        flex: 1; /* Allow column to grow within its 50% height */
+        margin: 0;
+        padding: 0;
+    }
+
+    .about-section picture,
+    .about-section img {
+        object-fit: cover;
+        height: 100%; /* Fill the 50% height of its parent column */
+        width: 100%;
+    }
+
+    .about-content-overlay {
+        position: relative;
+        height: 100%; /* Fill the 50% height of its parent column */
         background: #ECEFF4;
         color: #666666;
-    }
-
-    .about-content-overlay {
-        position: relative;
-        height: auto;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        background: #ECEFF4; /* Ensure consistent background color */
-        color: #666666; /* Ensure consistent text color */
+        box-sizing: border-box;
     }
 
-    .about-section .row.no-gutters {
-        flex-direction: column;
-    }
-
-    .about-section picture,
-    .about-section img {
-        object-fit: contain; /* Ensure images are contained within the viewport */
-        height: 50vh; /* Limit the height of the image to half the viewport height */
+    .about-content {
+        text-align: center;
+        padding: 0;
+        max-width: 600px;
+        margin: auto;
+        color: inherit;
     }
 }
 
-/* Specific adjustments for Nest Hub Max (1280x800) */
 @media (min-width: 1280px) and (max-width: 1350px) and (orientation: landscape) {
-    .about-section {
-        min-height: 100vh;
+    .about-section .row.no-gutters {
+        flex-direction: column !important; /* FORCE column stacking for Nest Hub */
+        height: 100%;
+        flex: 1;
+        position: relative; /* Make row positioning context */
     }
 
-    .about-section .row.no-gutters {
-        height: 100%;
+    .about-section .col-lg-6 {
+        position: relative; /* Ensure these are relative for stacking */
+        width: 100% !important; /* FORCE full width for stacking */
+        height: 50% !important; /* FORCE half height for stacking */
+        display: flex;
         flex-direction: column;
+        flex: 1; /* Allow columns to grow within their 50% height */
+        margin: 0; /* Remove any residual margins */
+        padding: 0; /* Remove any residual padding */
     }
 
     .about-section picture,
     .about-section img {
-        object-fit: cover; /* Ensure the image covers the entire section */
-        height: 100%; /* Make the image take full height of the section */
-        width: 100%; /* Make the image take full width of the section */
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
     }
 
     .about-content-overlay {
-        position: relative;
+        position: relative; /* Ensure it's relative for stacking within its col */
         width: 100%;
         height: 100%;
         padding: 2rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #ECEFF4; /* Ensure consistent background color */
-        color: #666666; /* Ensure consistent text color */
-        box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
+        background: #ECEFF4;
+        color: #666666;
+        box-sizing: border-box;
     }
 
     .about-content {
         text-align: center;
         padding: 2rem;
         max-width: 600px;
-        margin: auto; /* Center the content */
-        color: inherit; /* Ensure text color matches overlay */
+        margin: auto;
+        color: inherit;
     }
 }
 
-/* Tablet landscape view with 4x5 aspect ratio for iPad Pro */
-@media (min-width: 1024px) and (max-width: 1199px) {
+---
+
+### **Mobile View (`max-width: 767px`)**
+
+```css
+@media (max-width: 767px) {
+    .about-section .row.no-gutters {
+        flex-direction: column; /* Stack columns vertically */
+        height: auto;
+        flex: none;
+    }
+
+    .about-section .col-12 {
+        height: auto;
+        flex: none;
+    }
+
     .about-section picture,
     .about-section img {
-        object-fit: contain;
+        object-fit: cover;
         height: 50vh;
-    }
-}
-
-/* Mobile view: stacking behavior */
-@media (max-width: 767px) {
-    .about-section .row {
-        flex-direction: column;
-    }
-
-    .about-section .col-lg-12 {
-        width: 100%;
     }
 
     .about-content-overlay {
         position: relative;
         height: auto;
-        justify-content: center;
-        background: #ECEFF4; /* Background color matching the contact section */
-        color: #666666; /* Change text color for mobile displays */
+        background: #ECEFF4;
+        color: #666666;
+        flex: none;
+        padding: 2rem;
     }
 
     .about-content {
         width: 100%;
         text-align: center;
-        padding: 10%;
-        color: inherit; /* Inherit text color from overlay */
+        padding: 0;
+        color: inherit;
     }
 }

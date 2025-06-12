@@ -3,6 +3,21 @@
     --button-text-color: #000; /* Define the default button text color */
 }
 
+/* Sticky Footer base styles */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure body is at least full viewport height */
+}
+/* Ensure main content area grows to push footer down */
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
 /* Font */
 .open-sans {
     font-family: "Open Sans", sans-serif;
