@@ -25,7 +25,15 @@ This project is public not just as a portfolio piece, but also to serve as a lea
             * [Troubleshooting Docker Permissions on Linux](#troubleshooting-docker-permissions-on-linux)
         * [Windows](#windows)
     * [Running the Docker Containers](#running-the-docker-containers)
+        * [Prepare your Environment File](#prepare-your-environment-file)
+        * [Navigate to the Project Directory](#navigate-to-the-project-directory)
+        * [Start the Containers](#start-the-containers)
+        * [Verify Running Containers](#verify-running-containers)
+        * [Access Your Application](#access-your-application)
     * [Troubleshooting: Application Not Accessible (Web Container Exited)](#troubleshooting-application-not-accessible-web-container-exited)
+        * [How to Diagnose](#how-to-diagnose)
+        * [Rebuilding Containers from Scratch](#rebuilding-containers-from-scratch)
+        * [How to Fix](#how-to-fix)
 * [Deployment](#deployment)
     * [Strategy](#strategy)
     * [CI/CD (GitHub Actions)](#cicd-github-actions)
@@ -295,6 +303,30 @@ If you run `docker compose up -d` and then find that your application is not acc
           The output will stream directly to your terminal. This is often the quickest way to catch the exact error message that causes the container to exit. Once you see the error and diagnose it, you can press `Ctrl+C` to stop the foreground process (which will also stop the containers), then resolve the issue, and finally run `docker compose up -d --build` again.
 
     By examining the logs, you'll get detailed information about why your Flask application container (`web`) is exiting with status code 1, allowing you to pinpoint the specific error or misconfiguration.
+
+3. **Rebuilding Containers from Scratch:**
+   If you suspect the issue is related to package installation or cached layers:
+
+    * **Clean rebuild of a specific service:**
+        ```bash
+        docker compose down
+        docker compose build --no-cache web
+        docker compose up
+        ```
+      This forces Docker to rebuild the container without using cached layers, ensuring fresh installation of all dependencies.
+
+    * **If you need to rebuild everything:**
+        ```bash
+        docker compose down
+        docker compose build --no-cache
+        docker compose up
+        ```
+
+   This is particularly useful when:
+    - Dependencies aren't being installed correctly
+    - You've updated requirements.txt
+
+***
 
 **How to Fix:**
 

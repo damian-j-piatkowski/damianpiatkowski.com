@@ -3,18 +3,19 @@ from typing import Type
 
 from flask import Flask
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 
+from app.config import BaseConfig
 from app.domain.blog_post import BlogPost
 from app.domain.log import Log
 from app.extensions import db, mail
+from app.logging_config import configure_logging
 from app.orm import start_mappers
 from app.routes.about_me import about_me_bp
 from app.routes.admin import admin_bp
 from app.routes.blog import blog_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
-from app.config import BaseConfig
-from app.logging_config import configure_logging
 
 
 def create_app(config_class: Type[BaseConfig]) -> Flask:
@@ -31,6 +32,10 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
 
     # Apply the provided configuration
     flask_app.config.from_object(config_class)
+
+    # Initialize CSRF protection
+    csrf = CSRFProtect()
+    csrf.init_app(flask_app)
 
     # Initialize Flask-SQLAlchemy
     db.init_app(flask_app)

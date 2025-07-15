@@ -9,10 +9,11 @@ This guide provides essential information and commands for managing the MySQL da
 * [1. Database Overview](#1-database-overview)
 * [2. Verifying Persistent Storage Volume](#2-verifying-persistent-storage-volume)
 * [3. Accessing the Database via Command Line](#3-accessing-the-database-via-command-line)
-* [4. Database Initialization & Migrations](#4-database-initialization--migrations)
-* [5. Verifying Table Creation](#5-verifying-table-creation)
-* [6. Retrieving Data from Tables](#6-retrieving-data-from-tables)
-* [7. (Optional) Advanced Database Tasks](#7-optional-advanced-database-tasks)
+* [4. Resetting and Verifying Database Setup](#4-resetting-and-verifying-database-setup)
+* [5. Database Initialization & Migrations](#5-database-initialization--migrations)
+* [6. Verifying Table Creation](#6-verifying-table-creation)
+* [7. Retrieving Data from Tables](#7-retrieving-data-from-tables)
+* [8. (Optional) Advanced Database Tasks](#8-optional-advanced-database-tasks)
 
 ---
 
@@ -100,102 +101,136 @@ docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
   * The `mysql: [Warning] Using a password on the command line interface can be insecure.` warning is standard when providing the password directly in the command. For a more secure, interactive login (where you are prompted for the password), you can omit `-pdbpassword`:
 
     ```bash
-    docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -p dbname
+    docker exec -it damianpiatkowskicom-db-1 mysql -u damian-j-piatkowski -p damian-piatkowski-com-db
     ```
 
     You will then be prompted to enter the password.
 
 Once successfully connected, you will see the `mysql>` prompt.
 
------
+To exit the MySQL session, you can use any of these methods:
+* Type `exit;` and press Enter
+* Type `quit;` and press Enter
+* Press `Ctrl + D`
 
-## 4\. Database Initialization & Migrations
+---
+
+## 4. Resetting and Verifying Database Setup
+
+When you need to start fresh or verify your database setup, follow these steps:
+
+### 4.1. Reset Database
+
+To completely reset your database:
+
+```powershell
+# Stop all containers
+docker compose down
+
+# Remove the MySQL volume
+docker volume rm damianpiatkowskicom_mysql_data
+
+# Start services again
+docker compose up -d
+```
+
+### 4.2. Verify Setup with Root User
+
+After the database is reset, verify the setup using the root user:
+
+```powershell
+# Check MySQL users (use interactive password prompt)
+docker compose exec db mysql -uroot -p -e "SELECT User,Host FROM mysql.user;"
+
+# Expected output:
++---------------------+-----------+
+| User                | Host      |
++---------------------+-----------+
+| your-mysql-user     | %         |
+| root                | %         |
+| mysql.infoschema    | localhost |
+| mysql.session       | localhost |
+| mysql.sys          | localhost |
+| root               | localhost |
++---------------------+-----------+
+
+# Check databases
+docker compose exec db mysql -uroot -p -e "SHOW DATABASES;"
+
+# Expected output:
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql             |
+| performance_schema |
+| your-database-name |
+| sys               |
++--------------------+
+```
+
+---
+
+## 5. Database Initialization & Migrations
 
 When setting up the project for the first time, or after significant database schema changes, you'll need to ensure your MySQL database is properly initialized and updated with the latest schema. The Flask application includes a custom SQLAlchemy logger that attempts to write logs to the database from startup. If the `logs` table (or other application tables) doesn't exist yet, this will cause your application to crash immediately upon launch.
 
 Follow these steps to initialize your database tables:
 
-1.  **Temporarily Disable Database Logging:**
-    To allow the database migration tool (Alembic) to run without your application's logger immediately failing, you need to temporarily disable logging to the database.
+1. **Temporarily Disable Database Logging:**
+   To allow the database migration tool (Alembic) to run without your application's logger immediately failing, you need to temporarily disable logging to the database by setting the appropriate environment variable.
 
-      * Open `app/config.py`.
+    * Edit your `.env` file and add or modify the `LOG_TO_DB` setting:
+      ```
+      LOG_TO_DB=false
+      ```
 
-      * In the `DevelopmentConfig` class (or the relevant configuration class for your `FLASK_ENV`), locate the `LOG_TO_DB` setting and change it to `False`:
+2. **Run Database Migrations:**
+   This command will execute the Alembic migration scripts to create your `alembic_version`, `blog_posts`, and `logs` tables in your MySQL database.
 
-        ```python
-        # In app/config.py
-        from app.config import BaseConfig
+   ```bash
+   docker compose down              # Stop all services to ensure a clean state
+   docker compose up -d db         # Start only the database service
+   docker compose run --rm web flask db upgrade
+   ```
 
-        class DevelopmentConfig(BaseConfig):
-            # ... other settings ...
-            LOG_TO_DB = False # Temporarily set to False for migrations
-            # ...
-        ```
+   You should see output similar to `INFO [alembic.runtime.migration] Running upgrade ... Initial migration.` If this command completes without errors or a traceback, your tables have been created!
 
-      * Save the file.
+3. **Verify Table Creation (Optional but Recommended):**
+   You can confirm that the tables exist by connecting directly to your MySQL container and listing the tables.
 
-2.  **Run Database Migrations:**
-    This command will execute the Alembic migration scripts to create your `alembic_version`, `blog_posts`, and `logs` tables in your MySQL database.
+   ```bash
+   docker exec -it damianpiatkowskicom-db-1 mysql -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE
+   ```
 
-    ```bash
-    docker compose down              # Stop all services to ensure a clean state
-    docker compose up -d db          # Start only the database service
-    docker compose run --rm web flask db upgrade
-    ```
+   Once at the `mysql>` prompt, run:
+   ```sql
+   SHOW TABLES;
+   ```
 
-    You should see output similar to `INFO [alembic.runtime.migration] Running upgrade ... Initial migration.` If this command completes without errors or a traceback, your tables have been created\!
+   You should see `alembic_version`, `blog_posts`, and `logs` listed. Type `exit;` to leave the MySQL prompt.
 
-3.  **Verify Table Creation (Optional but Recommended):**
-    You can confirm that the tables exist by connecting directly to your MySQL container and listing the tables.
+4. **Re-enable Database Logging:**
+   Now that your `logs` table exists, you can re-enable logging to the database.
 
-    ```bash
-    docker exec -it damianpiatkowskicom-db-1 mysql -u dbuser -pdbpassword dbname
-    ```
+    * Edit your `.env` file again and set `LOG_TO_DB` back to true:
+      ```
+      LOG_TO_DB=true
+      ```
 
-    *(**Important:** Replace `dbuser`, `dbpassword`, and `dbname` with the actual values from your project's `.env` file.)*
+5. **Start Your Full Application:**
+   Finally, bring up all your services. Your application should now start and log to the database without issues.
 
-    Once at the `mysql>` prompt, run:
+   ```bash
+   docker compose down              # Stop all services to pick up the env changes
+   docker compose up -d             # Start all services in detached mode
+   ```
 
-    ```sql
-    SHOW TABLES;
-    ```
+   You can check your application's logs (`docker compose logs web`) to confirm it's running cleanly.
 
-    You should see `alembic_version`, `blog_posts`, and `logs` listed. Type `exit;` to leave the MySQL prompt.
+---
 
-4.  **Re-enable Database Logging:**
-    Now that your `logs` table exists, you can re-enable logging to the database.
-
-      * Open `app/config.py` again.
-
-      * Change `LOG_TO_DB` back to `True` (or revert it to its original state if you're using environment variables to control it):
-
-        ```python
-        # In app/config.py
-        import os
-
-        from app.config import BaseConfig
-
-        class DevelopmentConfig(BaseConfig):
-            # ... other settings ...
-            LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true' # Revert to True
-            # ...
-        ```
-
-      * Save the file.
-
-5.  **Start Your Full Application:**
-    Finally, bring up all your services. Your application should now start and log to the database without issues.
-
-    ```bash
-    docker compose down              # Stop all services to pick up the config change
-    docker compose up -d             # Start all services in detached mode
-    ```
-
-    You can check your application's logs (`docker compose logs web`) to confirm it's running cleanly.
-
------
-
-## 5\. Verifying Table Creation
+## 6. Verifying Table Creation
 
 After running database migrations (e.g., `flask db upgrade`), you can verify that the expected tables have been created in your database.
 
@@ -221,7 +256,7 @@ After running database migrations (e.g., `flask db upgrade`), you can verify tha
 
     The `alembic_version` table is used by the migration tool itself, while `blog_posts` and `logs` are your application's tables.
 
-## 6\. Retrieving Data from Tables
+## 7. Retrieving Data from Tables
 
 Once tables exist and your application has been running (potentially inserting data), you can query them to retrieve records.
 
@@ -259,7 +294,7 @@ Once tables exist and your application has been running (potentially inserting d
         SELECT * FROM logs WHERE level = 'ERROR' ORDER BY timestamp DESC LIMIT 5;
         ```
 
-## 7\. (Optional) Advanced Database Tasks
+## 8. (Optional) Advanced Database Tasks
 
 This section can be expanded in the future to include more advanced database management topics such as:
 
