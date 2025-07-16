@@ -25,10 +25,10 @@
                                     <img src="{{ url_for('static', filename='images/default_blog_thumbnail.jpg') }}" class="card-img-top blog-thumbnail" alt="Blog Post Thumbnail">
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title">{{ post.title }}</h5>
-                                        <p class="card-text text-muted small">{{ post.created_at.split(' ')[0] }}</p>
+                                        <p class="card-text text-muted small">{{ post.created_at }}</p>
                                         <p class="card-text blog-summary">{{ post.content | truncate(150, True, '...') }}</p>
                                         <div class="mt-auto">
-                                            <a href="{{ url_for('blog_bp.render_single_post', slug=post.slug) }}" class="btn btn-custom-green btn-sm">Read More</a>
+                                            <a href="{{ url_for('blog.render_single_blog_post', slug=post.slug) }}" class="btn btn-custom-green btn-sm">Read More</a>
                                         </div>
                                     </div>
                                 </div>
@@ -37,33 +37,35 @@
                     </div>
 
                     {# Pagination Controls #}
-                    <nav aria-label="Page navigation" class="mt-5">
-                        <ul class="pagination justify-content-center">
-                            {% set current_page = page %}
-                            {% set total_pages_count = total_pages %}
+                    {% if posts_data and total_pages > 1 %}
+                        <nav aria-label="Page navigation" class="mt-5">
+                            <ul class="pagination justify-content-center">
+                                {% set current_page = page %}
+                                {% set total_pages_count = total_pages %}
 
-                            {# Previous Page Button #}
-                            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('blog_bp.render_blog_posts', page=current_page - 1) }}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            {# Page Numbers #}
-                            {% for p in range(1, total_pages_count + 1) %}
-                                <li class="page-item {% if p == current_page %}active{% endif %}">
-                                    <a class="page-link" href="{{ url_for('blog_bp.render_blog_posts', page=p) }}">{{ p }}</a>
+                                {# Previous Page Button #}
+                                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                                    <a class="page-link" href="{{ url_for('blog.render_blog_posts', page=current_page - 1) }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
                                 </li>
-                            {% endfor %}
 
-                            {# Next Page Button #}
-                            <li class="page-item {% if current_page == total_pages_count %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('blog_bp.render_blog_posts', page=current_page + 1) }}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                                {# Page Numbers #}
+                                {% for p in range(1, total_pages_count + 1) %}
+                                    <li class="page-item {% if p == current_page %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('blog.render_blog_posts', page=p) }}">{{ p }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {# Next Page Button #}
+                                <li class="page-item {% if current_page == total_pages_count %}disabled{% endif %}">
+                                    <a class="page-link" href="{{ url_for('blog.render_blog_posts', page=current_page + 1) }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    {% endif %}
                 {% else %}
                     <div class="alert alert-info text-center" role="alert">
                         No blog posts found yet. Check back soon!
