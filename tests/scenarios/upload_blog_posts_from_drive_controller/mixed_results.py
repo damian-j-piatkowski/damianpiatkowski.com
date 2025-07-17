@@ -31,14 +31,14 @@ one_failure_then_success = {
     ],
     "side_effects": [
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="invalid_file_id"),
-        "Expected file content.",
+        "<p>Expected file content.</p>",
     ],
     "expected_status": 207,
     "expected_response": {
         "success": [
             {
                 "title": "Valid Blog Post",
-                "content": "Expected file content.",
+                "html_content": "<p>Expected file content.</p>",
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
             }
@@ -59,7 +59,7 @@ one_success_one_duplicate = {
         {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
     ],
     "side_effects": [
-        "Expected file content.",
+        "<p>Expected file content.</p>",
         BlogPostDuplicateError(
             "Duplicate blog post: drive_file_id 'valid_file_id' already exists.",
             field_name="drive_file_id",
@@ -71,7 +71,7 @@ one_success_one_duplicate = {
         "success": [
             {
                 "title": "Valid Blog Post",
-                "content": "Expected file content.",
+                "html_content": "<p>Expected file content.</p>",
                 "drive_file_id": "valid_file_id",
                 'slug': 'valid-blog-post',
             }
@@ -92,7 +92,7 @@ one_success_one_failure = {
         {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
     ],
     "side_effects": [
-        "Expected file content.",
+        "<p>Expected file content.</p>",
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="invalid_file_id"),
     ],
     "expected_status": 207,
@@ -100,7 +100,7 @@ one_success_one_failure = {
         "success": [
             {
                 "title": "Valid Blog Post",
-                "content": "Expected file content.",
+                "html_content": "<p>Expected file content.</p>",
                 "drive_file_id": "valid_file_id",
                 'slug': 'valid-blog-post',
             }
@@ -121,7 +121,7 @@ one_success_three_failures = {
         {"id": "runtime_error_file_id", "title": "Runtime Error Blog Post", "slug": "runtime-error-blog-post"},
     ],
     "side_effects": [
-        "Valid blog post content",
+        "<p>Valid blog post content</p>",
         GoogleDriveFileNotFoundError("Test error", file_id="missing_file_id"),
         GoogleDrivePermissionError("Test error"),
         RuntimeError("Error saving blog post"),
@@ -131,7 +131,7 @@ one_success_three_failures = {
         "success": [
             {
                 "title": "Valid Blog Post",
-                "content": "Valid blog post content",
+                "html_content": "<p>Valid blog post content</p>",
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
             }
@@ -147,10 +147,10 @@ one_success_three_failures = {
 
 # Scenario 5: 1 success (trimmed content), 1 failure
 long_content = (
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-    "Phasellus nec iaculis mauris. Curabitur lacinia, lorem in sodales bibendum, "
+    "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+    "Phasellus nec iaculis mauris. <b>Curabitur lacinia</b>, lorem in sodales bibendum, "
     "nibh tortor blandit nulla, non vehicula sem felis quis nunc. "
-    "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae."
+    "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>"
 )
 
 one_success_trimmed_long_content_one_failure = {
@@ -167,7 +167,7 @@ one_success_trimmed_long_content_one_failure = {
         "success": [
             {
                 "title": "Trimmed Blog Post",
-                "content": f"{long_content[:200]}...",
+                "html_content": long_content[:200] + "...",
                 "drive_file_id": "long_content_file_id",
                 'slug': 'trimmed-blog-post',
             }
@@ -188,7 +188,7 @@ five_successes_one_failure = {
         {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
     ],
     "side_effects": [
-        *[f"Valid blog post content {i}" for i in range(5)],
+        *[f"<p>Valid blog post content {i}</p>" for i in range(5)],
         GoogleDriveFileNotFoundError("Test error", file_id="invalid_file_id"),
     ],
     "expected_status": 207,
@@ -196,7 +196,7 @@ five_successes_one_failure = {
         "success": [
             {
                 "title": f"Valid Blog Post {i}",
-                "content": f"Valid blog post content {i}",
+                "html_content": f"<p>Valid blog post content {i}</p>",
                 "drive_file_id": f"valid_file_{i}_id",
                 "slug": f"valid-blog-post-{i}",
             }

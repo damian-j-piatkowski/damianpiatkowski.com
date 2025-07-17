@@ -3,13 +3,14 @@
 This module defines the BlogPostRepository class, responsible for handling
 CRUD operations on the blog_posts table. It provides methods for creating and
 fetching blog posts from the database, and raises informative errors in case
-of database issues.
+of database issues. The blog posts are stored with HTML content that has been
+converted from markdown during the import process.
 
 Methods:
 - count_total_blog_posts: Returns the total number of blog posts in the database.
-- create_blog_post: Inserts a new blog post into the database and returns the BlogPost instance.
+- create_blog_post: Inserts a new blog post with HTML content into the database and returns the BlogPost instance.
 - delete_blog_post_by_slug: Deletes a blog post from the database by its slug.
-- fetch_all_blog_posts: Retrieves all blog posts as BlogPost instances from the database.
+- fetch_all_post_identifiers: Retrieves minimal metadata (slug, title, drive_file_id) for all blog posts.
 - fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 - fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
 """
@@ -19,6 +20,7 @@ from typing import List
 from sqlalchemy import delete, insert, select
 from sqlalchemy import func, column
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
@@ -29,11 +31,16 @@ from app.models.tables.blog_post import blog_posts
 class BlogPostRepository:
     """Repository for handling blog post database operations."""
 
-    def __init__(self, session):
+    def __init__(self, session: Session) -> None:
+        """Initializes the repository with a database session.
+
+        Args:
+            session (Session): SQLAlchemy database session for database operations.
+        """
         self.session = session
 
     def count_total_blog_posts(self) -> int:
-        """Retrieve the total number of blog posts in the database.
+        """Retrieves the total number of blog posts in the database.
 
         Returns:
             int: The total count of blog posts.
@@ -52,15 +59,15 @@ class BlogPostRepository:
             self,
             title: str,
             slug: str,
-            content: str,
+            html_content: str,  # Changed from 'content' to 'html_content'
             drive_file_id: str
     ) -> BlogPost:
-        """Create a new blog post using SQLAlchemy.
+        """Creates a new blog post using SQLAlchemy.
 
         Args:
             title (str): The title of the blog post.
             slug (str): The unique slug for the blog post.
-            content (str): The content of the blog post.
+            html_content (str): The HTML content of the blog post.
             drive_file_id (str): The unique Google Drive file ID for the post.
 
         Returns:
@@ -75,20 +82,18 @@ class BlogPostRepository:
             new_post_data = {
                 'title': title,
                 'slug': slug,
-                'content': content,
+                'html_content': html_content,  # Changed from 'content' to 'html_content'
                 'drive_file_id': drive_file_id
             }
 
-            # Insert the new blog post into the database
             insert_query = insert(blog_posts).values(new_post_data).returning(blog_posts.c.created_at)
             result = self.session.execute(insert_query).scalar_one()
             self.session.commit()
 
-            # Return the newly created BlogPost object
             return BlogPost(
                 title=title,
                 slug=slug,
-                content=content,
+                html_content=html_content,
                 drive_file_id=drive_file_id,
                 created_at=result
             )
@@ -119,7 +124,7 @@ class BlogPostRepository:
             raise RuntimeError("Failed to create blog post in the database.") from e
 
     def delete_blog_post_by_slug(self, slug: str) -> None:
-        """Delete a blog post from the database by its slug.
+        """Deletes a blog post from the database by its slug.
 
         Args:
             slug (str): The unique slug of the blog post to delete.
@@ -142,7 +147,7 @@ class BlogPostRepository:
             raise RuntimeError("Failed to delete blog post from the database.") from e
 
     def fetch_all_post_identifiers(self) -> List[dict]:
-        """Fetch slugs and other identifiers of all blog posts from the database.
+        """Fetches slugs and other identifiers of all blog posts from the database.
 
         Returns:
             List[dict]: A list of dicts with 'slug', 'title', and 'drive_file_id'.
@@ -168,17 +173,17 @@ class BlogPostRepository:
             raise RuntimeError("Failed to fetch blog post identifiers from the database.") from e
 
     def fetch_blog_post_by_slug(self, slug: str) -> BlogPost:
-        """Retrieve a single blog post by its slug.
+        """Retrieves a single blog post by its slug.
 
         Args:
-            slug (str): The unique slug of the blog post.
+            slug (str): The unique slug of the blog post to retrieve.
 
         Returns:
             BlogPost: The retrieved blog post instance.
 
         Raises:
             BlogPostNotFoundError: If no blog post with the given slug exists.
-            RuntimeError: If a database error occurs.
+            RuntimeError: If a database error occurs during retrieval.
         """
         try:
             query = select(blog_posts).where(column("slug") == slug)
@@ -190,7 +195,7 @@ class BlogPostRepository:
             return BlogPost(
                 title=result["title"],
                 slug=result["slug"],
-                content=result["content"],
+                html_content=result["html_content"],
                 drive_file_id=result["drive_file_id"],
                 created_at=result["created_at"]
             )
@@ -198,19 +203,24 @@ class BlogPostRepository:
             raise RuntimeError("Failed to fetch blog post from the database.") from e
 
     def fetch_paginated_blog_posts(self, page: int, per_page: int) -> tuple[List[BlogPost], int]:
-        """Retrieve paginated blog posts from the database.
+        """Retrieves a paginated list of blog posts from the database.
 
         Args:
-            page (int): The page number to retrieve.
-            per_page (int): The number of posts per page.
+            page (int): The page number to retrieve (1-based indexing).
+            per_page (int): The number of blog posts to retrieve per page.
 
         Returns:
             tuple[List[BlogPost], int]: A tuple containing:
-                - A list of `BlogPost` objects (or an empty list if no posts are found).
-                - The total number of pages.
+                - List[BlogPost]: The list of blog posts for the requested page.
+                - int: The total number of pages available.
 
         Raises:
             RuntimeError: If database retrieval fails.
+
+        Notes:
+            - Returns an empty list if the page is out of range.
+            - Total pages is calculated as ceiling(total_posts / per_page).
+            - Blog posts are ordered by their natural database order.
         """
         try:
             total_posts = self.count_total_blog_posts()
@@ -223,7 +233,7 @@ class BlogPostRepository:
                 BlogPost(
                     title=row['title'],
                     slug=row['slug'],
-                    content=row['content'],
+                    html_content=row['html_content'],
                     drive_file_id=row['drive_file_id'],
                     created_at=row['created_at']
                 )

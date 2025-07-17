@@ -42,7 +42,7 @@ def test_blog_no_posts_message_disappears_when_post_added(client, session, creat
     create_blog_post(
         title="Test Post",
         slug="test-post",
-        content="Some test content",
+        html_content="<p>Some test content</p>",
         drive_file_id="test123"
     )
     session.commit()
@@ -215,11 +215,14 @@ def test_pagination_controls_with_multiple_pages(client, session, seed_blog_post
 @pytest.mark.render_blog_posts
 def test_post_content_truncation(client, session, create_blog_post):
     """Verifies that long post content is properly truncated in the cards."""
-    long_content = "This is a very long post content that should be truncated. " * 10
+    # Create content that will definitely need truncation
+    base_text = "This is a very long post content that should be truncated. "
+    long_content = f"<p>{base_text * 10}</p>"
+
     create_blog_post(
         title="Long Post",
         slug="long-post",
-        content=long_content,
+        html_content=long_content,
         drive_file_id="test123"
     )
     session.commit()
@@ -227,9 +230,14 @@ def test_post_content_truncation(client, session, create_blog_post):
     response = client.get("/blog")
     soup = BeautifulSoup(response.data, 'html.parser')
 
-    summary = soup.find('p', class_='blog-summary').text
-    assert len(summary) <= 153  # 150 chars + '...'
-    assert summary.endswith('...')
+    summary_element = soup.find('p', class_='blog-summary')
+    assert summary_element is not None, "Summary element not found"
+
+    summary = summary_element.text.strip()
+    assert summary, "Summary should not be empty"
+    assert len(summary) <= 153, f"Summary too long: {len(summary)} chars"
+    assert summary.endswith('...'), f"Summary doesn't end with '...': '{summary}'"
+    assert base_text in summary, "Original content not found in summary"
 
 
 @pytest.mark.render_blog_posts
@@ -241,7 +249,7 @@ def test_post_date_formatting(client, session, create_blog_post):
     create_blog_post(
         title="Date Test Post",
         slug="date-test",
-        content="Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="test123",
         created_at=test_date
     )
@@ -262,7 +270,7 @@ def test_read_more_links(client, session, create_blog_post):
     create_blog_post(
         title="Test Post",
         slug="test-post",
-        content="Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="test123"
     )
     session.commit()

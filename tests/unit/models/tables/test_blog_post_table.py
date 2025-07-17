@@ -25,7 +25,7 @@ def test_drive_file_id_uniqueness_constraint(session):
     session.execute(blog_posts.insert().values(
         title="Post A",
         slug="post-a",
-        content="First post content.",
+        html_content="<p>First post content.</p>",
         drive_file_id="drive-unique-123",
     ))
     session.commit()
@@ -34,7 +34,7 @@ def test_drive_file_id_uniqueness_constraint(session):
         session.execute(blog_posts.insert().values(
             title="Post B",
             slug="post-b",
-            content="Second post content.",
+            html_content="<p>Second post content.</p>",
             drive_file_id="drive-unique-123",
         ))
         session.commit()
@@ -45,7 +45,7 @@ def test_insert_blog_post(session):
     insert_stmt = blog_posts.insert().values(
         title="Test Post",
         slug="test-post",
-        content="This is a test post.",
+        html_content="<p>This is a test post.</p>",
         drive_file_id="drive-file-123",
         created_at=datetime(2024, 3, 17, 12, 0, 0, tzinfo=timezone.utc),
     )
@@ -58,7 +58,7 @@ def test_insert_blog_post(session):
     assert result is not None
     assert result.title == "Test Post"
     assert result.slug == "test-post"
-    assert result.content == "This is a test post."
+    assert result.html_content == "<p>This is a test post.</p>"
     assert result.drive_file_id == "drive-file-123"
 
     # Handle MySQL returning a naive datetime
@@ -72,7 +72,7 @@ def test_slug_uniqueness_constraint(session):
     session.execute(blog_posts.insert().values(
         title="Post One",
         slug="unique-slug",
-        content="Content of post one.",
+        html_content="<p>Content of post one.</p>",
         drive_file_id="drive-file-1",
     ))
     session.commit()
@@ -81,7 +81,7 @@ def test_slug_uniqueness_constraint(session):
         session.execute(blog_posts.insert().values(
             title="Post Two",
             slug="unique-slug",
-            content="Content of post two.",
+            html_content="<p>Content of post two.</p>",
             drive_file_id="drive-file-2",
         ))
         session.commit()
@@ -92,7 +92,7 @@ def test_title_uniqueness_constraint(session):
     session.execute(blog_posts.insert().values(
         title="Non-Duplicate Title",
         slug="slug-1",
-        content="Content of post one.",
+        html_content="<p>Content of post one.</p>",
         drive_file_id="drive-file-1",
     ))
     session.commit()
@@ -101,7 +101,7 @@ def test_title_uniqueness_constraint(session):
         session.execute(blog_posts.insert().values(
             title="Non-Duplicate Title",
             slug="slug-2",
-            content="Content of post two.",
+            html_content="<p>Content of post two.</p>",
             drive_file_id="drive-file-2",
         ))
         session.commit()

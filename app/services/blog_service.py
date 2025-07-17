@@ -154,7 +154,7 @@ def save_blog_post(validated_data) -> BlogPost:
         BlogPostDuplicateError: If a duplicate blog post is detected.
         RuntimeError: For other unexpected errors during blog post creation.
     """
-    required_fields = ['title', 'content', 'slug', 'drive_file_id']
+    required_fields = ['title', 'html_content', 'slug', 'drive_file_id']
 
     # Validate required fields
     logger.info("Validating required fields for blog post.")
@@ -173,7 +173,7 @@ def save_blog_post(validated_data) -> BlogPost:
         blog_post = blog_post_repo.create_blog_post(
             title=validated_data['title'],
             slug=validated_data['slug'],
-            content=validated_data['content'],  # Already sanitized earlier
+            html_content=validated_data['html_content'],  # Already sanitized earlier
             drive_file_id=validated_data['drive_file_id']
         )
 

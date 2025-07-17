@@ -34,7 +34,7 @@ def test_create_blog_post_created_at(session):
     post = repository.create_blog_post(
         title="Timestamp Test",
         slug="timestamp-test",
-        content="Checking created_at field",
+        html_content="<p>Some test content</p>",
         drive_file_id="drive-timestamp"
     )
 
@@ -53,11 +53,13 @@ def test_create_blog_post_duplicate_drive_file_id(session):
     repository = BlogPostRepository(session)
 
     # Arrange - Create initial post
-    repository.create_blog_post(title="First Post", slug="first-post", content="Some content", drive_file_id="drive123")
+    repository.create_blog_post(title="First Post", slug="first-post", html_content="<p>Some test content</p>",
+                                drive_file_id="drive123")
 
     # Act & Assert - Attempt to create another post with the same drive_file_id
     with pytest.raises(BlogPostDuplicateError, match="A blog post with this drive_file_id already exists."):
-        repository.create_blog_post(title="Another Post", slug="another-post", content="Different content",
+        repository.create_blog_post(title="Another Post", slug="another-post",
+                                    html_content='<p>Some different content.</p>',
                                     drive_file_id="drive123")
 
 
@@ -67,12 +69,13 @@ def test_create_blog_post_duplicate_slug(session):
     repository = BlogPostRepository(session)
 
     # Arrange - Create initial post
-    repository.create_blog_post(title="First Post", slug="duplicate-slug", content="Some content",
+    repository.create_blog_post(title="First Post", slug="duplicate-slug", html_content="<p>Some test content</p>",
                                 drive_file_id="drive123")
 
     # Act & Assert - Attempt to create another post with the same slug
     with pytest.raises(BlogPostDuplicateError, match="A blog post with this slug already exists."):
-        repository.create_blog_post(title="Another Post", slug="duplicate-slug", content="Different content",
+        repository.create_blog_post(title="Another Post", slug="duplicate-slug",
+                                    html_content='<p>Some different content.</p>',
                                     drive_file_id="drive456")
 
 
@@ -88,7 +91,7 @@ def test_create_blog_post_failure(session, monkeypatch):
         repository.create_blog_post(
             title='Fail Title',
             slug='fail-title',
-            content='Fail Content',
+            html_content='<p>Fail Content</p>',
             drive_file_id='fail-drive-file-id'
         )
 
@@ -97,13 +100,13 @@ def test_create_blog_post_failure(session, monkeypatch):
 def test_create_blog_post_long_content(session):
     """Handles very long content fields."""
     repository = BlogPostRepository(session)
-    long_content = "A" * 5000  # 5000 characters
+    long_content = "<p>" + "A" * 2500 + "</p><p>" + "A" * 2500 + "</p>"  # 5000 characters split into two paragraphs
 
-    post = repository.create_blog_post(title="Long Content Post", slug="long-content-post", content=long_content,
+    post = repository.create_blog_post(title="Long Content Post", slug="long-content-post", html_content=long_content,
                                        drive_file_id="drive789")
 
     assert post.title == "Long Content Post"
-    assert post.content == long_content
+    assert post.html_content == long_content
     assert post.slug == "long-content-post"
     assert post.drive_file_id == "drive789"
 
@@ -114,11 +117,11 @@ def test_create_blog_post_missing_content(session):
     repository = BlogPostRepository(session)
 
     # Act & Assert: Attempt to create a post with `None` content
-    with pytest.raises(IntegrityError, match="NOT NULL constraint failed: blog_posts.content"):
+    with pytest.raises(IntegrityError, match="NOT NULL constraint failed: blog_posts.html_content"):
         repository.create_blog_post(
             title='Missing Content Post',
             slug='missing-content',
-            content=None,  # type: ignore
+            html_content=None,  # type: ignore
             drive_file_id='missing-content-file-id'
         )
 
@@ -129,10 +132,10 @@ def test_create_blog_post_special_characters(session):
     repository = BlogPostRepository(session)
 
     post = repository.create_blog_post(title="Spécîål 💡 Tîtle", slug="special-title",
-                                       content="Côntênt with 🎉 emojis & symbols!", drive_file_id="drive987")
+                                       html_content="<p>Côntênt with 🎉 emojis & symbols!</p>", drive_file_id="drive987")
 
     assert post.title == "Spécîål 💡 Tîtle"
-    assert post.content == "Côntênt with 🎉 emojis & symbols!"
+    assert post.html_content == "<p>Côntênt with 🎉 emojis & symbols!</p>"
     assert post.slug == "special-title"
     assert post.drive_file_id == "drive987"
 
@@ -142,10 +145,10 @@ def test_create_blog_post_valid(session):
     """Ensures a blog post is successfully created in the database."""
     repository = BlogPostRepository(session)
 
-    post = repository.create_blog_post(title="Valid Post", slug="valid-post", content="Valid Content",
+    post = repository.create_blog_post(title="Valid Post", slug="valid-post", html_content="<p>Valid Content</p>",
                                        drive_file_id="drive654")
 
     assert post.title == "Valid Post"
-    assert post.content == "Valid Content"
+    assert post.html_content == "<p>Valid Content</p>"
     assert post.slug == "valid-post"
     assert post.drive_file_id == "drive654"

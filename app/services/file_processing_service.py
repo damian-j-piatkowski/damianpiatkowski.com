@@ -43,7 +43,7 @@ def process_file(file_id: str, title: str, slug: str) -> BlogPost:
         blog_post = save_blog_post({
             "title": title,
             "slug": slug,
-            "content": sanitized_content,
+            "html_content": sanitized_content,
             "drive_file_id": file_id,
         })
 

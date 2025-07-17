@@ -37,7 +37,7 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
     def _create_blog_post(
             title: Optional[str] = 'Test Blog Post',
             slug: Optional[str] = 'test-blog-post',
-            content: Optional[str] = 'This is the content of the blog post.',
+            html_content: Optional[str] = '<p>This is the content of the blog post.</p>',
             drive_file_id: Optional[str] = 'unique_drive_file_id_1',
             created_at: Optional[datetime] = None
     ) -> BlogPost:
@@ -47,7 +47,7 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
         query = blog_posts.insert().values(
             title=title,
             slug=slug,
-            content=content,
+            html_content=html_content,
             drive_file_id=drive_file_id,
             created_at=created_at
         ).returning(blog_posts.c.id)
@@ -57,7 +57,7 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
         return BlogPost(
             title=title,
             slug=slug,
-            content=content,
+            html_content=html_content,
             drive_file_id=drive_file_id,
             created_at=created_at
         )
@@ -84,7 +84,7 @@ def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
             create_blog_post(
                 title=f"Post {i + 1}",
                 slug=f"post-{i + 1}",
-                content=f"Content {i + 1}",
+                html_content=f"<p>Content {i + 1}</p>",
                 drive_file_id=f"drive_id_{i + 1}",
                 created_at=datetime.now(UTC)  # Always create timezone-aware timestamps
             ) for i in range(count)

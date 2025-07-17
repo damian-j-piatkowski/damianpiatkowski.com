@@ -1,8 +1,9 @@
 """Schema definition for blog post data serialization and validation.
 
 This schema validates incoming blog post data, ensuring required fields are present and
-correctly formatted. It also facilitates serialization of blog post instances, including
-auto-generated fields like `id` and `created_at`.
+correctly formatted. The schema expects HTML content that has been converted from markdown
+during the import process. It also facilitates serialization of blog post instances,
+including auto-generated fields like `id` and `created_at`.
 """
 
 from marshmallow import Schema, fields, validate
@@ -10,7 +11,7 @@ from marshmallow import Schema, fields, validate
 
 class BlogPostSchema(Schema):
     title = fields.Str(required=True, validate=validate.Length(min=1))
-    slug = fields.Str(required=True, validate=validate.Length(min=1))  # Ensuring slug is required
-    content = fields.Str(required=True)
+    slug = fields.Str(required=True, validate=validate.Length(min=1))
+    html_content = fields.Str(required=True)
     drive_file_id = fields.Str(required=True, validate=validate.Length(min=1))
-    created_at = fields.DateTime(required=True, format="%Y-%m-%d %H:%M:%S")  # Custom format
+    created_at = fields.DateTime(required=True, format="%Y-%m-%d %H:%M:%S")

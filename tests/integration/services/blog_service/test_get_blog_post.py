@@ -44,7 +44,7 @@ def test_get_blog_post_existing(session, seed_blog_posts) -> None:
     assert post is not None
     assert post.title == posts[0].title
     assert post.slug == posts[0].slug
-    assert post.content == posts[0].content
+    assert post.html_content == posts[0].html_content
     assert post.drive_file_id == posts[0].drive_file_id
 
 

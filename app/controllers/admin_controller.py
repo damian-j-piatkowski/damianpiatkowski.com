@@ -291,7 +291,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
         try:
             blog_post = process_file(file_id, title, slug)
             serialized_post = schema.dump(blog_post)
-            serialized_post["content"] = trim_content(serialized_post.get("content", ""))
+            serialized_post["html_content"] = trim_content(serialized_post.get("html_content", ""))
             response_data["success"].append(serialized_post)
 
         except BlogPostDuplicateError as de:

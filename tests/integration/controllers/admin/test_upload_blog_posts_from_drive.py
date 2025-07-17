@@ -223,14 +223,14 @@ class TestUploadBlogPostsRealDriveAPI:
             assert uploaded_post["drive_file_id"] == file_id
             assert uploaded_post["title"] == title
             assert uploaded_post["slug"] == slug
-            assert "content" in uploaded_post and uploaded_post["content"]
+            assert "html_content" in uploaded_post and uploaded_post["html_content"]
 
             from app.models.tables.blog_post import blog_posts
             saved_post = session.query(blog_posts).filter_by(drive_file_id=file_id).one_or_none()
             assert saved_post is not None
             assert saved_post.title == title
             assert saved_post.slug == slug
-            assert saved_post.content
+            assert saved_post.html_content
 
     def test_upload_multiple_blog_posts_with_actual_api(
             self, app, google_drive_service_fixture, session, test_drive_file_metadata_map
@@ -255,9 +255,10 @@ class TestUploadBlogPostsRealDriveAPI:
             max_trimmed_length = 200
 
             for uploaded_post in response_data["success"]:
-                assert "content" in uploaded_post
-                assert len(uploaded_post["content"]) == max_trimmed_length + 3  # +3 for potential ellipsis
-                assert uploaded_post["content"].endswith("...") or len(uploaded_post["content"]) <= max_trimmed_length
+                assert "html_content" in uploaded_post
+                assert len(uploaded_post["html_content"]) == max_trimmed_length + 3  # +3 for potential ellipsis
+                assert uploaded_post["html_content"].endswith("...") or len(
+                    uploaded_post["html_content"]) <= max_trimmed_length
 
             uploaded_slugs = {post["slug"] for post in response_data["success"]}
             assert metadata_1["slug"] in uploaded_slugs
@@ -269,4 +270,4 @@ class TestUploadBlogPostsRealDriveAPI:
                 assert saved_post is not None
                 assert saved_post.title == metadata["title"]
                 assert saved_post.slug == metadata["slug"]
-                assert saved_post.content
+                assert saved_post.html_content

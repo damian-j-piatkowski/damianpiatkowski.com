@@ -31,7 +31,7 @@ def test_blog_post_schema_empty_slug():
     blog_post_data = {
         "title": "Valid Title",
         "slug": "",
-        "content": "Some content",
+        "html_content": "<p>Some content.</p>",
         "drive_file_id": "some-drive-id",
     }
     with pytest.raises(ValidationError) as excinfo:
@@ -47,7 +47,7 @@ def test_blog_post_schema_empty_title():
     blog_post_data = {
         "title": "",
         "slug": "valid-slug",
-        "content": "Some content",
+        "html_content": "<p>Some content</p>",
         "drive_file_id": "some-drive-id",
     }
     with pytest.raises(ValidationError) as excinfo:
@@ -67,8 +67,8 @@ def test_blog_post_schema_missing_content():
     }
     with pytest.raises(ValidationError) as excinfo:
         schema.load(blog_post_data)
-    assert "content" in excinfo.value.messages
-    assert "Missing data for required field." in excinfo.value.messages["content"]
+    assert "html_content" in excinfo.value.messages
+    assert "Missing data for required field." in excinfo.value.messages["html_content"]
 
 
 @pytest.mark.admin_upload_blog_posts
@@ -78,7 +78,7 @@ def test_blog_post_schema_missing_drive_file_id():
     blog_post_data = {
         "title": "Valid Title",
         "slug": "valid-slug",
-        "content": "Some content",
+        "html_content": "<p>Some content.</p>",
     }
     with pytest.raises(ValidationError) as excinfo:
         schema.load(blog_post_data)
@@ -92,7 +92,7 @@ def test_blog_post_schema_missing_slug():
     schema = BlogPostSchema()
     blog_post_data = {
         "title": "Valid Title",
-        "content": "Some content",
+        "html_content": "<p>Some content.</p>",
         "drive_file_id": "some-drive-id",
     }
     with pytest.raises(ValidationError) as excinfo:
@@ -107,7 +107,7 @@ def test_blog_post_schema_missing_title():
     schema = BlogPostSchema()
     blog_post_data = {
         "slug": "valid-slug",
-        "content": "Some content",
+        "html_content": "<p>Some content.</p>",
         "drive_file_id": "some-drive-id",
     }
     with pytest.raises(ValidationError) as excinfo:

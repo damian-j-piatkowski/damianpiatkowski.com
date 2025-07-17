@@ -37,7 +37,7 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
     initial_data = {
         'title': "First Post",
         'slug': "first-post",
-        'content': "Content for the first post.",
+        'html_content': "<p>Content for the first post.</p>",
         'drive_file_id': "unique_drive_file_id_1"
     }
 
@@ -49,7 +49,7 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
     duplicate_data = {
         'title': "Second Post",
         'slug': "second-post",
-        'content': "Content for the second post.",
+        'html_content': "<p>Content for the second post.</p>",
         'drive_file_id': "unique_drive_file_id_1"  # Duplicate drive_file_id
     }
 
@@ -73,7 +73,7 @@ def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
     initial_data = {
         'title': "First Post",
         'slug': "first-post",
-        'content': "Content for the first post.",
+        'html_content': "<p>Content for the first post.</p>",
         'drive_file_id': "unique_drive_file_id_1"
     }
 
@@ -85,7 +85,7 @@ def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
     duplicate_data = {
         'title': "Second Post",
         'slug': "first-post",  # Duplicate slug
-        'content': "Content for the second post.",
+        'html_content': "<p>Content for the second post.</p>",
         'drive_file_id': "unique_drive_file_id_2"
     }
 
@@ -109,7 +109,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     initial_data = {
         'title': "First Post",
         'slug': "first-post",
-        'content': "Content for the first post.",
+        'html_content': "<p>Content for the first post.</p>",
         'drive_file_id': "unique_drive_file_id_1"
     }
 
@@ -121,7 +121,7 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
     duplicate_data = {
         'title': "First Post",  # Duplicate title
         'slug': "first-post-duplicate",
-        'content': "Content for the second post.",
+        'html_content': "<p>Content for the second post.</p>",
         'drive_file_id': "unique_drive_file_id_2"
     }
 
@@ -144,7 +144,7 @@ def test_save_blog_post_missing_fields(session) -> None:
     incomplete_data = {
         'title': "Incomplete Post",
         'slug': "incomplete-post",
-        'content': "Content for the incomplete post.",
+        'html_content': "<p>Content for the incomplete post.</p>",
         # Missing drive_file_id
     }
 
@@ -168,7 +168,7 @@ def test_save_blog_post_success(session) -> None:
     valid_data = {
         'title': "First Post",
         'slug': "first-post",
-        'content': "Content for the first post.",
+        'html_content': "<p>Content for the first post.</p>",
         'drive_file_id': "unique_drive_file_id_1"
     }
 
@@ -179,5 +179,5 @@ def test_save_blog_post_success(session) -> None:
     assert isinstance(saved_post, BlogPost)
     assert saved_post.title == valid_data['title']
     assert saved_post.slug == valid_data['slug']  # Check slug
-    assert saved_post.content == valid_data['content']
+    assert saved_post.html_content == valid_data['html_content']
     assert saved_post.drive_file_id == valid_data['drive_file_id']

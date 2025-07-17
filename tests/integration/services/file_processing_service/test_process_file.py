@@ -84,7 +84,7 @@ class TestProcessFileMockedAPI:
     def test_process_file_success(self, mock_google_drive_service, test_drive_file_metadata_map, app, session):
         """Tests the happy path of processing a blog post file."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
-        mock_google_drive_service.read_file.return_value = "This is a mock file content"
+        mock_google_drive_service.read_file.return_value = "<p>This is a mock file content</p>"
         process_file(file_id=file_data['file_id'], title=file_data['title'], slug=file_data['slug'])
 
         repo = BlogPostRepository(session)
@@ -92,7 +92,7 @@ class TestProcessFileMockedAPI:
         assert saved_post is not None
         assert saved_post.title == file_data['title']
         assert saved_post.slug == file_data['slug']
-        assert saved_post.content == "This is a mock file content"
+        assert saved_post.html_content == "<p>This is a mock file content</p>"
         assert saved_post.drive_file_id == file_data['file_id']
         assert saved_post.created_at is not None
 
@@ -175,8 +175,8 @@ class TestProcessFileRealDriveAPI:
         assert blog_post.title == metadata["title"]
         assert blog_post.slug == metadata["slug"]
         assert blog_post.drive_file_id == metadata["file_id"]
-        assert isinstance(blog_post.content, str)
-        assert len(blog_post.content.strip()) > 0
+        assert isinstance(blog_post.html_content, str)
+        assert len(blog_post.html_content.strip()) > 0
         assert blog_post.created_at is not None
 
     def test_unexpected_error_during_sanitization(self, mock_google_drive_service, test_drive_file_metadata_map,

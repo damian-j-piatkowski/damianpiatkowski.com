@@ -25,15 +25,15 @@ from app.models.repositories.blog_post_repository import BlogPostRepository
 @pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_long_content(session, create_blog_post):
     """Handles very long content fields."""
-    long_content = "A" * 5000  # 5000 characters
-    post = create_blog_post(title="Long Content Post", slug="long-content-post", content=long_content)
+    long_content = "<p>" + ("This is some <b>formatted</b> text with <i>various</i> tags. " * 100) + "</p>"
+    post = create_blog_post(title="Long Content Post", slug="long-content-post", html_content=long_content)
     session.commit()
     repository = BlogPostRepository(session)
 
     retrieved_post = repository.fetch_blog_post_by_slug(post.slug)
 
     assert retrieved_post.title == "Long Content Post"
-    assert retrieved_post.content == long_content
+    assert retrieved_post.html_content == long_content
 
 
 @pytest.mark.render_single_blog_post
@@ -48,25 +48,25 @@ def test_fetch_blog_post_by_slug_not_found(session):
 @pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_special_characters(session, create_blog_post):
     """Handles titles and content with special characters."""
-    post = create_blog_post(title="Spécîål 💡 Tîtle", slug="special-title", content="Côntênt with 🎉 emojis & symbols!")
+    post = create_blog_post(title="Spécîål 💡 Tîtle", slug="special-title", html_content="Côntênt with 🎉 emojis & symbols!")
     session.commit()
     repository = BlogPostRepository(session)
 
     retrieved_post = repository.fetch_blog_post_by_slug(post.slug)
 
     assert retrieved_post.title == "Spécîål 💡 Tîtle"
-    assert retrieved_post.content == "Côntênt with 🎉 emojis & symbols!"
+    assert retrieved_post.html_content == "Côntênt with 🎉 emojis & symbols!"
 
 
 @pytest.mark.render_single_blog_post
 def test_fetch_blog_post_by_slug_valid(session, create_blog_post):
     """Ensures a blog post can be retrieved by its slug."""
-    post = create_blog_post(title="Valid Post", slug="valid-post", content="Valid Content", drive_file_id="drive123")
+    post = create_blog_post(title="Valid Post", slug="valid-post", html_content="<p>Valid content</p>", drive_file_id="drive123")
     session.commit()
     repository = BlogPostRepository(session)
 
     retrieved_post = repository.fetch_blog_post_by_slug(post.slug)
 
     assert retrieved_post.title == "Valid Post"
-    assert retrieved_post.content == "Valid Content"
+    assert retrieved_post.html_content == "<p>Valid content</p>"
     assert retrieved_post.drive_file_id == "drive123"

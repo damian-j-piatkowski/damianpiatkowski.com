@@ -26,14 +26,14 @@ def test_blog_post_creation():
 
     post = BlogPost(
         title="Test Title",
-        content="Test Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="drive123",
         slug="test-title",
         created_at=created_at
     )
 
     assert post.title == "Test Title"
-    assert post.content == "Test Content"
+    assert post.html_content == "<p>Some test content</p>"
     assert post.drive_file_id == "drive123"
     assert post.slug == "test-title"
     assert post.created_at == created_at
@@ -50,7 +50,7 @@ def test_blog_post_drive_file_id():
 
     post = BlogPost(
         title="Test Title",
-        content="Test Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="drive-file-456",
         slug="test-title",
         created_at=created_at
@@ -70,7 +70,7 @@ def test_blog_post_slug():
 
     post = BlogPost(
         title="Test Title",
-        content="Test Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="drive123",
         slug="test-title",
         created_at=created_at
@@ -90,13 +90,13 @@ def test_blog_post_title_and_content():
 
     post = BlogPost(
         title="Example Post",
-        content="Example Content",
+        html_content="<p>Some test content</p>",
         drive_file_id="drive-file-789",
         slug="example-post",
         created_at=created_at
     )
 
     assert post.title == "Example Post"
-    assert post.content == "Example Content"
+    assert post.html_content == "<p>Some test content</p>"
     assert isinstance(post.created_at, datetime)
     assert post.created_at.tzinfo == timezone.utc  # Ensure UTC timezone

@@ -36,7 +36,7 @@ def test_unpublished_posts_all_articles_published(client, session, create_blog_p
         create_blog_post(
             title=metadata["title"],
             slug=metadata["slug"],
-            content="Some content",
+            html_content="<p>Some content</p>",
             drive_file_id=metadata["file_id"],
         )
     session.commit()
@@ -119,7 +119,7 @@ def test_unpublished_posts_some_articles_unpublished(client, session, create_blo
     create_blog_post(
         title=design_metadata["title"],
         slug=design_metadata["slug"],
-        content="Already published content.",
+        html_content="<p>Already published content.</p>",
         drive_file_id=design_metadata["file_id"]
     )
     session.commit()

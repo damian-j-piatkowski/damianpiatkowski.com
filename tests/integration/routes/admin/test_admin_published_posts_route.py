@@ -40,7 +40,7 @@ def test_published_posts_returns_correct_structure(client, session, create_blog_
     create_blog_post(
         title="Test Post",
         slug="test-post",
-        content="Some content",
+        html_content="<p>Some content</p>",
         drive_file_id="abc123"
     )
     session.commit()

@@ -47,7 +47,7 @@ one_success_then_unexpected_error = {
         {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post", "slug": "unexpected-error-blog-post"},
     ],
     "side_effects": [
-        "Expected file content to be a string.",
+        "<p>Expected file content to be a string.</p>",
         Exception("Unexpected error occurred"),
     ],
     "expected_status": 207,
@@ -55,7 +55,7 @@ one_success_then_unexpected_error = {
         "success": [
             {
                 "title": "Successful Blog Post",
-                "content": "Expected file content to be a string.",
+                "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id",
                 "slug": "successful-blog-post",
             }
@@ -92,9 +92,9 @@ three_successes_then_critical_error = {
         {"id": "unprocessed_file_id", "title": "Unprocessed Blog Post", "slug": "unprocessed-blog-post"},
     ],
     "side_effects": [
-        "Expected file content to be a string.",
-        "Expected file content to be a string.",
-        "Expected file content to be a string.",
+        "<p>Expected file content to be a string.</p>",
+        "<p>Expected file content to be a string.</p>",
+        "<p>Expected file content to be a string.</p>",
         Exception("Critical error occurred"),
     ],
     "expected_status": 207,
@@ -102,19 +102,19 @@ three_successes_then_critical_error = {
         "success": [
             {
                 "title": "Successful Blog Post 1",
-                "content": "Expected file content to be a string.",
+                "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_1",
                 "slug": "successful-blog-post-1",
             },
             {
                 "title": "Successful Blog Post 2",
-                "content": "Expected file content to be a string.",
+                "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_2",
                 "slug": "successful-blog-post-2",
             },
             {
                 "title": "Successful Blog Post 3",
-                "content": "Expected file content to be a string.",
+                "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_3",
                 "slug": "successful-blog-post-3",
             },

@@ -83,6 +83,6 @@ def test_get_single_post_success(session, seed_blog_posts) -> None:
     assert json_data == {
         "title": expected_post.title,
         "slug": expected_post.slug,
-        "content": expected_post.content,
+        "html_content": expected_post.html_content,
         "drive_file_id": expected_post.drive_file_id,
     }

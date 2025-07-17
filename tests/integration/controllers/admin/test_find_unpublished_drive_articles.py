@@ -49,7 +49,7 @@ def test_find_unpublished_drive_articles_all_articles_published(
             create_blog_post(
                 title=metadata["title"],
                 slug=metadata["slug"],
-                content=f"Content for {metadata['slug']}",
+                html_content=f"Content for {metadata['slug']}",
                 drive_file_id=metadata["file_id"],
             )
         session.commit()
@@ -143,7 +143,7 @@ def test_find_unpublished_drive_articles_success(app, session, create_blog_post,
         create_blog_post(
             title=real_metadata["title"],
             slug=real_metadata["slug"],
-            content="Sample content for design principles article.",
+            html_content="<p>Sample content for design principles article.</p>",
             drive_file_id=real_metadata["file_id"],
         )
         session.commit()
@@ -160,7 +160,7 @@ def test_find_unpublished_drive_articles_success(app, session, create_blog_post,
         create_blog_post(
             title=another_metadata["title"],
             slug=another_metadata["slug"],
-            content="Sample content for value objects article.",
+            html_content="<p>Sample content for value objects article.</p>",
             drive_file_id=another_metadata["file_id"],
         )
         session.commit()
