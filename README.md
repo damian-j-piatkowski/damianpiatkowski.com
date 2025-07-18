@@ -6,8 +6,8 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 
 ***
 
-**For database setup and management details, refer to [Database Management Guide](docs/DATABASE.md).**
-**For detailed information on project diagrams, refer to [Draw.io Diagramming Guide](docs/DRAWIO_GUIDE.md).**
+**For database setup and management details, refer to [Database Management Guide](docs/database-guide.md).**
+**For detailed information on project diagrams, refer to [Draw.io Diagramming Guide](docs/drawio-guide.md).**
 
 ---
 
