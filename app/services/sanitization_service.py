@@ -89,24 +89,53 @@ def sanitize_contact_form_input(form_data: Dict[str, str]) -> Dict[str, str]:
 
 
 def sanitize_html(content: str) -> str:
-    """Sanitize the HTML content to prevent XSS attacks.
+    """Sanitizes HTML content to prevent XSS attacks while preserving formatted text.
+
+    Performs the following sanitization steps:
+    1. Removes dangerous <script> tags and their content
+    2. Filters HTML to allow only safe tags for blog content
+    3. Normalizes whitespace and formatting
 
     Args:
-        content (str): The HTML content to be sanitized.
+        content: Raw HTML content to be sanitized.
 
     Returns:
-        str: The sanitized HTML content.
+        Sanitized HTML content with preserved formatting and structure.
+
+    Example:
+        >>> sanitize_html('<h1>Title</h1><script>alert("xss")</script><p>Content</p>')
+        '<h1>Title</h1><p>Content</p>'
     """
-    # Remove <script> tags and their content using regex, ensuring surrounding spaces are reduced
+    # Remove <script> tags and their content using regex
     content = re.sub(r'\s*<script.*?>.*?</script>\s*', '', content, flags=re.DOTALL)
 
     # Use Bleach to sanitize remaining HTML, allowing only safe tags
-    sanitized_content = clean(content, tags=['p', 'b', 'i', 'ul', 'li'], strip=True)
+    allowed_tags = [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',  # Headers
+        'p', 'br',  # Paragraphs and line breaks
+        'b', 'strong', 'i', 'em',  # Text emphasis
+        'ul', 'ol', 'li',  # Lists
+        'pre', 'code',  # Code blocks
+        'blockquote', 'q',  # Quotes
+        'table', 'thead', 'tbody', 'tr',  # Tables
+        'th', 'td',
+        'a', 'img',  # Links and images
+        'sup', 'sub'  # Superscript/subscript
+    ]
 
-    # Remove extra spaces before closing tags and collapse excess spaces between tags
+    sanitized_content = clean(
+        content,
+        tags=allowed_tags,
+        attributes={
+            'a': ['href', 'title'],
+            'img': ['src', 'alt', 'title']
+        },
+        strip=True
+    )
+
+    # Normalize whitespace
     sanitized_content = re.sub(r'\s+</', '</', sanitized_content)  # Trim space before closing tags
     sanitized_content = re.sub(r'>\s+<', '><', sanitized_content)  # Remove spaces between tags
-    sanitized_content = re.sub(r'\s{2,}', ' ',
-                               sanitized_content)  # Collapse multiple spaces to a single space
+    sanitized_content = re.sub(r'\s{2,}', ' ', sanitized_content)  # Collapse multiple spaces
 
-    return sanitized_content.strip()  # Return the trimmed result
+    return sanitized_content.strip()
