@@ -1,27 +1,108 @@
+"""Service for content formatting and manipulation.
+
+This module provides utilities for transforming and manipulating content in various formats,
+particularly focusing on blog post content processing. It includes:
+
+1. Markdown to HTML conversion:
+   - Advanced markdown features support through Python-Markdown
+   - Code syntax highlighting
+   - Tables, footnotes, and other technical writing elements
+   - Configurable extensions system
+
+2. Content manipulation:
+   - Text truncation for previews
+   - Smart ellipsis handling
+   - Empty content handling
+
+The module uses the Python-Markdown library with carefully selected
+extensions to ensure proper rendering of code blocks, tables, and other
+markdown elements commonly used in technical blog posts.
+
+Typical usage example:
+    html_content = convert_markdown_to_html("# Title\nContent")
+    preview = trim_content(html_content, max_length=100)
+
+Functions:
+    convert_markdown_to_html: Transforms markdown text to HTML with enhanced features
+    trim_content: Creates preview versions of content by trimming to specified length
+"""
+
+from typing import List, Optional
+
 import markdown
 
-def convert_markdown_to_html(markdown_text: str) -> str:
-    """
-    Converts a markdown-formatted article to HTML.
+
+def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]] = None) -> str:
+    """Converts markdown-formatted text to HTML with enhanced features.
+
+    Supports advanced markdown features like:
+    - Fenced code blocks with syntax highlighting
+    - Tables
+    - Line breaks
+    - Task lists
+    - Table of contents
+    - Definition lists
+    - Footnotes
 
     Args:
-        markdown_text (str): The article content in markdown format.
+        markdown_text: The article content in markdown format.
+        extensions: Optional list of additional markdown extensions to use.
+            Defaults to None, using the standard set of extensions.
 
     Returns:
-        str: The HTML content that can be stored in the blog_posts table.
+        The HTML content ready for storage in the blog_posts table.
     """
+    # Remove BOM if present
     markdown_text = markdown_text.lstrip('\ufeff')
-    # Initialize markdown with extensions for code highlighting and other features
+
+    first_debug = f"First 100 chars of markdown input: {repr(markdown_text[:100])}"
+
+    # Default extensions for technical blog posts
+    default_extensions = [
+        'fenced_code',  # Code blocks with language specification
+        'codehilite',  # Syntax highlighting
+        'tables',  # Markdown tables
+        'nl2br',  # Convert newlines to <br>
+        'toc',  # Table of contents
+        'def_list',  # Definition lists
+        'footnotes',  # Footnotes support
+        'md_in_html',  # Allow markdown inside HTML
+        'sane_lists',  # Better list handling
+        'smarty',  # Smart quotes, dashes, etc.
+        'attr_list'  # Add HTML attributes to elements
+    ]
+
+    # Combine default and custom extensions
+    all_extensions = default_extensions + (extensions or [])
+
+    # Extension configuration
+    extension_configs = {
+        'codehilite': {
+            'css_class': 'highlight',
+            'use_pygments': True,
+            'noclasses': False,
+            'linenums': False
+        },
+        'toc': {
+            'permalink': True,
+            'baselevel': 1
+        }
+    }
+
+    # Convert markdown to HTML with configured extensions
     html_content = markdown.markdown(
         markdown_text,
-        extensions=['fenced_code', 'codehilite', 'tables', 'nl2br']
+        extensions=all_extensions,
+        extension_configs=extension_configs,
+        output_format='html'
     )
+    second_debug = f"First 100 chars of HTML output: {repr(html_content[:100])}"
 
     return html_content
 
+
 def trim_content(content: str, max_length: int = 200) -> str:
-    """
-    Trims the content to a maximum length for preview purposes.
+    """Trims the content to a maximum length for preview purposes.
 
     Args:
         content (str): The full content to be trimmed.

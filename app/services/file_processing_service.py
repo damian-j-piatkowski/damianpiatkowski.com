@@ -1,3 +1,31 @@
+"""Service for processing blog post files from Google Drive.
+
+This module handles the complete flow of transforming Google Drive documents into blog posts:
+    1. Retrieves markdown content from Google Drive
+    2. Converts markdown to HTML
+    3. Sanitizes HTML content
+    4. Persists the blog post in the database
+
+The module provides a single entry point through the process_file function, which
+orchestrates all these steps while providing proper error handling and logging.
+
+Typical usage example:
+    try:
+        blog_post = process_file(
+            file_id="1234567890",
+            title="My Blog Post",
+            slug="my-blog-post"
+        )
+        print(f"Successfully created blog post: {blog_post.title}")
+    except ValueError as e:
+        print(f"File not found: {e}")
+    except PermissionError as e:
+        print(f"Permission denied: {e}")
+
+Attributes:
+    logger: Logger instance for this module.
+"""
+
 import logging
 
 from app.domain.blog_post import BlogPost
@@ -10,8 +38,10 @@ from app.services.sanitization_service import sanitize_html
 logger = logging.getLogger(__name__)
 
 
+from app.services.formatting_service import convert_markdown_to_html
+
 def process_file(file_id: str, title: str, slug: str) -> BlogPost:
-    """Processes a single file: reads from Google Drive, sanitizes content, and saves as a blog post.
+    """Processes a single file: reads from Google Drive, converts to HTML, sanitizes content, and saves as a blog post.
 
     Args:
         file_id (str): ID of the file to process.
@@ -30,15 +60,19 @@ def process_file(file_id: str, title: str, slug: str) -> BlogPost:
     try:
         google_drive_service = GoogleDriveService()
 
-        # Step 1: Read file content from Google Drive
+        # Step 1: Read markdown content from Google Drive
         logger.info(f"Reading file with ID {file_id} from Google Drive.")
-        file_content = google_drive_service.read_file(file_id)
+        markdown_content = google_drive_service.read_file(file_id)
 
-        # Step 2: Sanitize content
+        # Step 2: Convert markdown to HTML
+        logger.info(f"Converting markdown to HTML for file ID {file_id}.")
+        html_content = convert_markdown_to_html(markdown_content)
+
+        # Step 3: Sanitize HTML content
         logger.info(f"Sanitizing content for file ID {file_id}.")
-        sanitized_content = sanitize_html(file_content)
+        sanitized_content = sanitize_html(html_content)
 
-        # Step 3: Save the blog post
+        # Step 4: Save the blog post
         logger.info(f"Saving blog post with title: {title}, slug: {slug}.")
         blog_post = save_blog_post({
             "title": title,
