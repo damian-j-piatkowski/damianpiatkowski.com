@@ -16,6 +16,8 @@ from app.routes.admin import admin_bp
 from app.routes.blog import blog_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
+from app.__version__ import __version__
+
 
 
 def create_app(config_class: Type[BaseConfig]) -> Flask:
@@ -62,9 +64,9 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
     with flask_app.app_context():
         app_logger = logging.getLogger(__name__)
         app_logger.info(
-            f"Database URI: {flask_app.config['SQLALCHEMY_DATABASE_URI']}")
-        app_logger.info(f"FLASK_ENV: {flask_app.config['FLASK_ENV']}")
-        app_logger.info(f"Log file path: {flask_app.config['LOG_FILE']}")
-        app_logger.info("App created successfully.")
+            f"Starting application v{__version__} in {flask_app.config['FLASK_ENV']} environment "
+            f"(Database: {flask_app.config['SQLALCHEMY_DATABASE_URI']}, "
+            f"Logs: {flask_app.config['LOG_FILE']})"
+        )
 
     return flask_app
