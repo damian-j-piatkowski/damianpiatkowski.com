@@ -59,7 +59,7 @@ class BlogPostRepository:
             self,
             title: str,
             slug: str,
-            html_content: str,  # Changed from 'content' to 'html_content'
+            html_content: str,
             drive_file_id: str
     ) -> BlogPost:
         """Creates a new blog post using SQLAlchemy.
@@ -82,20 +82,25 @@ class BlogPostRepository:
             new_post_data = {
                 'title': title,
                 'slug': slug,
-                'html_content': html_content,  # Changed from 'content' to 'html_content'
+                'html_content': html_content,
                 'drive_file_id': drive_file_id
             }
 
-            insert_query = insert(blog_posts).values(new_post_data).returning(blog_posts.c.created_at)
-            result = self.session.execute(insert_query).scalar_one()
+            # First, do the insert
+            insert_query = insert(blog_posts).values(new_post_data)
+            self.session.execute(insert_query)
             self.session.commit()
+
+            # Then fetch the newly created post using its slug
+            fetch_query = select(blog_posts).where(blog_posts.c.slug == slug)
+            result = self.session.execute(fetch_query).mappings().one()
 
             return BlogPost(
                 title=title,
                 slug=slug,
                 html_content=html_content,
                 drive_file_id=drive_file_id,
-                created_at=result
+                created_at=result['created_at']
             )
 
         except IntegrityError as e:
@@ -121,6 +126,7 @@ class BlogPostRepository:
             raise
 
         except SQLAlchemyError as e:
+            self.session.rollback()
             raise RuntimeError("Failed to create blog post in the database.") from e
 
     def delete_blog_post_by_slug(self, slug: str) -> None:
