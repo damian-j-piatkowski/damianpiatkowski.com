@@ -1,8 +1,8 @@
-"""Initial migration.
+"""Initial schema
 
-Revision ID: 3fae8c9ceece
+Revision ID: f721522773e7
 Revises: 
-Create Date: 2024-08-01 07:49:11.950004
+Create Date: 2025-07-19 07:06:44.220366
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3fae8c9ceece'
+revision = 'f721522773e7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,19 +21,20 @@ def upgrade():
     op.create_table('blog_posts',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('image_small', sa.String(length=255), nullable=True),
-    sa.Column('image_medium', sa.String(length=255), nullable=True),
-    sa.Column('image_large', sa.String(length=255), nullable=True),
-    sa.Column('url', sa.String(length=255), nullable=False),
+    sa.Column('slug', sa.String(length=255), nullable=False),
+    sa.Column('html_content', sa.Text(), nullable=False),
+    sa.Column('drive_file_id', sa.String(length=255), nullable=False),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('url')
+    sa.UniqueConstraint('drive_file_id'),
+    sa.UniqueConstraint('slug'),
+    sa.UniqueConstraint('title')
     )
     op.create_table('logs',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('level', sa.String(length=50), nullable=True),
-    sa.Column('message', sa.Text(), nullable=True),
-    sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.Column('level', sa.String(length=50), nullable=False),
+    sa.Column('message', sa.Text(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

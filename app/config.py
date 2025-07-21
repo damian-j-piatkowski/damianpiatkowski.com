@@ -24,7 +24,7 @@ class BaseConfig:
     # App-specific
     BASE_THUMBNAIL_PATH = os.environ.get('BASE_THUMBNAIL_PATH', '')
     DOWNLOAD_DIRECTORY = os.environ.get('DOWNLOAD_DIRECTORY', '')
-    PER_PAGE = int(os.environ.get('PER_PAGE', 10))
+    PER_PAGE = 9
 
     # Mail
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')

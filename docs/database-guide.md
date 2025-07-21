@@ -115,15 +115,42 @@ To exit the MySQL session, you can use any of these methods:
 
 ---
 
-## 4. Resetting and Verifying Database Setup
+## 4. Resetting Database Setup
 
-When you need to start fresh or verify your database setup, follow these steps:
+> **Quick Decision Guide:**
+> - Need to modify database schema? → Use [4.1. Complete Schema Reset](#41-complete-schema-reset)
+> - Just want to clear data? → Use [4.2. Data-Only Reset](#42-data-only-reset)
 
-### 4.1. Reset Database
+***
 
-To completely reset your database:
+### 4.1. Complete Schema Reset
 
-```powershell
+> ⚠️ **WARNING**: This will delete ALL data and schema history. Use only when:
+> - Making major schema changes
+> - Setting up a fresh development environment
+> - Troubleshooting schema-related issues
+
+```
+bash
+# 1. Stop everything and clean up
+docker compose down
+docker volume rm damianpiatkowskicom_mysql_data
+rm -r migrations/*
+
+# 2. Initialize new migration environment
+docker compose run --rm web flask db init
+docker compose run --rm web flask db migrate -m "Initial schema"
+docker compose run --rm web flask db upgrade
+```
+### 4.2. Data-Only Reset
+
+> 💡 **NOTE**: This preserves your schema but removes all data. Use when:
+> - Testing with fresh data
+> - Clearing test data
+> - Resolving data-related issues
+
+```
+bash
 # Stop all containers
 docker compose down
 
@@ -134,39 +161,16 @@ docker volume rm damianpiatkowskicom_mysql_data
 docker compose up -d
 ```
 
-### 4.2. Verify Setup with Root User
+***
 
-After the database is reset, verify the setup using the root user:
+### 4.3. Verify Setup
 
-```powershell
-# Check MySQL users (use interactive password prompt)
-docker compose exec db mysql -uroot -p -e "SELECT User,Host FROM mysql.user;"
-
-# Expected output:
-+---------------------+-----------+
-| User                | Host      |
-+---------------------+-----------+
-| your-mysql-user     | %         |
-| root                | %         |
-| mysql.infoschema    | localhost |
-| mysql.session       | localhost |
-| mysql.sys          | localhost |
-| root               | localhost |
-+---------------------+-----------+
-
-# Check databases
-docker compose exec db mysql -uroot -p -e "SHOW DATABASES;"
-
-# Expected output:
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| mysql             |
-| performance_schema |
-| your-database-name |
-| sys               |
-+--------------------+
+After either reset method, verify the setup:
+```
+docker exec -it damianpiatkowskicom-db-1 mysql -u damian-j-piatkowski -p damian-piatkowski-com-db
+# At MySQL prompt:
+SHOW TABLES;
+DESCRIBE blog_posts;
 ```
 
 ---
