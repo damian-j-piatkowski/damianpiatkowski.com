@@ -1,0 +1,85 @@
+/* Styles specifically for individual blog post pages */
+.single-blog-post {
+    background-color: #FFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.single-blog-post header {
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.single-blog-post header h1 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.single-blog-post header .text-muted {
+    color: #666666 !important;
+    font-size: 0.9rem;
+}
+
+/* Blog content styling for single post */
+.single-blog-post .blog-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* Markdown content styles */
+.single-blog-post .blog-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.single-blog-post .blog-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #444;
+}
+
+.single-blog-post .blog-content p {
+    margin-bottom: 1.5rem;
+}
+
+/* pymdown-extensions support */
+.single-blog-post .blog-content .highlight {
+    background-color: #ECEFF4;
+    border-radius: 4px;
+    margin: 1.5rem 0;
+}
+
+.single-blog-post .blog-content .highlight pre {
+    padding: 1rem;
+    margin: 0;
+    overflow-x: auto;
+}
+
+.single-blog-post .blog-content mark {
+    background-color: #D0F0C0;
+    padding: 0.2em 0.4em;
+    border-radius: 2px;
+}
+
+.single-blog-post .blog-content .task-list-item {
+    list-style-type: none;
+}
+
+/* Post not found alert */
+.single-blog-post-not-found {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.single-blog-post-not-found h4 {
+    color: #856404;
+    margin-bottom: 1rem;
+}

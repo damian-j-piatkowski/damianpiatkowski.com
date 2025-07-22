@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if post %}
+        {{ post.title }} - Blog
+    {% else %}
+        Post Not Found - Blog
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        {% if post %}
+            <article class="single-blog-post">
+                <header class="mb-4">
+                    <h1 class="display-4">{{ post.title }}</h1>
+                    <div class="text-muted">
+                        <time datetime="{{ post.created_at }}">
+                            {{ post.created_at }}
+                        </time>
+                    </div>
+                </header>
+
+                <div class="blog-content">
+                    {{ post.html_content | safe }}
+                </div>
+            </article>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Post Not Found</h4>
+                <p>The blog post you're looking for could not be found. It might have been moved or deleted.</p>
+                <hr>
+                <p class="mb-0">
+                    <a href="{{ url_for('blog.render_blog_posts') }}" class="alert-link">
+                        Return to Blog Posts
+                    </a>
+                </p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
