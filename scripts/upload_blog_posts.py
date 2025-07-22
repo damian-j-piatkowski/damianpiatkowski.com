@@ -1,11 +1,19 @@
-"""Script for uploading blog posts to development database from Google Drive.
+r"""Script for uploading blog posts to development database from Google Drive.
 
 Usage:
     python -m scripts.upload_blog_posts --file-id "google_drive_file_id" --title "Post Title" --slug "post-slug"
 
 Docker:
     docker-compose exec web python -m scripts.upload_blog_posts --file-id "google_drive_file_id" --title "Post Title" --slug "post-slug"
+
+PowerShell Note:
+    When using titles with double quotes in PowerShell, escape them with backticks:
+    --title "Title with \`"quoted text\`" inside"
+
+    Example:
+        --title "Six Essential Object-Oriented Design Principles from Matthias Noback's \`"Object Design Style Guide\`""
 """
+
 
 import argparse
 import sys

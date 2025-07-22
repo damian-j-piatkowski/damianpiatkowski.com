@@ -256,8 +256,17 @@ class TestUploadBlogPostsRealDriveAPI:
 
             for uploaded_post in response_data["success"]:
                 assert "html_content" in uploaded_post
-                assert len(uploaded_post["html_content"]) == max_trimmed_length + 3  # +3 for potential ellipsis
-                assert uploaded_post["html_content"].endswith("...") or len(
+                html_content = uploaded_post["html_content"]
+
+                if html_content.endswith("..."):
+                    # Account for rstrip() in trim_content function
+                    # Length should be <= max_length + 3 (could be less due to rstrip)
+                    assert len(html_content) <= max_trimmed_length + 3
+                    assert len(html_content) > max_trimmed_length  # But should be more than max_length
+                else:
+                    assert len(html_content) <= max_trimmed_length
+
+            assert uploaded_post["html_content"].endswith("...") or len(
                     uploaded_post["html_content"]) <= max_trimmed_length
 
             uploaded_slugs = {post["slug"] for post in response_data["success"]}

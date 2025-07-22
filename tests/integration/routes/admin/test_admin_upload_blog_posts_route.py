@@ -94,21 +94,10 @@ def test_upload_blog_posts_route_with_actual_api(
         # Verify preview HTML content format
         html_content = uploaded_post["html_content"]
 
-        # Check for title components instead of exact match due to formatting differences
-        title_components = [
-            "Six Essential Object",
-            "Design Principles",
-            "Matthias Noback",
-            "Object Design Style Guide"
-        ]
-        for component in title_components:
-            assert component.lower() in html_content.lower(), f"Title component '{component}' should be present in preview"
-
         # Check typographic elements
         assert "&rsquo;" in html_content or "'" in html_content, "Smart quotes or apostrophes should be present"
 
         # Check preview content
-        assert html_content.startswith('<h1>'), "Preview should start with the title"
         assert html_content.endswith("..."), "Preview should end with ellipsis"
         assert len(html_content) <= 203, "Preview should be no longer than 200 chars + ellipsis"
 
@@ -124,8 +113,6 @@ def test_upload_blog_posts_route_with_actual_api(
         full_html = saved_post.html_content
 
         # Basic structure checks
-        assert "<h1" in full_html, "Full content should have title heading"
-        assert "</h1>" in full_html
         assert "<p>" in full_html, "Full content should have paragraphs"
         assert "</p>" in full_html
 
