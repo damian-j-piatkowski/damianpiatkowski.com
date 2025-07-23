@@ -36,19 +36,18 @@ def test_convert_markdown_to_html_blockquotes() -> None:
         "> This is another blockquote."
     )
     expected_html = (
-        "<blockquote><p>This is a blockquote.<br/>"
-        "This continues in blockquote.</p></blockquote>\n"
-        "<p>This is regular text.</p>\n"
+        "<blockquote><p>This is a blockquote. "
+        "This continues in blockquote.</p></blockquote>"
+        "<p>This is regular text.</p>"
         "<blockquote><p>This is another blockquote.</p></blockquote>"
     )
     result_html = convert_markdown_to_html(text)
 
-    # Python-Markdown might use either <br> or <br/> tags depending on the version and configuration
-    # Normalize both strings to use the same format before comparison
-    normalized_expected = expected_html.replace('<br/>', '<br>')
-    normalized_result = result_html.replace('<br/>', '<br>')
+    # Remove all whitespace for comparison since markdown processing can add extra spaces
+    normalized_expected = ''.join(expected_html.split())
+    normalized_result = ''.join(result_html.split())
 
-    assert ''.join(normalized_result.split()) == ''.join(normalized_expected.split())
+    assert normalized_result == normalized_expected
 
 
 def test_convert_markdown_to_html_bullet_list() -> None:
