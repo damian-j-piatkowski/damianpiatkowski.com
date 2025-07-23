@@ -8,7 +8,7 @@ Routes:
 """
 
 from flask import Blueprint, render_template, request, current_app
-
+import os
 from app.controllers.blog_controller import get_paginated_posts, get_single_post
 
 blog_bp = Blueprint("blog", __name__)
@@ -55,4 +55,27 @@ def render_single_blog_post(slug: str):
     if status_code != 200:
         return render_template("single_blog_post.html", post=None), status_code
 
-    return render_template("single_blog_post.html", post=json_response.json)
+    # Get configuration
+    flask_env = current_app.config.get('FLASK_ENV', 'development')
+    images_base = current_app.config.get('IMAGES_BASE_PATH', '/static/hero-images')
+    default_slug = current_app.config.get('DEFAULT_HERO_IMAGE_SLUG', 'default-placeholder')
+
+    # Start with post-specific images
+    hero_images_path = f"{images_base}/{slug}"
+
+    # Environment-based logic
+    if flask_env in ['production', 'qa']:
+        # Production/QA: Assume S3, images should exist or fallback gracefully
+        # We trust that images exist in S3, fallback handled by frontend
+        pass  # Keep hero_images_path as is
+    else:
+        # Development/local: Check file system for existence
+        # Fix: Use 'hero-images' instead of 'images' to match your actual folder structure
+        local_path = os.path.join(current_app.static_folder, 'hero-images', slug, 'small.jpg')
+        if not os.path.exists(local_path):
+            # Fallback to default placeholder
+            hero_images_path = f"{images_base}/{default_slug}"
+
+    return render_template("single_blog_post.html",
+                           post=json_response.json,
+                           hero_images_path=hero_images_path)

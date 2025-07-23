@@ -24,6 +24,8 @@ class BaseConfig:
     # App-specific
     BASE_THUMBNAIL_PATH = os.environ.get('BASE_THUMBNAIL_PATH', '')
     DOWNLOAD_DIRECTORY = os.environ.get('DOWNLOAD_DIRECTORY', '')
+    IMAGES_BASE_PATH = '/static/hero-images'
+    DEFAULT_HERO_IMAGE_SLUG = 'default-placeholder'
     PER_PAGE = 9
 
     # Mail
@@ -79,6 +81,7 @@ class ProductionConfig(BaseConfig):
     LOG_FILE = os.environ.get('LOG_FILE', '/logs/production/app.log')
     FALLBACK_LOG_PATH = os.environ.get('FALLBACK_LOG_PATH', '/logs/production/fallback.log')
     LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true'
+    IMAGES_BASE_PATH = 'https://prod-bucket.s3.amazonaws.com/images' # adjust
     IMAGE_UPLOAD_DIRECTORY = os.environ.get('IMAGE_UPLOAD_DIRECTORY')
 
 

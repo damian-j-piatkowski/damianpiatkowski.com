@@ -174,3 +174,7 @@ screenshots
 token.json
 
 .temp*
+
+# Local blog hero images
+app/static/hero-images/
+

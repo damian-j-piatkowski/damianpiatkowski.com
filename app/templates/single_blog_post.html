@@ -21,6 +21,23 @@
                     </div>
                 </header>
 
+                <div class="hero-image-container mb-4">
+                    <img src="{{ hero_images_path }}/medium.jpg"
+                         srcset="{{ hero_images_path }}/xs.jpg 480w,
+                                 {{ hero_images_path }}/small.jpg 600w,
+                                 {{ hero_images_path }}/medium.jpg 800w,
+                                 {{ hero_images_path }}/large.jpg 1200w,
+                                 {{ hero_images_path }}/xl.jpg 1600w"
+                         sizes="(max-width: 575.98px) calc(100vw - 4rem),
+                                (max-width: 767.98px) calc(100vw - 4rem),
+                                (max-width: 991.98px) calc(696px - 4rem),
+                                (max-width: 1199.98px) calc(960px - 4rem),
+                                calc(1140px - 4rem)"
+                         alt="Hero image for {{ post.title }}"
+                         loading="lazy"
+                         class="hero-image">
+                </div>
+
                 <div class="blog-content">
                     {{ post.html_content | safe }}
                 </div>

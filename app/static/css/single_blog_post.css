@@ -5,6 +5,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     padding: 2rem;
     margin-bottom: 3rem;
+    overflow: hidden;
 }
 
 .single-blog-post header {
@@ -21,6 +22,81 @@
 .single-blog-post header .text-muted {
     color: #666666 !important;
     font-size: 0.9rem;
+}
+
+/* Hero image styling - 16:9 aspect ratio with srcset optimization */
+.hero-image-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 2rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    position: relative;
+    aspect-ratio: 16 / 9; /* Modern CSS approach for consistent 16:9 */
+    /* Force containment - crucial for preventing overflow */
+    contain: layout style size;
+}
+
+.hero-image {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+    /* Prevent any stretching beyond container */
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.hero-image:hover {
+    transform: scale(1.02);
+}
+
+/* Fallback for browsers that don't support aspect-ratio */
+@supports not (aspect-ratio: 16 / 9) {
+    .hero-image-container::before {
+        content: "";
+        display: block;
+        padding-top: 56.25%; /* 16:9 aspect ratio */
+    }
+
+    .hero-image {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .hero-image-container {
+        position: relative;
+    }
+}
+
+/* Additional device-specific fixes for problematic viewports */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    /* Tablet range including iPad Air, Surface Pro 7 */
+    .hero-image-container {
+        width: calc(100% - 0.1px); /* Tiny adjustment to prevent subpixel issues */
+    }
+}
+
+@media screen and (min-width: 800px) and (max-width: 900px) {
+    /* Specific range that might include Asus ZenBook Fold */
+    .hero-image-container {
+        max-width: calc(100% - 1px); /* Prevent any potential overflow */
+    }
+}
+
+/* Ensure parent containers don't cause overflow */
+.single-blog-post {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Blog content styling for single post */
