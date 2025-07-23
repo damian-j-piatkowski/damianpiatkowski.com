@@ -62,7 +62,7 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
         'fenced_code',  # Code blocks with language specification
         'codehilite',  # Syntax highlighting
         'tables',  # Markdown tables
-        'nl2br',  # Convert newlines to <br>
+        # 'nl2br',  # REMOVED - This was breaking code block formatting
         'toc',  # Table of contents
         'def_list',  # Definition lists
         'footnotes',  # Footnotes support

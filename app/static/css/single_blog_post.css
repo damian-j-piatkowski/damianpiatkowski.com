@@ -111,11 +111,23 @@
     margin-top: 2rem;
     margin-bottom: 1rem;
     color: #333;
+    position: relative;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #D0F0C0; /* Your brand color accent */
 }
 
 .single-blog-post .blog-content h3 {
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
+    color: #444;
+    position: relative;
+}
+
+.single-blog-post .blog-content h4,
+.single-blog-post .blog-content h5,
+.single-blog-post .blog-content h6 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
     color: #444;
 }
 
@@ -123,17 +135,120 @@
     margin-bottom: 1.5rem;
 }
 
-/* pymdown-extensions support */
-.single-blog-post .blog-content .highlight {
-    background-color: #ECEFF4;
-    border-radius: 4px;
+/* Enhanced code block styling with your brand colors */
+.single-blog-post .blog-content pre {
+    background-color: #D0F0C0 !important; /* Your brand color */
+    border: 1px solid #a0d08c;
+    border-radius: 8px;
+    padding: 1.5rem;
     margin: 1.5rem 0;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #2c3e50;
+}
+
+.single-blog-post .blog-content pre code {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: inherit;
+    white-space: pre;
+    font-family: inherit;
+}
+
+/* Inline code styling */
+.single-blog-post .blog-content code:not(pre code) {
+    background-color: #f8f9fa;
+    color: #e83e8c;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    border: 1px solid #e9ecef;
+}
+
+/* Language label for code blocks */
+.single-blog-post .blog-content pre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #a0d08c;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    border-bottom-left-radius: 4px;
+    font-weight: 500;
+}
+
+/* Different styling for different code types if needed */
+.single-blog-post .blog-content pre.language-python::before {
+    content: 'Python';
+}
+
+.single-blog-post .blog-content pre.language-javascript::before {
+    content: 'JavaScript';
+}
+
+.single-blog-post .blog-content pre.language-html::before {
+    content: 'HTML';
+}
+
+.single-blog-post .blog-content pre.language-css::before {
+    content: 'CSS';
+}
+
+/* Blockquotes styling */
+.single-blog-post .blog-content blockquote {
+    border-left: 4px solid #D0F0C0;
+    background-color: #f8f9fa;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+}
+
+.single-blog-post .blog-content blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* Lists styling */
+.single-blog-post .blog-content ul,
+.single-blog-post .blog-content ol {
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.single-blog-post .blog-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* Links styling */
+.single-blog-post .blog-content a {
+    color: #2c7be5;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.single-blog-post .blog-content a:hover {
+    border-bottom-color: #2c7be5;
+}
+
+/* Remove old pymdown-extensions styles since we have better ones now */
+.single-blog-post .blog-content .highlight {
+    background: none;
+    border-radius: 0;
+    margin: 0;
 }
 
 .single-blog-post .blog-content .highlight pre {
-    padding: 1rem;
-    margin: 0;
-    overflow-x: auto;
+    /* Use our custom pre styles above */
 }
 
 .single-blog-post .blog-content mark {
@@ -158,4 +273,43 @@
 .single-blog-post-not-found h4 {
     color: #856404;
     margin-bottom: 1rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .single-blog-post .blog-content pre {
+        padding: 1rem;
+        font-size: 0.8rem;
+        margin: 1rem 0;
+        /* Add subtle scrollbar styling */
+        scrollbar-width: thin;
+        scrollbar-color: #a0d08c transparent;
+    }
+
+    /* Webkit scrollbar styling for mobile */
+    .single-blog-post .blog-content pre::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .single-blog-post .blog-content pre::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .single-blog-post .blog-content pre::-webkit-scrollbar-thumb {
+        background-color: #a0d08c;
+        border-radius: 3px;
+    }
+
+    .single-blog-post .blog-content {
+        font-size: 1rem;
+    }
+}
+
+/* Extra small devices (phones in portrait) */
+@media (max-width: 480px) {
+    .single-blog-post .blog-content pre {
+        font-size: 0.75rem; /* Even smaller on very small screens */
+        padding: 0.75rem;
+        margin: 0.75rem 0;
+    }
 }

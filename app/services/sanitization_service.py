@@ -94,7 +94,8 @@ def sanitize_html(content: str) -> str:
     Performs the following sanitization steps:
     1. Removes dangerous <script> tags and their content
     2. Filters HTML to allow only safe tags for blog content
-    3. Normalizes whitespace and formatting
+    3. Normalizes whitespace and formatting (but preserves code block formatting)
+    4. Removes pilcrow symbols (¶) from headings
 
     Args:
         content: Raw HTML content to be sanitized.
@@ -108,6 +109,11 @@ def sanitize_html(content: str) -> str:
     """
     # Remove <script> tags and their content using regex
     content = re.sub(r'\s*<script.*?>.*?</script>\s*', '', content, flags=re.DOTALL)
+
+    # Remove pilcrow symbols (¶) and related permalink anchors
+    content = re.sub(r'<a[^>]*class="[^"]*pilcrow[^"]*"[^>]*>.*?</a>', '', content)
+    content = re.sub(r'¶', '', content)
+    content = re.sub(r'&para;', '', content)
 
     # Use Bleach to sanitize remaining HTML, allowing only safe tags
     allowed_tags = [
@@ -133,9 +139,23 @@ def sanitize_html(content: str) -> str:
         strip=True
     )
 
-    # Normalize whitespace
+    # Extract code blocks before whitespace normalization to preserve their formatting
+    code_blocks = []
+    def preserve_code_block(match):
+        placeholder = f"__CODE_BLOCK_{len(code_blocks)}__"
+        code_blocks.append(match.group(0))
+        return placeholder
+
+    # Temporarily replace code blocks with placeholders
+    sanitized_content = re.sub(r'<pre><code>.*?</code></pre>', preserve_code_block, sanitized_content, flags=re.DOTALL)
+
+    # Now safely normalize whitespace outside of code blocks
     sanitized_content = re.sub(r'\s+</', '</', sanitized_content)  # Trim space before closing tags
     sanitized_content = re.sub(r'>\s+<', '><', sanitized_content)  # Remove spaces between tags
     sanitized_content = re.sub(r'\s{2,}', ' ', sanitized_content)  # Collapse multiple spaces
+
+    # Restore code blocks with their original formatting
+    for i, code_block in enumerate(code_blocks):
+        sanitized_content = sanitized_content.replace(f"__CODE_BLOCK_{i}__", code_block)
 
     return sanitized_content.strip()
