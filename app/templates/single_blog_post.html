@@ -8,15 +8,20 @@
     {% endif %}
 {% endblock %}
 
+{% block links %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/single_blog_post.css') }}">
+{% endblock %}
+
 {% block content %}
     <div class="container mt-4">
         {% if post %}
             <article class="single-blog-post">
                 <header class="mb-4">
-                    <h1 class="display-4">{{ post.title }}</h1>
+                    <h1>{{ post.title }}</h1>
                     <div class="text-muted">
+                        <span>by Damian Piatkowski</span> •
                         <time datetime="{{ post.created_at }}">
-                            {{ post.created_at }}
+                            {{ post.formatted_date }}
                         </time>
                     </div>
                 </header>

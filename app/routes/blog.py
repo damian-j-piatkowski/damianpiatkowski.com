@@ -55,6 +55,20 @@ def render_single_blog_post(slug: str):
     if status_code != 200:
         return render_template("single_blog_post.html", post=None), status_code
 
+    # Get the post data and format the date
+    post_data = json_response.json
+    if post_data and 'created_at' in post_data:
+        # Format the date - convert "2025-07-22 07:39:58" to "July 22, 2025"
+        from datetime import datetime
+        try:
+            # Parse the datetime string
+            dt = datetime.strptime(post_data['created_at'], '%Y-%m-%d %H:%M:%S')
+            # Format it nicely
+            post_data['formatted_date'] = dt.strftime('%B %d, %Y')
+        except ValueError:
+            # Fallback if the format is different
+            post_data['formatted_date'] = post_data['created_at'][:10]
+
     # Get configuration
     flask_env = current_app.config.get('FLASK_ENV', 'development')
     images_base = current_app.config.get('IMAGES_BASE_PATH', '/static/hero-images')
@@ -77,5 +91,5 @@ def render_single_blog_post(slug: str):
             hero_images_path = f"{images_base}/{default_slug}"
 
     return render_template("single_blog_post.html",
-                           post=json_response.json,
+                           post=post_data,
                            hero_images_path=hero_images_path)
