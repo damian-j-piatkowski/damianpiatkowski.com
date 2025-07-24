@@ -27,6 +27,16 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ post.title }}</h5>
                                     <p class="card-text text-muted small">{{ post.created_at }}</p>
+
+                                    <!-- Category Tags -->
+                                    {% if post.categories %}
+                                        <div class="category-tags mb-2">
+                                            {% for category in post.categories %}
+                                                <span class="category-tag">{{ category }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
                                     <p class="blog-summary">{{ post.html_content | striptags | truncate(150, True, '...') }}</p>
                                     <div class="mt-auto">
                                         <a href="{{ url_for('blog.render_single_blog_post', slug=post.slug) }}"

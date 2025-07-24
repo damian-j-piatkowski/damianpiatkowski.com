@@ -39,7 +39,8 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
             slug: Optional[str] = 'test-blog-post',
             html_content: Optional[str] = '<p>This is the content of the blog post.</p>',
             drive_file_id: Optional[str] = 'unique_drive_file_id_1',
-            created_at: Optional[datetime] = None
+            created_at: Optional[datetime] = None,
+            categories: Optional[List[str]] = None,
     ) -> BlogPost:
         if created_at is None:
             created_at = datetime.now(UTC)  # Use timezone-aware UTC datetime
@@ -49,7 +50,8 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
             slug=slug,
             html_content=html_content,
             drive_file_id=drive_file_id,
-            created_at=created_at
+            created_at=created_at,
+            categories=categories,
         ).returning(blog_posts.c.id)
         session.execute(query)
         session.commit()
@@ -59,7 +61,8 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
             slug=slug,
             html_content=html_content,
             drive_file_id=drive_file_id,
-            created_at=created_at
+            created_at=created_at,
+            categories=categories
         )
 
     return _create_blog_post

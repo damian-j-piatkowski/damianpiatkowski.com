@@ -48,7 +48,7 @@ def upload_post(file_id: str, title: str, slug: str) -> None:
         if "success" in response_data:
             print("\nSuccessfully uploaded:")
             for post in response_data["success"]:
-                print(f"- {post['title']} ({post['slug']})")
+                print(f"- {post['title']} ({post['slug']} {post['categories']})")
 
         if "errors" in response_data and response_data["errors"]:
             print("\nErrors:")

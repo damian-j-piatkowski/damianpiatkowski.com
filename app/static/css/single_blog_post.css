@@ -24,6 +24,36 @@
     font-size: 0.9rem;
 }
 
+/* Category tags specific styling for single blog post */
+.category-tags-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.category-tag-large {
+    background-color: #D0F0C0;
+    color: #2d5016;
+    border: 1px solid #a0d08c;
+    padding: 0.4rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    cursor: default;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-tag-large:hover {
+    background-color: #a0d08c;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* Hero image styling - 16:9 aspect ratio with srcset optimization */
 .hero-image-container {
     width: 100%;
@@ -303,6 +333,16 @@
     .single-blog-post .blog-content {
         font-size: 1rem;
     }
+
+    /* Mobile responsive category tags */
+    .category-tags-header {
+        gap: 0.5rem;
+    }
+
+    .category-tag-large {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+    }
 }
 
 /* Extra small devices (phones in portrait) */
@@ -311,5 +351,10 @@
         font-size: 0.75rem; /* Even smaller on very small screens */
         padding: 0.75rem;
         margin: 0.75rem 0;
+    }
+
+    .category-tag-large {
+        padding: 0.25rem 0.7rem;
+        font-size: 0.75rem;
     }
 }

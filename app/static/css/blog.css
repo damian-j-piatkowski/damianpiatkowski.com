@@ -8,6 +8,58 @@
     --blog-link: #1a73e8;
     --blog-border: #e0e0e0;
     --blog-shadow: rgba(0, 0, 0, 0.05);
+
+    /* Category tag colors */
+    --category-tag-bg: #D0F0C0;
+    --category-tag-hover: #a0d08c;
+    --category-tag-text: #2d5016;
+    --category-tag-border: #a0d08c;
+}
+
+/* === Category Tags Styling === */
+.category-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.category-tag {
+    display: inline-block;
+    background-color: var(--category-tag-bg);
+    color: var(--category-tag-text);
+    border: 1px solid var(--category-tag-border);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    cursor: default;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.category-tag:hover {
+    background-color: var(--category-tag-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* Larger variant for single blog post header */
+.category-tag-large {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 25px;
+}
+
+/* Category tags container for single blog post header */
+.category-tags-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
 }
 
 /* === Blog List Page === */
@@ -217,6 +269,16 @@
 
     .single-blog-post header h1 { font-size: 2rem; }
     .blog-content { font-size: 1rem; }
+
+    /* Responsive category tags */
+    .category-tags-header {
+        gap: 0.5rem;
+    }
+
+    .category-tag-large {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+    }
 }
 
 /* === Print Styles === */
@@ -230,5 +292,11 @@
     .blog-content code {
         white-space: pre-wrap;
         word-wrap: break-word;
+    }
+
+    /* Hide category tags in print */
+    .category-tags,
+    .category-tags-header {
+        display: none;
     }
 }

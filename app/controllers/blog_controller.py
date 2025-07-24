@@ -32,8 +32,22 @@ def get_paginated_posts(page: int, per_page: int) -> tuple[Response, int]:
           ```json
           {
               "posts": [
-                  {"title": "Post 1", "slug": "post-1", "content": "...", "drive_file_id": "..."},
-                  {"title": "Post 2", "slug": "post-2", "content": "...", "drive_file_id": "..."}
+                  {
+                      "title": "Post 1",
+                      "slug": "post-1",
+                      "html_content": "...",
+                      "drive_file_id": "...",
+                      "categories": ["Python", "Web Development"],
+                      "created_at": "2024-01-15 10:30:00"
+                  },
+                  {
+                      "title": "Post 2",
+                      "slug": "post-2",
+                      "html_content": "...",
+                      "drive_file_id": "...",
+                      "categories": ["JavaScript", "Frontend"],
+                      "created_at": "2024-01-16 14:20:00"
+                  }
               ],
               "total_pages": 5
           }
@@ -76,8 +90,10 @@ def get_single_post(slug: str) -> tuple[Response, int]:
           {
               "title": "Post 1",
               "slug": "post-1",
-              "content": "Post content...",
-              "drive_file_id": "drive_id_1"
+              "html_content": "Post content...",
+              "drive_file_id": "drive_id_1",
+              "categories": ["Python", "Web Development", "Flask"],
+              "created_at": "2024-01-15 10:30:00"
           }
           ```
     """

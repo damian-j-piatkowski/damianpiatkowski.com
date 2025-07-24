@@ -1,8 +1,8 @@
 """Initial schema
 
-Revision ID: f721522773e7
+Revision ID: a9e204eacc69
 Revises: 
-Create Date: 2025-07-19 07:06:44.220366
+Create Date: 2025-07-24 10:48:17.950691
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f721522773e7'
+revision = 'a9e204eacc69'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,6 +24,7 @@ def upgrade():
     sa.Column('slug', sa.String(length=255), nullable=False),
     sa.Column('html_content', sa.Text(), nullable=False),
     sa.Column('drive_file_id', sa.String(length=255), nullable=False),
+    sa.Column('categories', sa.JSON(), nullable=True),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('drive_file_id'),

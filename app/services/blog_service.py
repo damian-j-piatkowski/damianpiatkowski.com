@@ -13,6 +13,7 @@ Methods:
 """
 
 import logging
+from typing import Optional, List
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
@@ -144,7 +145,7 @@ def save_blog_post(validated_data) -> BlogPost:
 
     Args:
         validated_data (dict): Dictionary containing validated blog post data.
-            Expected fields: title, content, slug, drive_file_id.
+            Expected fields: title, html_content, slug, drive_file_id, categories (optional).
 
     Returns:
         BlogPost: The newly created blog post domain object.
@@ -168,13 +169,17 @@ def save_blog_post(validated_data) -> BlogPost:
     blog_post_repo = BlogPostRepository(session)
 
     try:
+        # Extract categories (optional field)
+        categories = validated_data.get('categories', [])
+
         # Create and save blog post
         logger.info("Saving the blog post to the database.")
         blog_post = blog_post_repo.create_blog_post(
             title=validated_data['title'],
             slug=validated_data['slug'],
             html_content=validated_data['html_content'],  # Already sanitized earlier
-            drive_file_id=validated_data['drive_file_id']
+            drive_file_id=validated_data['drive_file_id'],
+            categories=categories
         )
 
         logger.info("Blog post saved successfully with title: %s", blog_post.title)

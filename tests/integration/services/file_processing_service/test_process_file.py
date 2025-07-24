@@ -63,7 +63,7 @@ class TestProcessFileMockedAPI:
         """Tests the case where a duplicate blog post is detected."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
         process_file(file_data['file_id'], file_data['title'], file_data['slug'])
-        mock_google_drive_service.read_file.return_value = "This is a mock file content"
+        mock_google_drive_service.read_file.return_value = "Categories: Testing\nThis is a mock file content"
         with pytest.raises(BlogPostDuplicateError, match="drive_file_id.*already exists"):
             process_file(file_data['file_id'], file_data['title'], file_data['slug'])
 
@@ -84,7 +84,7 @@ class TestProcessFileMockedAPI:
     def test_process_file_success(self, mock_google_drive_service, test_drive_file_metadata_map, app, session):
         """Tests the happy path of processing a blog post file."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
-        mock_google_drive_service.read_file.return_value = "<p>This is a mock file content</p>"
+        mock_google_drive_service.read_file.return_value = "Categories: Testing\nThis is a mock file content"
         process_file(file_id=file_data['file_id'], title=file_data['title'], slug=file_data['slug'])
 
         repo = BlogPostRepository(session)

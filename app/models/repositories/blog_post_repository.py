@@ -4,18 +4,18 @@ This module defines the BlogPostRepository class, responsible for handling
 CRUD operations on the blog_posts table. It provides methods for creating and
 fetching blog posts from the database, and raises informative errors in case
 of database issues. The blog posts are stored with HTML content that has been
-converted from markdown during the import process.
+converted from markdown during the import process. Categories are stored as JSON arrays.
 
 Methods:
 - count_total_blog_posts: Returns the total number of blog posts in the database.
-- create_blog_post: Inserts a new blog post with HTML content into the database and returns the BlogPost instance.
+- create_blog_post: Inserts a new blog post with HTML content and categories into the database and returns the BlogPost instance.
 - delete_blog_post_by_slug: Deletes a blog post from the database by its slug.
 - fetch_all_post_identifiers: Retrieves minimal metadata (slug, title, drive_file_id) for all blog posts.
 - fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 - fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
 """
 
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import delete, insert, select
 from sqlalchemy import func, column
@@ -60,7 +60,8 @@ class BlogPostRepository:
             title: str,
             slug: str,
             html_content: str,
-            drive_file_id: str
+            drive_file_id: str,
+            categories: Optional[List[str]] = None
     ) -> BlogPost:
         """Creates a new blog post using SQLAlchemy.
 
@@ -69,6 +70,7 @@ class BlogPostRepository:
             slug (str): The unique slug for the blog post.
             html_content (str): The HTML content of the blog post.
             drive_file_id (str): The unique Google Drive file ID for the post.
+            categories (Optional[List[str]]): List of category strings. Defaults to empty list.
 
         Returns:
             BlogPost: The newly created BlogPost instance.
@@ -83,7 +85,8 @@ class BlogPostRepository:
                 'title': title,
                 'slug': slug,
                 'html_content': html_content,
-                'drive_file_id': drive_file_id
+                'drive_file_id': drive_file_id,
+                'categories': categories or []
             }
 
             # First, do the insert
@@ -100,6 +103,7 @@ class BlogPostRepository:
                 slug=slug,
                 html_content=html_content,
                 drive_file_id=drive_file_id,
+                categories=result['categories'] or [],
                 created_at=result['created_at']
             )
 
@@ -203,6 +207,7 @@ class BlogPostRepository:
                 slug=result["slug"],
                 html_content=result["html_content"],
                 drive_file_id=result["drive_file_id"],
+                categories=result["categories"] or [],
                 created_at=result["created_at"]
             )
         except SQLAlchemyError as e:
@@ -241,6 +246,7 @@ class BlogPostRepository:
                     slug=row['slug'],
                     html_content=row['html_content'],
                     drive_file_id=row['drive_file_id'],
+                    categories=row['categories'] or [],
                     created_at=row['created_at']
                 )
                 for row in result

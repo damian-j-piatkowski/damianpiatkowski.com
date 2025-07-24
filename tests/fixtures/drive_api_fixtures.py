@@ -28,7 +28,7 @@ def mock_google_drive_service(mocker, request) -> MagicMock:
     mock_service.list_folder_contents.return_value = [
         {"id": "1", "name": "Mock File", "mimeType": "application/vnd.google-apps.document"}
     ]
-    mock_service.read_file.return_value = "Mock file content"
+    mock_service.read_file.return_value = "Categories: Testing\nMock file content"
 
     if "read_file_side_effect" in param:
         mock_service.read_file.side_effect = param["read_file_side_effect"]

@@ -47,7 +47,7 @@ one_success_then_unexpected_error = {
         {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post", "slug": "unexpected-error-blog-post"},
     ],
     "side_effects": [
-        "<p>Expected file content to be a string.</p>",
+        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
         Exception("Unexpected error occurred"),
     ],
     "expected_status": 207,
@@ -58,6 +58,7 @@ one_success_then_unexpected_error = {
                 "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id",
                 "slug": "successful-blog-post",
+                "categories": ["Python", "Design"],
             }
         ],
         "errors": [
@@ -92,9 +93,9 @@ three_successes_then_critical_error = {
         {"id": "unprocessed_file_id", "title": "Unprocessed Blog Post", "slug": "unprocessed-blog-post"},
     ],
     "side_effects": [
-        "<p>Expected file content to be a string.</p>",
-        "<p>Expected file content to be a string.</p>",
-        "<p>Expected file content to be a string.</p>",
+        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
+        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
+        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
         Exception("Critical error occurred"),
     ],
     "expected_status": 207,
@@ -105,18 +106,21 @@ three_successes_then_critical_error = {
                 "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_1",
                 "slug": "successful-blog-post-1",
+                "categories": ["Python", "Design"],
             },
             {
                 "title": "Successful Blog Post 2",
                 "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_2",
                 "slug": "successful-blog-post-2",
+                "categories": ["Python", "Design"],
             },
             {
                 "title": "Successful Blog Post 3",
                 "html_content": "<p>Expected file content to be a string.</p>",
                 "drive_file_id": "success_file_id_3",
                 "slug": "successful-blog-post-3",
+                "categories": ["Python", "Design"],
             },
         ],
         "errors": [

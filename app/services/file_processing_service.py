@@ -2,12 +2,16 @@
 
 This module handles the complete flow of transforming Google Drive documents into blog posts:
     1. Retrieves markdown content from Google Drive
-    2. Converts markdown to HTML
-    3. Sanitizes HTML content
-    4. Persists the blog post in the database
+    2. Extracts categories from the first line (if present)
+    3. Converts remaining markdown to HTML
+    4. Sanitizes HTML content
+    5. Persists the blog post in the database
 
 The module provides a single entry point through the process_file function, which
 orchestrates all these steps while providing proper error handling and logging.
+
+Categories are expected to be on the first line of the markdown file in the format:
+Categories: Python, Web Development, Flask
 
 Typical usage example:
     try:
@@ -27,21 +31,38 @@ Attributes:
 """
 
 import logging
+from typing import List, Tuple
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
 from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionError
 from app.services.blog_service import save_blog_post
+from app.services.formatting_service import convert_markdown_to_html
 from app.services.google_drive_service import GoogleDriveService
 from app.services.sanitization_service import sanitize_html
 
 logger = logging.getLogger(__name__)
 
 
-from app.services.formatting_service import convert_markdown_to_html
+def extract_categories_from_markdown(markdown_content: str) -> Tuple[List[str], str]:
+    """Extract categories from the first line and return the rest of the content."""
+    cleaned = markdown_content.lstrip('\ufeff')
+
+    if '\n' not in cleaned:
+        raise ValueError("Markdown must start with 'Categories:' followed by a newline")
+
+    first_line, rest = cleaned.split('\n', 1)
+
+    if not first_line.lower().startswith("categories:"):
+        raise ValueError("First line must start with 'Categories:'")
+
+    categories_str = first_line.removeprefix('Categories:').strip()
+    categories = [cat.strip() for cat in categories_str.split(',') if cat]
+    return categories, rest.lstrip()
+
 
 def process_file(file_id: str, title: str, slug: str) -> BlogPost:
-    """Processes a single file: reads from Google Drive, converts to HTML, sanitizes content, and saves as a blog post.
+    """Processes a single file: reads from Google Drive, extracts categories, converts to HTML, sanitizes content, and saves as a blog post.
 
     Args:
         file_id (str): ID of the file to process.
@@ -64,26 +85,32 @@ def process_file(file_id: str, title: str, slug: str) -> BlogPost:
         logger.info(f"Reading file with ID {file_id} from Google Drive.")
         markdown_content = google_drive_service.read_file(file_id)
 
-        # Step 2: Convert markdown to HTML
-        logger.info(f"Converting markdown to HTML for file ID {file_id}.")
-        html_content = convert_markdown_to_html(markdown_content)
+        # Step 2: Extract categories from markdown content
+        logger.info(f"Extracting categories from markdown content for file ID {file_id}.")
+        categories, cleaned_markdown = extract_categories_from_markdown(markdown_content)
 
-        # Step 3: Sanitize HTML content
+        # Step 3: Convert remaining markdown to HTML
+        logger.info(f"Converting markdown to HTML for file ID {file_id}.")
+        html_content = convert_markdown_to_html(cleaned_markdown)
+
+        # Step 4: Sanitize HTML content
         logger.info(f"Sanitizing content for file ID {file_id}.")
         sanitized_content = sanitize_html(html_content)
 
-        # Step 4: Save the blog post
-        logger.info(f"Saving blog post with title: {title}, slug: {slug}.")
+        # Step 5: Save the blog post with categories
+        logger.info(f"Saving blog post with title: {title}, slug: {slug}, categories: {categories}.")
         blog_post = save_blog_post({
             "title": title,
             "slug": slug,
             "html_content": sanitized_content,
             "drive_file_id": file_id,
+            "categories": categories
         })
 
         logger.info(
             f"Successfully processed blog post: "
-            f"title='{blog_post.title}', slug='{blog_post.slug}', drive_file_id='{blog_post.drive_file_id}'"
+            f"title='{blog_post.title}', slug='{blog_post.slug}', "
+            f"drive_file_id='{blog_post.drive_file_id}', categories={blog_post.categories}"
         )
 
         return blog_post

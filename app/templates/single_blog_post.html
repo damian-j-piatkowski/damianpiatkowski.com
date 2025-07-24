@@ -18,12 +18,21 @@
             <article class="single-blog-post">
                 <header class="mb-4">
                     <h1>{{ post.title }}</h1>
-                    <div class="text-muted">
+                    <div class="text-muted mb-3">
                         <span>by Damian Piatkowski</span> •
                         <time datetime="{{ post.created_at }}">
                             {{ post.formatted_date }}
                         </time>
                     </div>
+
+                    <!-- Category Tags in Header -->
+                    {% if post.categories %}
+                        <div class="category-tags-header">
+                            {% for category in post.categories %}
+                                <span class="category-tag category-tag-large">{{ category }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </header>
 
                 <div class="hero-image-container mb-4">
