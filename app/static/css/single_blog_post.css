@@ -358,3 +358,220 @@
         font-size: 0.75rem;
     }
 }
+
+/* === Related Posts Section === */
+.related-posts-section {
+    background-color: #ECEFF4;
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-top: 3rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.related-posts-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #D0F0C0;
+    padding-bottom: 1rem;
+}
+
+.related-posts-header h3 {
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.related-posts-subtitle {
+    color: #666666;
+    font-size: 1rem;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Related Posts Grid */
+.related-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Related Post Cards */
+.related-post-card {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.related-post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    border-color: #D0F0C0;
+}
+
+/* Related Post Thumbnails */
+.related-post-thumbnail {
+    height: 140px;
+    overflow: hidden;
+    position: relative;
+}
+
+.related-post-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.related-post-card:hover .related-post-thumbnail img {
+    transform: scale(1.05);
+}
+
+/* Related Post Content */
+.related-post-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.related-post-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.related-post-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.related-post-title a:hover {
+    color: #2d5016;
+    text-decoration: none;
+}
+
+.related-post-excerpt {
+    color: #666666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+    flex-grow: 1;
+}
+
+/* Small Category Tags for Related Posts */
+.related-post-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.category-tag-small {
+    background-color: #D0F0C0;
+    color: #2d5016;
+    border: 1px solid #a0d08c;
+    padding: 0.2rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.category-tag-small:hover {
+    background-color: #a0d08c;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-tag-more {
+    background-color: #f8f9fa;
+    color: #666666;
+    border-color: #dee2e6;
+}
+
+.category-tag-more:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Related Post Meta */
+.related-post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.related-post-date {
+    font-weight: 500;
+}
+
+.read-time {
+    color: #2d5016;
+    font-weight: 600;
+}
+
+/* === Responsive Design for Related Posts === */
+@media (max-width: 768px) {
+    .related-posts-section {
+        padding: 1.5rem;
+        margin: 2rem 1rem 0;
+    }
+
+    .related-posts-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .related-posts-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .related-post-content {
+        padding: 1rem;
+    }
+
+    .related-post-title {
+        font-size: 1rem;
+    }
+
+    .category-tag-small {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .related-posts-section {
+        padding: 1rem;
+        margin: 1.5rem 0.5rem 0;
+    }
+
+    .related-post-thumbnail {
+        height: 120px;
+    }
+
+    .related-post-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}

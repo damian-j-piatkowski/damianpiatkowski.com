@@ -13,12 +13,14 @@ Methods:
 - fetch_all_post_identifiers: Retrieves minimal metadata (slug, title, drive_file_id) for all blog posts.
 - fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 - fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
+- fetch_posts_by_category: Retrieves paginated blog posts filtered by category.
+- fetch_related_posts: Retrieves posts that share categories with the current post, excluding the current post.
 """
 
+import json
 from typing import List, Optional
 
-from sqlalchemy import delete, insert, select
-from sqlalchemy import func, column
+from sqlalchemy import delete, insert, select, func, column, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -255,3 +257,96 @@ class BlogPostRepository:
             return posts, total_pages
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch paginated blog posts from the database.") from e
+
+    def fetch_posts_by_category(self, category: str, page: int, per_page: int) -> tuple[List[BlogPost], int]:
+        """Retrieves paginated blog posts filtered by category.
+
+        Args:
+            category (str): The category to filter by.
+            page (int): The page number to retrieve (1-based indexing).
+            per_page (int): The number of blog posts to retrieve per page.
+
+        Returns:
+            tuple[List[BlogPost], int]: A tuple containing the filtered posts and total pages.
+
+        Raises:
+            RuntimeError: If database retrieval fails.
+        """
+        try:
+            # Count total posts in this category
+            count_query = select(func.count()).select_from(blog_posts).where(
+                func.json_contains(blog_posts.c.categories, json.dumps([category]))
+            )
+            total_posts = self.session.execute(count_query).scalar() or 0
+            total_pages = (total_posts + per_page - 1) // per_page
+
+            # Get paginated posts for this category
+            offset = (page - 1) * per_page
+            query = select(blog_posts).where(
+                func.json_contains(blog_posts.c.categories, json.dumps([category]))
+            ).order_by(blog_posts.c.created_at.desc()).limit(per_page).offset(offset)
+
+            result = self.session.execute(query).mappings().all()
+
+            posts = [
+                BlogPost(
+                    title=row['title'],
+                    slug=row['slug'],
+                    html_content=row['html_content'],
+                    drive_file_id=row['drive_file_id'],
+                    categories=row['categories'] or [],
+                    created_at=row['created_at']
+                )
+                for row in result
+            ] if result else []
+
+            return posts, total_pages
+
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to fetch posts by category from the database.") from e
+
+    def fetch_related_posts(self, categories: List[str], exclude_slug: str, limit: int = 3) -> List[BlogPost]:
+        """Get posts that share categories with the current post, excluding the current post.
+
+        Args:
+            categories (List[str]): List of categories to find related posts for.
+            exclude_slug (str): Slug of the current post to exclude from results.
+            limit (int): Maximum number of related posts to return.
+
+        Returns:
+            List[BlogPost]: List of related blog posts.
+
+        Raises:
+            RuntimeError: If database retrieval fails.
+        """
+        try:
+            if not categories:
+                return []
+
+            # Build conditions for each category - posts that contain ANY of these categories
+            category_conditions = [
+                func.json_contains(blog_posts.c.categories, json.dumps([cat]))
+                for cat in categories
+            ]
+
+            query = select(blog_posts).where(
+                blog_posts.c.slug != exclude_slug,
+                or_(*category_conditions)
+            ).order_by(blog_posts.c.created_at.desc()).limit(limit)
+
+            result = self.session.execute(query).mappings().all()
+
+            return [
+                BlogPost(
+                    title=row['title'],
+                    slug=row['slug'],
+                    html_content=row['html_content'],
+                    drive_file_id=row['drive_file_id'],
+                    categories=row['categories'] or [],
+                    created_at=row['created_at']
+                )
+                for row in result
+            ]
+
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to fetch related posts from the database.") from e

@@ -1,9 +1,54 @@
 {% extends "base.html" %}
 
-{% block title %}Blog{% endblock %}
+{% block title %}
+    {% if current_category %}
+        {{ current_category }} Articles - Blog
+    {% else %}
+        Blog
+    {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+    {% if current_category %}
+        Explore {{ current_category }} articles and tutorials by Damian Piatkowski. In-depth guides, best practices, and insights on {{ current_category.lower() }} development.
+    {% else %}
+        Explore programming articles, tutorials, and insights by Damian Piatkowski. Topics include Python, Flask, web development, and software engineering best practices.
+    {% endif %}
+{% endblock %}
+
+{% block meta_keywords %}
+    {% if current_category %}
+        {{ current_category.lower() }}, {{ current_category.lower() }} tutorials, {{ current_category.lower() }} articles, programming, software development, Damian Piatkowski
+    {% else %}
+        programming blog, Python tutorials, Flask development, web development, software engineering, back-end development, Damian Piatkowski
+    {% endif %}
+{% endblock %}
+
+{% block og_title %}
+    {% if current_category %}
+        {{ current_category }} Articles - Damian Piatkowski
+    {% else %}
+        Programming Blog - Damian Piatkowski
+    {% endif %}
+{% endblock %}
+
+{% block og_description %}
+    {% if current_category %}
+        Discover {{ current_category }} articles and tutorials with practical examples and best practices.
+    {% else %}
+        Professional insights on Python, Flask, web development, and software engineering best practices.
+    {% endif %}
+{% endblock %}
 
 {% block links %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}">
+
+    <!-- Category-specific canonical URL -->
+    {% if current_category and category_slug %}
+        <link rel="canonical" href="{{ url_for('blog.render_category_posts', category_slug=category_slug, _external=True) }}">
+    {% else %}
+        <link rel="canonical" href="{{ url_for('blog.render_blog_posts', _external=True) }}">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -12,6 +57,22 @@
             <div class="container text-center">
                 <h1 class="text-overlay">My Blog</h1>
                 <p class="text-overlay">Insights and articles on software development and more.</p>
+            </div>
+        </section>
+
+        <section class="category-filter-section">
+            <div class="container">
+                {% if current_category %}
+                    <div class="active-filter-bar">
+                        <div class="filter-info">
+                            <span class="filter-label">Showing posts in:</span>
+                            <span class="active-category-badge">{{ current_category }}</span>
+                            <a href="{{ url_for('blog.render_blog_posts') }}" class="clear-filter-btn">
+                                <i class="fas fa-times"></i> Clear Filter
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </section>
 
@@ -28,11 +89,15 @@
                                     <h5 class="card-title">{{ post.title }}</h5>
                                     <p class="card-text text-muted small">{{ post.created_at }}</p>
 
-                                    <!-- Category Tags -->
+                                    <!-- Category Tags with SEO-friendly URLs -->
                                     {% if post.categories %}
                                         <div class="category-tags mb-2">
                                             {% for category in post.categories %}
-                                                <span class="category-tag">{{ category }}</span>
+                                                {% set category_slug = category.lower().replace(' ', '-') %}
+                                                <a href="{{ url_for('blog.render_category_posts', category_slug=category_slug) }}"
+                                                   class="category-tag {% if current_category == category %}category-tag-active{% endif %}">
+                                                    {{ category }}
+                                                </a>
                                             {% endfor %}
                                         </div>
                                     {% endif %}
@@ -40,7 +105,7 @@
                                     <p class="blog-summary">{{ post.html_content | striptags | truncate(150, True, '...') }}</p>
                                     <div class="mt-auto">
                                         <a href="{{ url_for('blog.render_single_blog_post', slug=post.slug) }}"
-                                           class="btn btn-custom-green btn-sm">Read More</a>
+                                           class="btn btn-custom-green btn-sm">Read Full Article</a>
                                     </div>
                                 </div>
                             </div>
@@ -52,32 +117,57 @@
                             <ul class="pagination justify-content-center">
                                 {# Previous button #}
                                 <li class="page-item {{ 'disabled' if page == 1 }}">
-                                    <a class="page-link"
-                                       href="{{ url_for('blog.render_blog_posts', page=(page - 1)) if page > 1 else '#' }}"
-                                       aria-label="Previous"
-                                            {{ 'tabindex="-1" aria-disabled="true"' if page == 1 }}>
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
+                                    {% if current_category and category_slug %}
+                                        <a class="page-link"
+                                           href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=(page - 1)) if page > 1 else '#' }}"
+                                           aria-label="Previous"
+                                                {{ 'tabindex="-1" aria-disabled="true"' if page == 1 }}>
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    {% else %}
+                                        <a class="page-link"
+                                           href="{{ url_for('blog.render_blog_posts', page=(page - 1)) if page > 1 else '#' }}"
+                                           aria-label="Previous"
+                                                {{ 'tabindex="-1" aria-disabled="true"' if page == 1 }}>
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    {% endif %}
                                 </li>
 
                                 {# Page numbers #}
                                 {% for p in range(1, total_pages + 1) %}
                                     <li class="page-item {{ 'active' if p == page }}">
-                                        <a class="page-link"
-                                           href="{{ url_for('blog.render_blog_posts', page=p) }}">
-                                            {{ p }}
-                                        </a>
+                                        {% if current_category and category_slug %}
+                                            <a class="page-link"
+                                               href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=p) }}">
+                                                {{ p }}
+                                            </a>
+                                        {% else %}
+                                            <a class="page-link"
+                                               href="{{ url_for('blog.render_blog_posts', page=p) }}">
+                                                {{ p }}
+                                            </a>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
 
                                 {# Next button #}
                                 <li class="page-item {{ 'disabled' if page == total_pages }}">
-                                    <a class="page-link"
-                                       href="{{ url_for('blog.render_blog_posts', page=(page + 1)) if page < total_pages else '#' }}"
-                                       aria-label="Next"
-                                            {{ 'tabindex="-1" aria-disabled="true"' if page == total_pages }}>
-                                        <span aria-hidden="true">&raquo;</span>
-                                    </a>
+                                    {% if current_category and category_slug %}
+                                        <a class="page-link"
+                                           href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=(page + 1)) if page < total_pages else '#' }}"
+                                           aria-label="Next"
+                                                {{ 'tabindex="-1" aria-disabled="true"' if page == total_pages }}>
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    {% else %}
+                                        <a class="page-link"
+                                           href="{{ url_for('blog.render_blog_posts', page=(page + 1)) if page < total_pages else '#' }}"
+                                           aria-label="Next"
+                                                {{ 'tabindex="-1" aria-disabled="true"' if page == total_pages }}>
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    {% endif %}
                                 </li>
                             </ul>
                         </nav>

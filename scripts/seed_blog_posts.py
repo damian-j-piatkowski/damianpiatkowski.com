@@ -43,6 +43,13 @@ def seed_posts(num_posts: int, base_content: str = None) -> None:
     with app.app_context():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+        # Define category sets - each post will get 2 categories from one of these sets
+        category_sets = [
+            ["Python", "Web Development"],      # Set 1 - posts 1, 4, 7, 10, ...
+            ["JavaScript", "Frontend"],         # Set 2 - posts 2, 5, 8, 11, ...
+            ["DevOps", "Cloud Computing"]       # Set 3 - posts 3, 6, 9, 12, ...
+        ]
+
         for i in range(num_posts):
             post_number = i + 1
             unique_id = f"{timestamp}_{post_number}"
@@ -53,15 +60,19 @@ def seed_posts(num_posts: int, base_content: str = None) -> None:
             else:
                 content = generate_lorem_ipsum()
 
-            # Insert the post with timestamp-based unique identifiers
+            # Get categories using modulo to cycle through the sets
+            categories = category_sets[i % len(category_sets)]
+
+            # Insert the post with timestamp-based unique identifiers and categories
             db.session.execute(blog_posts.insert().values(
                 title=f"Development Test Post {unique_id}",
                 slug=f"dev-test-post-{unique_id}",
                 html_content=content,
-                drive_file_id=f"dev-test-file-{unique_id}"
+                drive_file_id=f"dev-test-file-{unique_id}",
+                categories=categories
             ))
 
-            print(f"Created post {post_number}/{num_posts}")
+            print(f"Created post {post_number}/{num_posts} with categories: {categories}")
 
         db.session.commit()
         print(f"\nSuccessfully created {num_posts} blog posts")

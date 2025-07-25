@@ -5,50 +5,103 @@ This module defines routes for rendering blog-related pages.
 Routes:
 - /blog: Renders a paginated list of blog posts.
 - /blog/<slug>: Renders a single blog post based on the given slug.
+- /blog/category/<category_slug>: Renders posts filtered by category with SEO-friendly URL.
 """
 
 from flask import Blueprint, render_template, request, current_app
 import os
-from app.controllers.blog_controller import get_paginated_posts, get_single_post
+import re
+from app.controllers.blog_controller import get_paginated_posts, get_single_post, get_related_posts
 
 blog_bp = Blueprint("blog", __name__)
 
 
+def slug_to_category_name(slug: str) -> str:
+    """Convert slug back to category name.
+
+    Examples:
+        'python' -> 'Python'
+        'object-oriented-programming' -> 'Object-Oriented Programming'
+        'web-development' -> 'Web Development'
+    """
+    return slug.replace('-', ' ').title()
+
+
 @blog_bp.route("/blog", methods=["GET"])
 def render_blog_posts():
-    """Render the blog posts page with pagination.
+    """Render the blog posts page with pagination and optional category filtering.
 
     Query Parameters:
         page (int, optional): The current page number. Example: `/blog?page=2`
         per_page (int, optional): The number of posts per page. Example: `/blog?page=2&per_page=5`
             (Defaults to `Config.PER_PAGE` if not provided).
+        category (str, optional): Filter posts by category. Example: `/blog?category=Python`
 
     Returns:
         Response: Rendered HTML page with paginated blog posts.
     """
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", current_app.config["PER_PAGE"], type=int)
+    category = request.args.get("category", None, type=str)
 
-    json_response, status_code = get_paginated_posts(page, per_page)
+    json_response, status_code = get_paginated_posts(page, per_page, category)
 
     if status_code != 200:
-        return render_template("blog.html", posts_data=[], total_pages=0, page=page)
+        return render_template("blog.html", posts_data=[], total_pages=0, page=page, current_category=category)
 
     posts_data = json_response.json["posts"]
     total_pages = json_response.json["total_pages"]
 
-    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page)
+    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page, current_category=category)
+
+
+@blog_bp.route("/blog/category/<category_slug>", methods=["GET"])
+def render_category_posts(category_slug: str):
+    """Render blog posts filtered by category using SEO-friendly URL.
+
+    Args:
+        category_slug (str): URL-friendly category slug (e.g., 'object-oriented-programming')
+
+    Query Parameters:
+        page (int, optional): The current page number. Example: `/blog/category/python?page=2`
+        per_page (int, optional): The number of posts per page.
+
+    Examples:
+        /blog/category/python
+        /blog/category/object-oriented-programming
+        /blog/category/web-development?page=2
+
+    Returns:
+        Response: Rendered HTML page with category-filtered blog posts.
+    """
+    # Convert slug back to category name
+    category_name = slug_to_category_name(category_slug)
+
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", current_app.config["PER_PAGE"], type=int)
+
+    json_response, status_code = get_paginated_posts(page, per_page, category_name)
+
+    if status_code != 200:
+        return render_template("blog.html", posts_data=[], total_pages=0, page=page,
+                               current_category=category_name, category_slug=category_slug)
+
+    posts_data = json_response.json["posts"]
+    total_pages = json_response.json["total_pages"]
+
+    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page,
+                           current_category=category_name, category_slug=category_slug)
 
 
 @blog_bp.route("/blog/<slug>", methods=["GET"])
 def render_single_blog_post(slug: str):
-    """Render a single blog post based on the provided slug.
+    """Render a single blog post with related posts based on the provided slug.
 
     Args:
         slug (str): The unique identifier for the blog post.
 
     Returns:
-        Response: Rendered HTML page displaying the blog post details.
+        Response: Rendered HTML page displaying the blog post details and related posts.
     """
     json_response, status_code = get_single_post(slug)
 
@@ -90,6 +143,14 @@ def render_single_blog_post(slug: str):
             # Fallback to default placeholder
             hero_images_path = f"{images_base}/{default_slug}"
 
+    # Get related posts if the post has categories
+    related_posts_data = []
+    if post_data and post_data.get('categories'):
+        related_response, related_status = get_related_posts(post_data['categories'], slug)
+        if related_status == 200:
+            related_posts_data = related_response.json.get('related_posts', [])
+
     return render_template("single_blog_post.html",
                            post=post_data,
-                           hero_images_path=hero_images_path)
+                           hero_images_path=hero_images_path,
+                           related_posts=related_posts_data)

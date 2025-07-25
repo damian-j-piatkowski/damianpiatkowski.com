@@ -10,25 +10,31 @@ from flask import Response, jsonify, current_app
 from app.exceptions import BlogPostNotFoundError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_blog_post, get_paginated_blog_posts
+from typing import List, Optional
+from app.services.blog_service import get_blog_post, get_paginated_blog_posts, get_blog_posts_by_category, get_related_blog_posts
 
 
-def get_paginated_posts(page: int, per_page: int) -> tuple[Response, int]:
-    """Handles the retrieval of paginated blog posts and returns a JSON response.
+
+def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None) -> tuple[Response, int]:
+    """Handles the retrieval of paginated blog posts with optional category filtering and returns a JSON response.
 
     This function calls the service layer to fetch paginated blog posts and formats
-    the result as a JSON response, including the total number of pages.
+    the result as a JSON response, including the total number of pages. When a category
+    is provided, it filters posts to only include those containing the specified category.
 
     Args:
         page (int): The current page number.
         per_page (int): The number of posts per page.
+        category (Optional[str]): The category to filter posts by. If None, returns all posts.
 
     Returns:
         tuple[Response, int]: A Flask JSON response containing paginated blog posts and
         total pages, along with the corresponding HTTP status code.
 
-    Example:
-        - GET `/blog?page=1&per_page=10`
-        - Response:
+    Examples:
+        - GET `/blog?page=1&per_page=10` (all posts)
+        - GET `/blog?page=1&per_page=10&category=Python` (Python posts only)
+        - Response (all posts):
           ```json
           {
               "posts": [
@@ -52,9 +58,28 @@ def get_paginated_posts(page: int, per_page: int) -> tuple[Response, int]:
               "total_pages": 5
           }
           ```
+        - Response (category filtered):
+          ```json
+          {
+              "posts": [
+                  {
+                      "title": "Python Best Practices",
+                      "slug": "python-best-practices",
+                      "html_content": "...",
+                      "drive_file_id": "...",
+                      "categories": ["Python", "Programming"],
+                      "created_at": "2024-01-15 10:30:00"
+                  }
+              ],
+              "total_pages": 2
+          }
+          ```
     """
     try:
-        posts, total_pages = get_paginated_blog_posts(page, per_page)
+        if category:
+            posts, total_pages = get_blog_posts_by_category(page, per_page, category)
+        else:
+            posts, total_pages = get_paginated_blog_posts(page, per_page)
 
         if not posts:
             current_app.logger.info("No blog posts found.")
@@ -67,7 +92,31 @@ def get_paginated_posts(page: int, per_page: int) -> tuple[Response, int]:
 
     except RuntimeError as e:
         current_app.logger.error(f"Failed to retrieve blog posts: {e}")
-        return jsonify({"error": str(e)}), 500  # Internal Server Error
+        return jsonify({"error": str(e)}), 500
+
+
+def get_related_posts(post_categories: List[str], exclude_slug: str, limit: int = 3) -> tuple[Response, int]:
+    """Handles the retrieval of related blog posts.
+
+    Args:
+        post_categories (List[str]): Categories of the current post.
+        exclude_slug (str): Slug of the current post to exclude.
+        limit (int): Maximum number of related posts to return.
+
+    Returns:
+        tuple[Response, int]: A Flask JSON response containing related posts.
+    """
+    try:
+        related_posts = get_related_blog_posts(post_categories, exclude_slug, limit)
+
+        schema = BlogPostSchema(many=True)
+        serialized_posts = schema.dump(related_posts)
+
+        return jsonify({"related_posts": serialized_posts}), 200
+
+    except RuntimeError as e:
+        current_app.logger.error(f"Failed to retrieve related posts: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 def get_single_post(slug: str) -> tuple[Response, int]:

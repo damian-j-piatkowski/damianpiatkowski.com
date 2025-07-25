@@ -7,13 +7,15 @@ database access, validation, logging, and error handling.
 Methods:
 - get_all_blog_post_identifiers: Retrieves all blog post identifiers (slug, title, drive_file_id).
 - get_blog_post: Retrieves a blog post by its slug.
+- get_blog_posts_by_category: Retrieves blog posts filtered by category.
+- get_related_blog_posts: Retrieves related blog posts based on categories and exclude_slug.
 - get_paginated_blog_posts: Retrieves paginated blog posts based on page and per-page limits.
 - remove_blog_post_by_slug: Deletes a blog post from the database by its slug.
 - save_blog_post: Validates and saves a new blog post to the database.
 """
 
 import logging
-from typing import Optional, List
+from typing import List
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
@@ -82,6 +84,37 @@ def get_blog_post(slug: str):
         raise RuntimeError("Failed to retrieve blog post") from e
 
 
+def get_blog_posts_by_category(page: int, per_page: int, category: str) -> tuple[list, int]:
+    """Fetches paginated blog posts filtered by category via the repository.
+
+    Args:
+        page (int): The page number to retrieve (must be >= 1).
+        per_page (int): The fixed number of posts per page.
+        category (str): The category to filter by.
+
+    Returns:
+        tuple[list, int]: A tuple containing the filtered posts and total pages.
+
+    Raises:
+        RuntimeError: If retrieving posts from the repository fails.
+    """
+    if page < 1:
+        logger.warning(f"Invalid page number {page}, defaulting to page 1.")
+        page = 1
+
+    session = db.session
+    try:
+        logger.info(f"Fetching page {page} with {per_page} posts per page for category: {category}")
+        repository = BlogPostRepository(session)
+        posts, total_pages = repository.fetch_posts_by_category(category, page, per_page)
+
+        logger.info(f"Successfully retrieved {len(posts)} blog posts for category: {category}")
+        return posts, total_pages
+    except RuntimeError as e:
+        logger.error(f"Error in BlogPostService: {e}")
+        raise RuntimeError("Failed to retrieve blog posts by category") from e
+
+
 def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     """Fetches paginated blog posts via the repository.
 
@@ -116,6 +149,33 @@ def get_paginated_blog_posts(page: int, per_page: int) -> tuple[list, int]:
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
         raise RuntimeError("Failed to retrieve blog posts") from e
+
+
+def get_related_blog_posts(categories: List[str], exclude_slug: str, limit: int = 3) -> List[BlogPost]:
+    """Fetches related blog posts that share categories with the current post.
+
+    Args:
+        categories (List[str]): Categories of the current post.
+        exclude_slug (str): Slug of the current post to exclude.
+        limit (int): Maximum number of related posts to return.
+
+    Returns:
+        List[BlogPost]: List of related blog posts.
+
+    Raises:
+        RuntimeError: If retrieving related posts fails.
+    """
+    session = db.session
+    try:
+        logger.info(f"Fetching related posts for categories: {categories}, excluding: {exclude_slug}")
+        repository = BlogPostRepository(session)
+        related_posts = repository.fetch_related_posts(categories, exclude_slug, limit)
+
+        logger.info(f"Successfully retrieved {len(related_posts)} related blog posts")
+        return related_posts
+    except RuntimeError as e:
+        logger.error(f"Error fetching related posts: {e}")
+        raise RuntimeError("Failed to retrieve related blog posts") from e
 
 
 def remove_blog_post_by_slug(slug: str) -> None:

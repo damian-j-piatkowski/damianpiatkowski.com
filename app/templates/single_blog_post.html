@@ -56,6 +56,63 @@
                     {{ post.html_content | safe }}
                 </div>
             </article>
+
+            <!-- Related Posts Section -->
+            {% if related_posts and related_posts|length > 0 %}
+                <section class="related-posts-section">
+                    <div class="related-posts-header">
+                        <h3>Related Articles</h3>
+                        <p class="related-posts-subtitle">Continue exploring these topics</p>
+                    </div>
+
+                    <div class="related-posts-grid">
+                        {% for related_post in related_posts %}
+                            <article class="related-post-card">
+                                <div class="related-post-thumbnail">
+                                    <img src="{{ url_for('static', filename='images/default_blog_thumbnail.jpg') }}"
+                                         alt="Thumbnail for {{ related_post.title }}"
+                                         loading="lazy">
+                                </div>
+
+                                <div class="related-post-content">
+                                    <h4 class="related-post-title">
+                                        <a href="{{ url_for('blog.render_single_blog_post', slug=related_post.slug) }}">
+                                            {{ related_post.title }}
+                                        </a>
+                                    </h4>
+
+                                    <p class="related-post-excerpt">
+                                        {{ related_post.html_content | striptags | truncate(100, True, '...') }}
+                                    </p>
+
+                                    <!-- Category Tags for Related Posts -->
+                                    {% if related_post.categories %}
+                                        <div class="related-post-categories">
+                                            {% for category in related_post.categories[:2] %}
+                                                <span class="category-tag category-tag-small">{{ category }}</span>
+                                            {% endfor %}
+                                            {% if related_post.categories|length > 2 %}
+                                                <span class="category-tag category-tag-small category-tag-more">+{{ related_post.categories|length - 2 }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="related-post-meta">
+                                        <time class="related-post-date">
+                                            {% set dt = related_post.created_at %}
+                                            {% if dt %}
+                                                {{ dt.strftime('%b %d, %Y') if dt is not string else dt[:10] }}
+                                            {% endif %}
+                                        </time>
+                                        <span class="read-time">3 min read</span>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
         {% else %}
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Post Not Found</h4>
