@@ -389,15 +389,36 @@
     font-style: italic;
 }
 
-/* Related Posts Grid */
+/* FIXED: Related Posts Grid - Optimal Layout for All Screen Sizes */
 .related-posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
+    /* Center the grid content */
+    justify-content: center;
 }
 
-/* Related Post Cards */
+/* Responsive grid columns based on screen size */
+@media (min-width: 1200px) {
+    .related-posts-grid {
+        grid-template-columns: repeat(3, 280px); /* Exactly 3 columns on large screens */
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .related-posts-grid {
+        grid-template-columns: repeat(2, 280px); /* Exactly 2 columns on tablets */
+    }
+}
+
+@media (max-width: 767px) {
+    .related-posts-grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        justify-items: center; /* Center single column */
+    }
+}
+
+/* FIXED: Related Post Cards - Consistent Smaller Size */
 .related-post-card {
     background-color: #fff;
     border-radius: 8px;
@@ -408,6 +429,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    /* FIXED: Consistent smaller width for related posts */
+    width: 280px; /* Fixed width - smaller than main blog cards */
 }
 
 .related-post-card:hover {
@@ -416,9 +439,9 @@
     border-color: #D0F0C0;
 }
 
-/* Related Post Thumbnails */
+/* Related Post Thumbnails - Smaller Height */
 .related-post-thumbnail {
-    height: 140px;
+    height: 120px; /* Reduced from 140px */
     overflow: hidden;
     position: relative;
 }
@@ -436,7 +459,7 @@
 
 /* Related Post Content */
 .related-post-content {
-    padding: 1.25rem;
+    padding: 1rem; /* Reduced from 1.25rem */
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -444,7 +467,7 @@
 
 .related-post-title {
     margin: 0 0 0.75rem 0;
-    font-size: 1.1rem;
+    font-size: 1rem; /* Reduced from 1.1rem */
     font-weight: 600;
     line-height: 1.4;
 }
@@ -462,7 +485,7 @@
 
 .related-post-excerpt {
     color: #666666;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Reduced from 0.9rem */
     line-height: 1.5;
     margin: 0 0 1rem 0;
     flex-grow: 1;
@@ -480,9 +503,9 @@
     background-color: #D0F0C0;
     color: #2d5016;
     border: 1px solid #a0d08c;
-    padding: 0.2rem 0.6rem;
+    padding: 0.2rem 0.5rem; /* Reduced padding */
     border-radius: 15px;
-    font-size: 0.7rem;
+    font-size: 0.65rem; /* Reduced from 0.7rem */
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
@@ -513,7 +536,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* Reduced from 0.8rem */
     color: #999;
     margin-top: auto;
     padding-top: 0.5rem;
@@ -536,13 +559,13 @@
         margin: 2rem 1rem 0;
     }
 
-    .related-posts-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
     .related-posts-header h3 {
         font-size: 1.5rem;
+    }
+
+    .related-post-card {
+        width: 100%; /* Full width on mobile */
+        max-width: 350px; /* But not too wide */
     }
 
     .related-post-content {
@@ -554,8 +577,8 @@
     }
 
     .category-tag-small {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.5rem;
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
     }
 }
 
@@ -566,7 +589,7 @@
     }
 
     .related-post-thumbnail {
-        height: 120px;
+        height: 100px;
     }
 
     .related-post-meta {

@@ -47,12 +47,26 @@ def render_blog_posts():
     json_response, status_code = get_paginated_posts(page, per_page, category)
 
     if status_code != 200:
-        return render_template("blog.html", posts_data=[], total_pages=0, page=page, current_category=category)
+        return render_template("blog.html", posts_data=[], total_pages=0, page=page,
+                               current_category=category, all_categories=[], total_posts=0)
 
     posts_data = json_response.json["posts"]
     total_pages = json_response.json["total_pages"]
 
-    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page, current_category=category)
+    # Get all categories with counts for the sidebar
+    from app.controllers.blog_controller import get_all_categories_with_counts
+    categories_response, categories_status = get_all_categories_with_counts()
+
+    if categories_status == 200:
+        all_categories = categories_response.json["categories"]
+        total_posts = categories_response.json["total_posts"]
+    else:
+        all_categories = []
+        total_posts = 0
+
+    return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page,
+                           current_category=category, all_categories=all_categories,
+                           total_posts=total_posts)
 
 
 @blog_bp.route("/blog/category/<category_slug>", methods=["GET"])
@@ -84,13 +98,26 @@ def render_category_posts(category_slug: str):
 
     if status_code != 200:
         return render_template("blog.html", posts_data=[], total_pages=0, page=page,
-                               current_category=category_name, category_slug=category_slug)
+                               current_category=category_name, category_slug=category_slug,
+                               all_categories=[], total_posts=0)
 
     posts_data = json_response.json["posts"]
     total_pages = json_response.json["total_pages"]
 
+    # Get all categories with counts for the sidebar
+    from app.controllers.blog_controller import get_all_categories_with_counts
+    categories_response, categories_status = get_all_categories_with_counts()
+
+    if categories_status == 200:
+        all_categories = categories_response.json["categories"]
+        total_posts = categories_response.json["total_posts"]
+    else:
+        all_categories = []
+        total_posts = 0
+
     return render_template("blog.html", posts_data=posts_data, total_pages=total_pages, page=page,
-                           current_category=category_name, category_slug=category_slug)
+                           current_category=category_name, category_slug=category_slug,
+                           all_categories=all_categories, total_posts=total_posts)
 
 
 @blog_bp.route("/blog/<slug>", methods=["GET"])

@@ -10,6 +10,7 @@ Methods:
 - count_total_blog_posts: Returns the total number of blog posts in the database.
 - create_blog_post: Inserts a new blog post with HTML content and categories into the database and returns the BlogPost instance.
 - delete_blog_post_by_slug: Deletes a blog post from the database by its slug.
+- fetch_all_categories_with_counts: Retrieves all categories with their post counts.
 - fetch_all_post_identifiers: Retrieves minimal metadata (slug, title, drive_file_id) for all blog posts.
 - fetch_blog_post_by_slug: Retrieves a blog post by its slug.
 - fetch_paginated_blog_posts: Retrieves paginated blog posts from the database based on page and limit parameters.
@@ -20,7 +21,7 @@ Methods:
 import json
 from typing import List, Optional
 
-from sqlalchemy import delete, insert, select, func, column, or_
+from sqlalchemy import delete, insert, select, func, column, or_, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -157,6 +158,41 @@ class BlogPostRepository:
         except SQLAlchemyError as e:
             self.session.rollback()
             raise RuntimeError("Failed to delete blog post from the database.") from e
+
+    def fetch_all_categories_with_counts(self) -> List[tuple[str, int]]:
+        """Retrieves all categories with their post counts.
+
+        Returns:
+            List[tuple[str, int]]: A list of tuples containing (category_name, post_count)
+            sorted by count in descending order.
+
+        Raises:
+            RuntimeError: If database retrieval fails.
+        """
+        try:
+            from collections import Counter
+
+            # Fetch all posts with their categories using pure SQLAlchemy
+            query = select(blog_posts.c.categories).where(
+                blog_posts.c.categories.isnot(None)
+            )
+
+            result = self.session.execute(query).fetchall()
+
+            # Process categories in Python (more reliable than complex JSON SQL)
+            all_categories = []
+            for row in result:
+                categories = row[0] if row[0] else []
+                all_categories.extend(categories)
+
+            # Count occurrences and sort by count (descending)
+            category_counts = Counter(all_categories)
+            categories_with_counts = category_counts.most_common()
+
+            return categories_with_counts
+
+        except SQLAlchemyError as e:
+            raise RuntimeError("Failed to fetch categories with counts from the database.") from e
 
     def fetch_all_post_identifiers(self) -> List[dict]:
         """Fetches slugs and other identifiers of all blog posts from the database.

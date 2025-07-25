@@ -1,19 +1,46 @@
 """Controller for handling blog post retrieval.
 
 This module provides functions for fetching blog posts, including:
+    - get_all_categories_with_counts: Retrieves all categories with their post counts.
     - get_paginated_posts: Retrieves paginated blog posts.
+    - get_related_posts: Retrieves related blog posts.
     - get_single_post: Retrieves a single blog post by its slug.
 """
+
+from typing import List, Optional
 
 from flask import Response, jsonify, current_app
 
 from app.exceptions import BlogPostNotFoundError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
-from app.services.blog_service import get_blog_post, get_paginated_blog_posts
-from typing import List, Optional
-from app.services.blog_service import get_blog_post, get_paginated_blog_posts, get_blog_posts_by_category, get_related_blog_posts
+from app.services.blog_service import get_all_categories_with_counts as get_categories_service
+from app.services.blog_service import get_blog_post, get_paginated_blog_posts, get_blog_posts_by_category, \
+    get_related_blog_posts
 
 
+def get_all_categories_with_counts() -> tuple[Response, int]:
+    """Handles the retrieval of all categories with their post counts and total posts.
+
+    Returns:
+        tuple[Response, int]: A Flask JSON response containing categories with counts and total posts.
+    """
+    try:
+        categories_with_counts, total_posts = get_categories_service()
+
+        # Convert to a more frontend-friendly format
+        categories_data = [
+            {"name": category, "count": count, "slug": category.lower().replace(' ', '-')}
+            for category, count in categories_with_counts
+        ]
+
+        return jsonify({
+            "categories": categories_data,
+            "total_posts": total_posts
+        }), 200
+
+    except RuntimeError as e:
+        current_app.logger.error(f"Failed to retrieve categories: {e}")
+        return jsonify({"error": str(e)}), 500
 
 def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None) -> tuple[Response, int]:
     """Handles the retrieval of paginated blog posts with optional category filtering and returns a JSON response.

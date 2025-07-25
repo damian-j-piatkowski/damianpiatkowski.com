@@ -6,6 +6,7 @@ database access, validation, logging, and error handling.
 
 Methods:
 - get_all_blog_post_identifiers: Retrieves all blog post identifiers (slug, title, drive_file_id).
+- get_all_categories_with_counts: Retrieves all categories with their post counts.
 - get_blog_post: Retrieves a blog post by its slug.
 - get_blog_posts_by_category: Retrieves blog posts filtered by category.
 - get_related_blog_posts: Retrieves related blog posts based on categories and exclude_slug.
@@ -49,6 +50,34 @@ def get_all_blog_post_identifiers() -> list[dict]:
     except RuntimeError as e:
         logger.error(f"Error in BlogPostService: {e}")
         raise RuntimeError("Failed to retrieve blog post identifiers") from e
+
+def get_all_categories_with_counts() -> tuple[List[tuple[str, int]], int]:
+    """Fetches all categories with their post counts and total unique posts via the repository.
+
+    Returns:
+        tuple[List[tuple[str, int]], int]: A tuple containing:
+            - List of tuples with (category_name, post_count)
+            - Total number of unique blog posts in the database
+
+    Raises:
+        RuntimeError: If retrieving categories from the repository fails.
+    """
+    session = db.session
+    try:
+        logger.info("Fetching all categories with counts and total posts")
+        repository = BlogPostRepository(session)
+
+        # Get categories with their counts
+        categories_with_counts = repository.fetch_all_categories_with_counts()
+
+        # Get total unique posts count
+        total_posts = repository.count_total_blog_posts()
+
+        logger.info(f"Successfully retrieved {len(categories_with_counts)} categories and {total_posts} total posts")
+        return categories_with_counts, total_posts
+    except RuntimeError as e:
+        logger.error(f"Error in BlogPostService getting categories: {e}")
+        raise RuntimeError("Failed to retrieve categories with counts") from e
 
 
 def get_blog_post(slug: str):
