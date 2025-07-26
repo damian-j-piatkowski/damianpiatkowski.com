@@ -157,8 +157,8 @@
                         </div>
                     {% endif %}
 
-                    <!-- Blog Posts Content - Centered with Original Layout -->
-                    <div class="{% if all_categories and all_categories|length > 0 %}col-xl-8 col-lg-6{% else %}col-xl-8{% endif %}">
+                    <!-- Blog Posts Content - UPDATED: Dynamic column sizing -->
+                    <div class="{% if all_categories and all_categories|length > 0 %}col-xl-8 col-lg-9{% else %}col-xl-10{% endif %}">
                         <div class="blog-content-container">
                             {% if posts_data %}
                                 <div class="blog-posts-grid">
@@ -267,9 +267,9 @@
                         </div>
                     </div>
 
-                    <!-- Right Space - Reserved for Future Use -->
+                    <!-- Right Space - UPDATED: Only show on XL screens (1200px+) -->
                     {% if all_categories and all_categories|length > 0 %}
-                        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+                        <div class="col-xl-2 d-none d-xl-block">
                             <!-- Future content area - intentionally left empty -->
                         </div>
                     {% endif %}
