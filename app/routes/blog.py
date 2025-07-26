@@ -17,13 +17,29 @@ blog_bp = Blueprint("blog", __name__)
 
 
 def slug_to_category_name(slug: str) -> str:
-    """Convert slug back to category name.
+    """Convert slug back to category name with fallback mapping for known exceptions.
 
     Examples:
         'python' -> 'Python'
         'object-oriented-programming' -> 'Object-Oriented Programming'
-        'web-development' -> 'Web Development'
+        'devops' -> 'DevOps'
+        'c-sharp' -> 'C#'
     """
+    exceptions = {
+        "devops": "DevOps",
+        "c-sharp": "C#",
+        "c-plus-plus": "C++",
+        "javascript": "JavaScript",
+        "typescript": "TypeScript",
+        "ai-ml": "AI/ML",
+        "ios": "iOS",
+        "html-css": "HTML/CSS",
+        "object-oriented-programming": "Object-Oriented Programming",
+    }
+
+    if slug in exceptions:
+        return exceptions[slug]
+
     return slug.replace('-', ' ').title()
 
 
