@@ -14,7 +14,7 @@ from flask import Response, jsonify, current_app
 from app.exceptions import BlogPostNotFoundError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_all_categories_with_counts as get_categories_service
-from app.services.blog_service import enrich_with_thumbnails, get_blog_post, get_paginated_blog_posts, \
+from app.services.blog_service import enrich_with_image_paths, get_blog_post, get_paginated_blog_posts, \
     get_blog_posts_by_category, get_related_blog_posts
 
 
@@ -123,7 +123,7 @@ def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None
 
         schema = BlogPostSchema(many=True)
         serialized_posts = schema.dump(posts)
-        serialized_posts = enrich_with_thumbnails(serialized_posts)
+        serialized_posts = enrich_with_image_paths(serialized_posts)
 
         return jsonify({"posts": serialized_posts, "total_pages": total_pages}), 200
 
@@ -148,6 +148,7 @@ def get_related_posts(post_categories: List[str], exclude_slug: str, limit: int 
 
         schema = BlogPostSchema(many=True)
         serialized_posts = schema.dump(related_posts)
+        serialized_posts = enrich_with_image_paths(serialized_posts)
 
         return jsonify({"related_posts": serialized_posts}), 200
 
@@ -159,8 +160,9 @@ def get_related_posts(post_categories: List[str], exclude_slug: str, limit: int 
 def get_single_post(slug: str) -> tuple[Response, int]:
     """Handles the retrieval of a single blog post by slug and returns a JSON response.
 
-    This function calls the service layer to fetch a blog post by its slug and
-    returns it as a JSON response.
+    This function fetches a blog post from the database and serializes it into JSON.
+    It also enriches the post with the resolved `hero_base` image path depending on
+    the environment (local or remote), using the enrich_with_image_paths utility.
 
     Args:
         slug (str): The unique slug of the blog post.
@@ -179,7 +181,8 @@ def get_single_post(slug: str) -> tuple[Response, int]:
               "html_content": "Post content...",
               "drive_file_id": "drive_id_1",
               "categories": ["Python", "Web Development", "Flask"],
-              "created_at": "2024-01-15 10:30:00"
+              "created_at": "2024-01-15 10:30:00",
+              "hero_base": "/static/blog-images/post-1/hero"
           }
           ```
     """
@@ -189,6 +192,9 @@ def get_single_post(slug: str) -> tuple[Response, int]:
         schema = BlogPostSchema()
         serialized_post = schema.dump(post)
 
+        # Enrich with hero_base path (local or remote)
+        enrich_with_image_paths([serialized_post], image_type="hero", key_name="hero_base")
+
         return jsonify(serialized_post), 200
 
     except BlogPostNotFoundError:
@@ -197,4 +203,4 @@ def get_single_post(slug: str) -> tuple[Response, int]:
 
     except RuntimeError as e:
         current_app.logger.error(f"Failed to retrieve blog post: {e}")
-        return jsonify({"error": str(e)}), 500  # Internal Server Error
+        return jsonify({"error": str(e)}), 500

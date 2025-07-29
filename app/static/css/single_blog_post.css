@@ -365,6 +365,7 @@
     border-radius: 12px;
     padding: 2.5rem;
     margin-top: 3rem;
+    margin-bottom: 3rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -441,7 +442,7 @@
 
 /* Related Post Thumbnails - Smaller Height */
 .related-post-thumbnail {
-    height: 120px; /* Reduced from 140px */
+    height: 180px;
     overflow: hidden;
     position: relative;
 }
@@ -556,7 +557,7 @@
 @media (max-width: 768px) {
     .related-posts-section {
         padding: 1.5rem;
-        margin: 2rem 1rem 0;
+        margin: 2rem 1rem 2rem;
     }
 
     .related-posts-header h3 {
@@ -585,11 +586,7 @@
 @media (max-width: 480px) {
     .related-posts-section {
         padding: 1rem;
-        margin: 1.5rem 0.5rem 0;
-    }
-
-    .related-post-thumbnail {
-        height: 100px;
+        margin: 1.5rem 0.5rem 1.5rem;
     }
 
     .related-post-meta {

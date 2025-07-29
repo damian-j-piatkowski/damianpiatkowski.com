@@ -39,8 +39,12 @@ for %%F in (*.jpg *.jpeg *.png) do (
     echo Creating xs.jpg      ^(480x270^) Mobile Phone
     magick "%%F" -resize 480x270^ -gravity center -crop 480x270+0+0 -quality 85 "xs.jpg"
 
+    echo Creating retina.jpg  ^(1920x1080^) Retina / High-DPI
+    magick "%%F" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 -quality 85 "retina.jpg"
+
     echo.
     echo Successfully created 16:9 hero images:
+    echo    retina.jpg       ^(1920x1080^) Retina
     echo    xl.jpg           ^(1600x900^) Extra Large Desktop
     echo    large.jpg        ^(1200x675^) Large Desktop
     echo    medium.jpg       ^(800x450^) Tablet/Small Laptop
@@ -54,4 +58,3 @@ exit /b 1
 
 :done
 echo All done!
-

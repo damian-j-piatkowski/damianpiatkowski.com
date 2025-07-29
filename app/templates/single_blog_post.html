@@ -35,22 +35,25 @@
                     {% endif %}
                 </header>
 
-                <div class="hero-image-container mb-4">
-                    <img src="{{ hero_images_path }}/medium.jpg"
-                         srcset="{{ hero_images_path }}/xs.jpg 480w,
-                                 {{ hero_images_path }}/small.jpg 600w,
-                                 {{ hero_images_path }}/medium.jpg 800w,
-                                 {{ hero_images_path }}/large.jpg 1200w,
-                                 {{ hero_images_path }}/xl.jpg 1600w"
-                         sizes="(max-width: 575.98px) calc(100vw - 4rem),
-                                (max-width: 767.98px) calc(100vw - 4rem),
-                                (max-width: 991.98px) calc(696px - 4rem),
-                                (max-width: 1199.98px) calc(960px - 4rem),
-                                calc(1140px - 4rem)"
-                         alt="Hero image for {{ post.title }}"
-                         loading="lazy"
-                         class="hero-image">
-                </div>
+                {% if post.hero_base %}
+                    <div class="hero-image-container mb-4">
+                        <img src="{{ post.hero_base }}/medium.jpg"
+                             srcset="{{ post.hero_base }}/xs.jpg 480w,
+                                     {{ post.hero_base }}/small.jpg 600w,
+                                     {{ post.hero_base }}/medium.jpg 800w,
+                                     {{ post.hero_base }}/large.jpg 1200w,
+                                     {{ post.hero_base }}/xl.jpg 1600w,
+                                     {{ post.hero_base }}/retina.jpg 1920w"
+                              sizes="(max-width: 575.98px) 100vw,
+                                   (max-width: 767.98px) 100vw,
+                                   (max-width: 991.98px) 696px,
+                                   (max-width: 1199.98px) 960px,
+                                   1140px"
+                             alt="Hero image for {{ post.title }}"
+                             loading="lazy"
+                             class="hero-image">
+                    </div>
+                {% endif %}
 
                 <div class="blog-content">
                     {{ post.html_content | safe }}
@@ -69,9 +72,17 @@
                         {% for related_post in related_posts %}
                             <article class="related-post-card">
                                 <div class="related-post-thumbnail">
-                                    <img src="{{ url_for('static', filename='images/default_blog_thumbnail.jpg') }}"
-                                         alt="Thumbnail for {{ related_post.title }}"
-                                         loading="lazy">
+                                    <img
+                                        src="{{ related_post.thumb_base }}/desktop.jpg"
+                                        srcset="{{ related_post.thumb_base }}/mobile.jpg 283w,
+                                                {{ related_post.thumb_base }}/tablet.jpg 425w,
+                                                {{ related_post.thumb_base }}/desktop.jpg 566w,
+                                                {{ related_post.thumb_base }}/retina.jpg 1132w"
+                                        sizes="(max-width: 575.98px) 100vw,
+                                               (max-width: 991.98px) 50vw,
+                                               33vw"
+                                        alt="Thumbnail for {{ related_post.title }}"
+                                        loading="lazy">
                                 </div>
 
                                 <div class="related-post-content">

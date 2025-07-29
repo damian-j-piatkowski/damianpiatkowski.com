@@ -86,4 +86,5 @@ def test_get_single_post_success(session, seed_blog_posts) -> None:
         "html_content": expected_post.html_content,
         "drive_file_id": expected_post.drive_file_id,
         "categories": [],
+        "hero_base": "/static/blog-images/default/hero",
     }

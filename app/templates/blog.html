@@ -157,21 +157,31 @@
                         </div>
                     {% endif %}
 
-                    <!-- Blog Posts Content - UPDATED: Dynamic column sizing -->
+                    <!-- Blog Posts Content -->
                     <div class="{% if all_categories and all_categories|length > 0 %}col-xl-8 col-lg-9{% else %}col-xl-10{% endif %}">
                         <div class="blog-content-container">
                             {% if posts_data %}
                                 <div class="blog-posts-grid">
                                     {% for post in posts_data %}
                                         <div class="blog-post-card">
-                                            <img src="{{ url_for('static', filename='images/default_blog_thumbnail.jpg') }}"
-                                                 class="blog-thumbnail"
-                                                 alt="Blog Post Thumbnail">
+                                            <img
+                                                src="{{ post.thumb_base }}/desktop.jpg"
+                                                srcset="{{ post.thumb_base }}/mobile.jpg 283w,
+                                                        {{ post.thumb_base }}/tablet.jpg 425w,
+                                                        {{ post.thumb_base }}/desktop.jpg 566w,
+                                                        {{ post.thumb_base }}/retina.jpg 850w"
+                                                sizes="(max-width: 575.98px) 100vw,
+                                                       (max-width: 991.98px) 50vw,
+                                                       33vw"
+                                                class="blog-thumbnail"
+                                                alt="Thumbnail for {{ post.title }}"
+                                                loading="lazy">
+
                                             <div class="card-body">
                                                 <h5 class="card-title">{{ post.title }}</h5>
                                                 <p class="card-text text-muted small">{{ post.created_at }}</p>
 
-                                                <!-- Category Tags with SEO-friendly URLs -->
+                                                <!-- Category Tags -->
                                                 {% if post.categories %}
                                                     <div class="category-tags mb-2">
                                                         {% for category in post.categories %}
@@ -197,7 +207,6 @@
                                 {% if total_pages > 1 %}
                                     <nav aria-label="Page navigation" class="mt-5">
                                         <ul class="pagination justify-content-center">
-                                            {# Previous button #}
                                             <li class="page-item {{ 'disabled' if page == 1 }}">
                                                 {% if current_category and category_slug %}
                                                     <a class="page-link"
@@ -216,7 +225,6 @@
                                                 {% endif %}
                                             </li>
 
-                                            {# Page numbers #}
                                             {% for p in range(1, total_pages + 1) %}
                                                 <li class="page-item {{ 'active' if p == page }}">
                                                     {% if current_category and category_slug %}
@@ -233,7 +241,6 @@
                                                 </li>
                                             {% endfor %}
 
-                                            {# Next button #}
                                             <li class="page-item {{ 'disabled' if page == total_pages }}">
                                                 {% if current_category and category_slug %}
                                                     <a class="page-link"
@@ -267,10 +274,9 @@
                         </div>
                     </div>
 
-                    <!-- Right Space - UPDATED: Only show on XL screens (1200px+) -->
                     {% if all_categories and all_categories|length > 0 %}
                         <div class="col-xl-2 d-none d-xl-block">
-                            <!-- Future content area - intentionally left empty -->
+                            <!-- Future content area -->
                         </div>
                     {% endif %}
                 </div>
