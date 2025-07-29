@@ -33,8 +33,12 @@ def app() -> Flask:
         'PREFERRED_URL_SCHEME': 'http',
         'WTF_CSRF_ENABLED': False,
         'GOOGLE_API_SCOPES': ['https://www.googleapis.com/auth/drive'],
-        'TESTING': True
+        'TESTING': True,
+        'BLOG_IMAGE_BASE_PATH': 'blog-images',
     })
+
+    # 👇 Add a fake static folder path for os.path.exists checks
+    app.static_folder = "/fake/static"
 
     with app.app_context():
         yield app

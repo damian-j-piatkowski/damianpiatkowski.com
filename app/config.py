@@ -24,8 +24,7 @@ class BaseConfig:
     # App-specific
     BASE_THUMBNAIL_PATH = os.environ.get('BASE_THUMBNAIL_PATH', '')
     DOWNLOAD_DIRECTORY = os.environ.get('DOWNLOAD_DIRECTORY', '')
-    IMAGES_BASE_PATH = '/static/hero-images'
-    DEFAULT_HERO_IMAGE_SLUG = 'default-placeholder'
+    BLOG_IMAGE_BASE_PATH = 'blog-images'
     PER_PAGE = 9
 
     # Mail
@@ -72,7 +71,6 @@ class DevelopmentConfig(BaseConfig):
     LOG_FILE = os.environ.get('LOG_FILE', '/logs/development/app.log')
     FALLBACK_LOG_PATH = os.environ.get('FALLBACK_LOG_PATH', '/logs/development/fallback.log')
     LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true'
-    IMAGE_UPLOAD_DIRECTORY = os.environ.get('IMAGE_UPLOAD_DIRECTORY', './instance/images')
 
 
 class ProductionConfig(BaseConfig):
@@ -81,9 +79,7 @@ class ProductionConfig(BaseConfig):
     LOG_FILE = os.environ.get('LOG_FILE', '/logs/production/app.log')
     FALLBACK_LOG_PATH = os.environ.get('FALLBACK_LOG_PATH', '/logs/production/fallback.log')
     LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true'
-    IMAGES_BASE_PATH = 'https://prod-bucket.s3.amazonaws.com/images' # adjust
-    IMAGE_UPLOAD_DIRECTORY = os.environ.get('IMAGE_UPLOAD_DIRECTORY')
-
+    BLOG_IMAGE_BASE_PATH = 'https://prod-bucket.s3.amazonaws.com/images' # adjust #todo
 
 class TestingConfig(BaseConfig):
     TESTING = True
@@ -93,7 +89,6 @@ class TestingConfig(BaseConfig):
     FALLBACK_LOG_PATH = None
     LOG_TO_DB = False
     DRIVE_BLOG_POSTS_FOLDER_ID = os.environ.get('DRIVE_BLOG_POSTS_FOLDER_ID_TEST')
-    IMAGE_UPLOAD_DIRECTORY = './tests/test_images'
 
     # Testing overrides
     SECRET_KEY = os.environ.get('SECRET_KEY', 'test-secret-key')

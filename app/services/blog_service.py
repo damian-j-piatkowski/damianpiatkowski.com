@@ -5,6 +5,7 @@ It acts as an intermediary between the controller layer and the BlogPostReposito
 database access, validation, logging, and error handling.
 
 Methods:
+- enrich_with_thumbnails: Attaches resolved thumbnail base paths to blog posts.
 - get_all_blog_post_identifiers: Retrieves all blog post identifiers (slug, title, drive_file_id).
 - get_all_categories_with_counts: Retrieves all categories with their post counts.
 - get_blog_post: Retrieves a blog post by its slug.
@@ -17,6 +18,8 @@ Methods:
 
 import logging
 from typing import List
+import os
+from flask import current_app, url_for
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
@@ -24,6 +27,75 @@ from app.extensions import db
 from app.models.repositories.blog_post_repository import BlogPostRepository
 
 logger = logging.getLogger(__name__)
+
+
+def enrich_with_thumbnails(posts: list[dict]) -> list[dict]:
+    """Attaches resolved thumbnail base paths to blog posts.
+
+    For each post, this function attaches a `thumb_base` key, which points to the base path
+    (without file extension) for thumbnail images like `desktop.jpg`, `mobile.jpg`, etc.
+
+    - If `BLOG_IMAGE_BASE_PATH` in app config is an HTTP URL (e.g., S3 bucket),
+      it assumes the images exist remotely and constructs the URL accordingly.
+
+    - If it's a local path (default: "images/blog-thumbnails"), it builds the static URL
+      via `url_for()` and checks if the file `desktop.jpg` exists in the expected directory.
+
+    - If `desktop.jpg` is missing, it falls back to `/default/thumbnail` under the same base path.
+
+    Example with local base:
+        BLOG_IMAGE_BASE_PATH = "images/blog-thumbnails"
+
+        Input:
+            {"slug": "post-1"}
+        Result (if file exists):
+            {"thumb_base": "/static/images/blog-thumbnails/post-1/thumbnail"}
+
+        Result (if missing):
+            {"thumb_base": "/static/images/blog-thumbnails/default/thumbnail"}
+
+    Example with remote base:
+        BLOG_IMAGE_BASE_PATH = "https://cdn.example.com/blog-thumbnails"
+
+        Input:
+            {"slug": "post-2"}
+        Result:
+            {"thumb_base": "https://cdn.example.com/blog-thumbnails/post-2/thumbnail"}
+
+    Returns:
+        A list of posts with an added `thumb_base` key per post.
+    """
+    if not posts:
+        return []
+
+    blog_image_base = current_app.config.get("BLOG_IMAGE_BASE_PATH", "images/blog-thumbnails")
+
+    for post in posts:
+        slug = post.get("slug")
+        if not slug:
+            continue
+
+        # S3 or remote image base – just build the remote URL
+        if blog_image_base.startswith("http"):
+            thumb_base = f"{blog_image_base}/{slug}/thumbnail"
+
+        # Local image base – use Flask static path resolution
+        else:
+            # Default to post-specific thumbnail path
+            thumb_base = url_for("static", filename=f"{blog_image_base}/{slug}/thumbnail", _external=False)
+
+            # Check if the desktop image exists on disk
+            desktop_path = os.path.join(
+                current_app.static_folder, blog_image_base, slug, "thumbnail", "desktop.jpg"
+            )
+
+            # Fallback to default thumbnails if missing
+            if not os.path.exists(desktop_path):
+                thumb_base = url_for("static", filename=f"{blog_image_base}/default/thumbnail", _external=False)
+
+        post["thumb_base"] = thumb_base
+
+    return posts
 
 
 def get_all_blog_post_identifiers() -> list[dict]:

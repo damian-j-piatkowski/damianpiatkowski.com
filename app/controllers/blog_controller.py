@@ -14,8 +14,8 @@ from flask import Response, jsonify, current_app
 from app.exceptions import BlogPostNotFoundError
 from app.models.data_schemas.blog_post_schema import BlogPostSchema
 from app.services.blog_service import get_all_categories_with_counts as get_categories_service
-from app.services.blog_service import get_blog_post, get_paginated_blog_posts, get_blog_posts_by_category, \
-    get_related_blog_posts
+from app.services.blog_service import enrich_with_thumbnails, get_blog_post, get_paginated_blog_posts, \
+    get_blog_posts_by_category, get_related_blog_posts
 
 
 def get_all_categories_with_counts() -> tuple[Response, int]:
@@ -42,12 +42,16 @@ def get_all_categories_with_counts() -> tuple[Response, int]:
         current_app.logger.error(f"Failed to retrieve categories: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None) -> tuple[Response, int]:
     """Handles the retrieval of paginated blog posts with optional category filtering and returns a JSON response.
 
     This function calls the service layer to fetch paginated blog posts and formats
     the result as a JSON response, including the total number of pages. When a category
     is provided, it filters posts to only include those containing the specified category.
+
+    Each post is also enriched with a `thumb_base` field that points to the base
+    path for responsive thumbnail images (e.g., desktop.jpg, tablet.jpg, etc.).
 
     Args:
         page (int): The current page number.
@@ -61,6 +65,7 @@ def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None
     Examples:
         - GET `/blog?page=1&per_page=10` (all posts)
         - GET `/blog?page=1&per_page=10&category=Python` (Python posts only)
+
         - Response (all posts):
           ```json
           {
@@ -68,23 +73,26 @@ def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None
                   {
                       "title": "Post 1",
                       "slug": "post-1",
-                      "html_content": "...",
-                      "drive_file_id": "...",
+                      "html_content": "<p>...</p>",
+                      "drive_file_id": "drive_id_1",
                       "categories": ["Python", "Web Development"],
-                      "created_at": "2024-01-15 10:30:00"
+                      "created_at": "2024-01-15 10:30:00",
+                      "thumb_base": "/static/images/blog-thumbnails/post-1/thumbnail"
                   },
                   {
                       "title": "Post 2",
                       "slug": "post-2",
-                      "html_content": "...",
-                      "drive_file_id": "...",
+                      "html_content": "<p>...</p>",
+                      "drive_file_id": "drive_id_2",
                       "categories": ["JavaScript", "Frontend"],
-                      "created_at": "2024-01-16 14:20:00"
+                      "created_at": "2024-01-16 14:20:00",
+                      "thumb_base": "/static/images/blog-thumbnails/default/thumbnail"
                   }
               ],
               "total_pages": 5
           }
           ```
+
         - Response (category filtered):
           ```json
           {
@@ -92,10 +100,11 @@ def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None
                   {
                       "title": "Python Best Practices",
                       "slug": "python-best-practices",
-                      "html_content": "...",
-                      "drive_file_id": "...",
+                      "html_content": "<p>...</p>",
+                      "drive_file_id": "drive_id_3",
                       "categories": ["Python", "Programming"],
-                      "created_at": "2024-01-15 10:30:00"
+                      "created_at": "2024-01-18 11:00:00",
+                      "thumb_base": "/static/images/blog-thumbnails/python-best-practices/thumbnail"
                   }
               ],
               "total_pages": 2
@@ -114,6 +123,7 @@ def get_paginated_posts(page: int, per_page: int, category: Optional[str] = None
 
         schema = BlogPostSchema(many=True)
         serialized_posts = schema.dump(posts)
+        serialized_posts = enrich_with_thumbnails(serialized_posts)
 
         return jsonify({"posts": serialized_posts, "total_pages": total_pages}), 200
 

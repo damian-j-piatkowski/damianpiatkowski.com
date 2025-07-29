@@ -176,5 +176,5 @@ token.json
 .temp*
 
 # Local blog hero images
-app/static/hero-images/
+app/static/blog-images/
 
