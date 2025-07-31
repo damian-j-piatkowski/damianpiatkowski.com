@@ -1,37 +1,26 @@
 """Service for processing blog post files from Google Drive.
 
-This module handles the complete flow of transforming Google Drive documents into blog posts:
+This module handles the complete flow of transforming Google Drive markdown documents into
+structured blog posts with SEO metadata. It performs the following steps:
+
     1. Retrieves markdown content from Google Drive
-    2. Extracts categories from the first line (if present)
+    2. Extracts structured metadata from the first block (Title, Categories, Meta Description, Keywords)
     3. Converts remaining markdown to HTML
     4. Sanitizes HTML content
     5. Persists the blog post in the database
 
-The module provides a single entry point through the process_file function, which
-orchestrates all these steps while providing proper error handling and logging.
+The metadata block must be present at the top of the markdown file in this format:
 
-Categories are expected to be on the first line of the markdown file in the format:
-Categories: Python, Web Development, Flask
+Title: Blog Post Title
+Categories: Python, Design, Programming
+Meta Description: A one-line summary for SEO purposes.
+Keywords: keyword1, keyword2, keyword3
 
-Typical usage example:
-    try:
-        blog_post = process_file(
-            file_id="1234567890",
-            title="My Blog Post",
-            slug="my-blog-post"
-        )
-        print(f"Successfully created blog post: {blog_post.title}")
-    except ValueError as e:
-        print(f"File not found: {e}")
-    except PermissionError as e:
-        print(f"Permission denied: {e}")
-
-Attributes:
-    logger: Logger instance for this module.
+Markdown content starts immediately after this block.
 """
 
 import logging
-from typing import List, Tuple
+from typing import Tuple, Dict
 
 from app.domain.blog_post import BlogPost
 from app.exceptions import BlogPostDuplicateError
@@ -44,81 +33,94 @@ from app.services.sanitization_service import sanitize_html
 logger = logging.getLogger(__name__)
 
 
-def extract_categories_from_markdown(markdown_content: str) -> Tuple[List[str], str]:
-    """Extract categories from the first line and return the rest of the content."""
-    cleaned = markdown_content.lstrip('\ufeff')
-
-    if '\n' not in cleaned:
-        raise ValueError("Markdown must start with 'Categories:' followed by a newline")
-
-    first_line, rest = cleaned.split('\n', 1)
-
-    if not first_line.lower().startswith("categories:"):
-        raise ValueError("First line must start with 'Categories:'")
-
-    categories_str = first_line.removeprefix('Categories:').strip()
-    categories = [cat.strip() for cat in categories_str.split(',') if cat]
-    return categories, rest.lstrip()
-
-
-def process_file(file_id: str, title: str, slug: str) -> BlogPost:
-    """Processes a single file: reads from Google Drive, extracts categories, converts to HTML, sanitizes content, and saves as a blog post.
+def extract_metadata_block(markdown_content: str) -> Tuple[Dict[str, str], str]:
+    """Extracts metadata block (title, categories, meta description, keywords) and the remaining markdown body.
 
     Args:
-        file_id (str): ID of the file to process.
-        title (str): Title of the blog post.
-        slug (str): URL-friendly slug derived from the title.
+        markdown_content (str): Full markdown content read from file.
+
+    Returns:
+        Tuple[Dict[str, str], str]: Metadata dictionary and markdown body.
+
+    Raises:
+        ValueError: If required fields are missing or malformed.
+    """
+    cleaned = markdown_content.lstrip('\ufeff')  # Handle possible BOM
+    lines = cleaned.splitlines()
+    metadata = {}
+    body_lines = []
+    in_metadata = True
+
+    for line in lines:
+        if in_metadata and ':' in line:
+            key, value = line.split(':', 1)
+            metadata[key.strip().lower()] = value.strip()
+        else:
+            in_metadata = False
+            body_lines.append(line)
+
+    required_keys = ['title', 'categories', 'meta description', 'keywords']
+    missing = [k for k in required_keys if k not in metadata]
+    if missing:
+        raise ValueError(f"Missing required metadata fields: {', '.join(missing)}")
+
+    metadata['categories'] = [cat.strip() for cat in metadata['categories'].split(',') if cat]
+    metadata['keywords'] = [kw.strip() for kw in metadata['keywords'].split(',') if kw]
+
+    return metadata, '\n'.join(body_lines).lstrip()
+
+
+def process_file(file_id: str, slug: str) -> BlogPost:
+    """Processes a file from Google Drive and creates a blog post.
+
+    Extracts structured metadata (title, categories, keywords, meta description)
+    from the top of the file, converts the markdown body to sanitized HTML, and
+    saves the result in the database with the given slug.
+
+    Args:
+        file_id (str): The Google Drive file ID of the markdown document.
+        slug (str): The unique slug for the blog post (typically from the Drive file name).
 
     Returns:
         BlogPost: The successfully created blog post domain model.
 
     Raises:
-        BlogPostDuplicateError: If the post already exists.
-        ValueError: If the file is not found on Google Drive.
-        PermissionError: If Drive access is denied.
-        RuntimeError: For any unexpected internal error.
+        BlogPostDuplicateError: If a post with the same slug or title already exists.
+        ValueError: If the file is malformed or required metadata is missing.
+        PermissionError: If access to the file is denied.
+        RuntimeError: For unexpected errors.
     """
     try:
         google_drive_service = GoogleDriveService()
 
-        # Step 1: Read markdown content from Google Drive
         logger.info(f"Reading file with ID {file_id} from Google Drive.")
         markdown_content = google_drive_service.read_file(file_id)
 
-        # Step 2: Extract categories from markdown content
-        logger.info(f"Extracting categories from markdown content for file ID {file_id}.")
-        categories, cleaned_markdown = extract_categories_from_markdown(markdown_content)
+        logger.info(f"Extracting metadata from markdown content for file ID {file_id}.")
+        metadata, markdown_body = extract_metadata_block(markdown_content)
 
-        # Step 3: Convert remaining markdown to HTML
         logger.info(f"Converting markdown to HTML for file ID {file_id}.")
-        html_content = convert_markdown_to_html(cleaned_markdown)
+        html_content = convert_markdown_to_html(markdown_body)
 
-        # Step 4: Sanitize HTML content
-        logger.info(f"Sanitizing content for file ID {file_id}.")
+        logger.info(f"Sanitizing HTML content for file ID {file_id}.")
         sanitized_content = sanitize_html(html_content)
 
-        # Step 5: Save the blog post with categories
-        logger.info(f"Saving blog post with title: {title}, slug: {slug}, categories: {categories}.")
+        logger.info(f"Saving blog post with slug '{slug}' and metadata: {metadata}")
         blog_post = save_blog_post({
-            "title": title,
+            "title": metadata["title"],
             "slug": slug,
             "html_content": sanitized_content,
             "drive_file_id": file_id,
-            "categories": categories
+            "categories": metadata["categories"],
+            "seo_keywords": metadata["keywords"],
+            "meta_description": metadata["meta description"]
         })
 
-        logger.info(
-            f"Successfully processed blog post: "
-            f"title='{blog_post.title}', slug='{blog_post.slug}', "
-            f"drive_file_id='{blog_post.drive_file_id}', categories={blog_post.categories}"
-        )
-
+        logger.info(f"Successfully saved blog post: {blog_post.title}")
         return blog_post
 
     except BlogPostDuplicateError as e:
-        logger.warning(
-            f"Duplicate blog post detected: {e.message} (field: {e.field_name}, value: {e.field_value})"
-        )
+        logger.warning(f"Duplicate blog post: {e.message} (field: {e.field_name}, value: {e.field_value})")
         raise
 
     except GoogleDriveFileNotFoundError as e:
