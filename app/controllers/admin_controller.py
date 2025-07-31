@@ -242,12 +242,11 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
 
 
 def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResponse, int]:
-    """Uploads blog posts from Google Drive using provided file IDs, titles, and slugs.
+    """Uploads blog posts from Google Drive using provided file IDs and slugs.
 
     Args:
         files (List[Dict[str, str]]): A list of dictionaries, each containing:
             - "id" (str): The Google Drive file ID.
-            - "title" (str): The title of the blog post.
             - "slug" (str): The slug to assign to the blog post.
 
     Returns:
@@ -278,10 +277,9 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
 
     for file in files:
         file_id = file.get("id")
-        title = file.get("title")
         slug = file.get("slug")
 
-        if not file_id or not title or not slug:
+        if not file_id or not slug:
             response_data["errors"].append({
                 "file_id": file.get("id", "unknown"),
                 "error": "Missing required fields",
@@ -289,7 +287,7 @@ def upload_blog_posts_from_drive(files: List[Dict[str, str]]) -> Tuple[FlaskResp
             continue
 
         try:
-            blog_post = process_file(file_id, title, slug)
+            blog_post = process_file(file_id, slug)
             serialized_post = schema.dump(blog_post)
             serialized_post["html_content"] = trim_content(serialized_post.get("html_content", ""))
             response_data["success"].append(serialized_post)
