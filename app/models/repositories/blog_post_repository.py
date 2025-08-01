@@ -21,7 +21,7 @@ Methods:
 import json
 from typing import List, Optional
 
-from sqlalchemy import delete, insert, select, func, column, or_, text
+from sqlalchemy import delete, insert, select, func, column, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -41,6 +41,29 @@ class BlogPostRepository:
             session (Session): SQLAlchemy database session for database operations.
         """
         self.session = session
+
+    @staticmethod
+    def _hydrate_blog_post(row: dict) -> BlogPost:
+        """Constructs a BlogPost domain object from a raw database row mapping.
+
+        Args:
+            row (dict): A dictionary representing a row from the database.
+
+        Returns:
+            BlogPost: The hydrated domain model.
+        """
+        return BlogPost(
+            title=row["title"],
+            slug=row["slug"],
+            html_content=row["html_content"],
+            drive_file_id=row["drive_file_id"],
+            categories=row.get("categories") or [],
+            read_time_minutes=row["read_time_minutes"],
+            meta_description=row["meta_description"],
+            keywords=row.get("keywords") or [],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"]
+        )
 
     def count_total_blog_posts(self) -> int:
         """Retrieves the total number of blog posts in the database.
@@ -64,72 +87,42 @@ class BlogPostRepository:
             slug: str,
             html_content: str,
             drive_file_id: str,
-            categories: Optional[List[str]] = None
+            categories: List[str] = None,
+            read_time_minutes: int = 1,
+            meta_description: str = "",
+            keywords: List[str] = None
     ) -> BlogPost:
-        """Creates a new blog post using SQLAlchemy.
-
-        Args:
-            title (str): The title of the blog post.
-            slug (str): The unique slug for the blog post.
-            html_content (str): The HTML content of the blog post.
-            drive_file_id (str): The unique Google Drive file ID for the post.
-            categories (Optional[List[str]]): List of category strings. Defaults to empty list.
-
-        Returns:
-            BlogPost: The newly created BlogPost instance.
-
-        Raises:
-            BlogPostDuplicateError: If a blog post with a duplicate slug or
-                drive_file_id is detected.
-            RuntimeError: If a general database error occurs during the operation.
-        """
+        """Creates a new blog post using SQLAlchemy."""
         try:
             new_post_data = {
                 'title': title,
                 'slug': slug,
                 'html_content': html_content,
                 'drive_file_id': drive_file_id,
-                'categories': categories or []
+                'categories': categories or [],
+                'read_time_minutes': read_time_minutes,
+                'meta_description': meta_description,
+                'keywords': keywords or []
             }
 
-            # First, do the insert
             insert_query = insert(blog_posts).values(new_post_data)
             self.session.execute(insert_query)
             self.session.commit()
 
-            # Then fetch the newly created post using its slug
             fetch_query = select(blog_posts).where(blog_posts.c.slug == slug)
             result = self.session.execute(fetch_query).mappings().one()
 
-            return BlogPost(
-                title=title,
-                slug=slug,
-                html_content=html_content,
-                drive_file_id=drive_file_id,
-                categories=result['categories'] or [],
-                created_at=result['created_at']
-            )
+            return self._hydrate_blog_post(dict(result))
 
         except IntegrityError as e:
             self.session.rollback()
             if 'slug' in str(e.orig):
-                raise BlogPostDuplicateError(
-                    message="A blog post with this slug already exists.",
-                    field_name="slug",
-                    field_value=slug
-                )
+                raise BlogPostDuplicateError("A blog post with this slug already exists.", "slug", slug)
             elif 'drive_file_id' in str(e.orig):
-                raise BlogPostDuplicateError(
-                    message="A blog post with this drive_file_id already exists.",
-                    field_name="drive_file_id",
-                    field_value=drive_file_id
-                )
+                raise BlogPostDuplicateError("A blog post with this drive_file_id already exists.", "drive_file_id",
+                                             drive_file_id)
             elif 'title' in str(e.orig):
-                raise BlogPostDuplicateError(
-                    message="A blog post with this title already exists.",
-                    field_name="title",
-                    field_value=title
-                )
+                raise BlogPostDuplicateError("A blog post with this title already exists.", "title", title)
             raise
 
         except SQLAlchemyError as e:
@@ -240,14 +233,7 @@ class BlogPostRepository:
             if not result:
                 raise BlogPostNotFoundError(f"No blog post found with slug {slug}")
 
-            return BlogPost(
-                title=result["title"],
-                slug=result["slug"],
-                html_content=result["html_content"],
-                drive_file_id=result["drive_file_id"],
-                categories=result["categories"] or [],
-                created_at=result["created_at"]
-            )
+            return self._hydrate_blog_post(dict(result))
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch blog post from the database.") from e
 
@@ -278,17 +264,7 @@ class BlogPostRepository:
             query = select(blog_posts).limit(per_page).offset(offset)
             result = self.session.execute(query).mappings().all()
 
-            posts = [
-                BlogPost(
-                    title=row['title'],
-                    slug=row['slug'],
-                    html_content=row['html_content'],
-                    drive_file_id=row['drive_file_id'],
-                    categories=row['categories'] or [],
-                    created_at=row['created_at']
-                )
-                for row in result
-            ] if result else []
+            posts = [self._hydrate_blog_post(dict(row)) for row in result] if result else []
 
             return posts, total_pages
         except SQLAlchemyError as e:
@@ -324,17 +300,7 @@ class BlogPostRepository:
 
             result = self.session.execute(query).mappings().all()
 
-            posts = [
-                BlogPost(
-                    title=row['title'],
-                    slug=row['slug'],
-                    html_content=row['html_content'],
-                    drive_file_id=row['drive_file_id'],
-                    categories=row['categories'] or [],
-                    created_at=row['created_at']
-                )
-                for row in result
-            ] if result else []
+            posts = [self._hydrate_blog_post(dict(row)) for row in result] if result else []
 
             return posts, total_pages
 
@@ -372,17 +338,7 @@ class BlogPostRepository:
 
             result = self.session.execute(query).mappings().all()
 
-            return [
-                BlogPost(
-                    title=row['title'],
-                    slug=row['slug'],
-                    html_content=row['html_content'],
-                    drive_file_id=row['drive_file_id'],
-                    categories=row['categories'] or [],
-                    created_at=row['created_at']
-                )
-                for row in result
-            ]
+            return [self._hydrate_blog_post(dict(row)) for row in result] if result else []
 
         except SQLAlchemyError as e:
             raise RuntimeError("Failed to fetch related posts from the database.") from e

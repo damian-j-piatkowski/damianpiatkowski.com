@@ -1,8 +1,8 @@
 """Initial schema
 
-Revision ID: a9e204eacc69
+Revision ID: b589eb1cb358
 Revises: 
-Create Date: 2025-07-24 10:48:17.950691
+Create Date: 2025-08-01 08:25:26.907624
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a9e204eacc69'
+revision = 'b589eb1cb358'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,8 +24,12 @@ def upgrade():
     sa.Column('slug', sa.String(length=255), nullable=False),
     sa.Column('html_content', sa.Text(), nullable=False),
     sa.Column('drive_file_id', sa.String(length=255), nullable=False),
-    sa.Column('categories', sa.JSON(), nullable=True),
+    sa.Column('meta_description', sa.String(length=255), nullable=False),
+    sa.Column('keywords', sa.JSON(), nullable=False),
+    sa.Column('read_time_minutes', sa.Integer(), nullable=False),
+    sa.Column('categories', sa.JSON(), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('drive_file_id'),
     sa.UniqueConstraint('slug'),

@@ -1,42 +1,40 @@
-r"""Script for uploading blog posts to development database from Google Drive.
+r"""Script for uploading blog posts to the database from Google Drive.
 
 Usage:
-    python -m scripts.upload_blog_posts --file-id "google_drive_file_id" --title "Post Title" --slug "post-slug"
+    python -m scripts.upload_blog_posts --env dev --file-id "google_drive_file_id" --slug "post-slug"
 
 Docker:
-    docker-compose exec web python -m scripts.upload_blog_posts --file-id "google_drive_file_id" --title "Post Title" --slug "post-slug"
-
-PowerShell Note:
-    When using titles with double quotes in PowerShell, escape them with backticks:
-    --title "Title with \`"quoted text\`" inside"
-
-    Example:
-        --title "Six Essential Object-Oriented Design Principles from Matthias Noback's \`"Object Design Style Guide\`""
+    docker-compose exec web python -m scripts.upload_blog_posts --env prod --file-id "google_drive_file_id" --slug "post-slug"
 """
-
 
 import argparse
 import sys
 
 from app import create_app
-from app.config import DevelopmentConfig
+from app.config import DevelopmentConfig, ProductionConfig
 from app.controllers.admin_controller import upload_blog_posts_from_drive
 
 
-def upload_post(file_id: str, title: str, slug: str) -> None:
-    """Upload a single blog post to development database.
+def upload_post(env: str, file_id: str, slug: str) -> None:
+    """Upload a single blog post to the database.
 
     Args:
+        env: Environment (dev or prod)
         file_id: Google Drive file ID
-        title: Post title
         slug: URL-friendly identifier
     """
-    app = create_app(DevelopmentConfig)
+    if env == "dev":
+        config_class = DevelopmentConfig
+    elif env == "prod":
+        config_class = ProductionConfig
+    else:
+        raise ValueError("Invalid env value. Use 'dev' or 'prod'.")
+
+    app = create_app(config_class)
 
     with app.app_context():
         post_data = [{
             "id": file_id,
-            "title": title,
             "slug": slug
         }]
 
@@ -57,19 +55,19 @@ def upload_post(file_id: str, title: str, slug: str) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Upload blog post from Google Drive to development database')
-    parser.add_argument('--file-id', required=True, help='Google Drive file ID')
-    parser.add_argument('--title', required=True, help='Post title')
-    parser.add_argument('--slug', required=True, help='Post slug')
+    parser = argparse.ArgumentParser(description="Upload blog post from Google Drive to database")
+    parser.add_argument("--env", required=True, choices=["dev", "prod"], help="Target environment")
+    parser.add_argument("--file-id", required=True, help="Google Drive file ID")
+    parser.add_argument("--slug", required=True, help="Post slug")
 
     args = parser.parse_args()
 
     try:
-        upload_post(args.file_id, args.title, args.slug)
+        upload_post(args.env, args.file_id, args.slug)
     except Exception as e:
         print(f"Error uploading post: {e}")
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
