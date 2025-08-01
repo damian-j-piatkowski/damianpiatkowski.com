@@ -59,40 +59,43 @@ def calculate_read_time_minutes(markdown_body: str, words_per_minute: int = 200)
 
 
 def extract_metadata_block(markdown_content: str) -> Tuple[Dict[str, str], str]:
-    """Extracts metadata block (title, categories, meta description, keywords) and the remaining markdown body.
+    """Extracts a metadata block and markdown body from the content, separated by a '+++' delimiter.
 
     Args:
         markdown_content (str): Full markdown content read from file.
 
     Returns:
-        Tuple[Dict[str, str], str]: Metadata dictionary and markdown body.
+        Tuple[Dict[str, str], str]: Parsed metadata and markdown body.
 
     Raises:
-        ValueError: If required fields are missing or malformed.
+        ValueError: If required metadata fields are missing.
     """
     cleaned = markdown_content.lstrip('\ufeff')  # Handle possible BOM
-    lines = cleaned.splitlines()
-    metadata = {}
-    body_lines = []
-    in_metadata = True
+    parts = cleaned.split('+++', 1)
 
-    for line in lines:
-        if in_metadata and ':' in line:
-            key, value = line.split(':', 1)
-            metadata[key.strip().lower()] = value.strip()
-        else:
-            in_metadata = False
-            body_lines.append(line)
+    if len(parts) != 2:
+        raise ValueError("Expected metadata block followed by '+++' delimiter.")
+
+    metadata_block, body = parts
+    metadata = {}
+
+    for line in metadata_block.strip().splitlines():
+        if not line.strip():
+            continue  # skip blank lines
+        if ':' not in line:
+            raise ValueError(f"Malformed metadata line: '{line}'")
+        key, value = line.split(':', 1)
+        metadata[key.strip().lower()] = value.strip()
 
     required_keys = ['title', 'categories', 'meta description', 'keywords']
     missing = [k for k in required_keys if k not in metadata]
     if missing:
         raise ValueError(f"Missing required metadata fields: {', '.join(missing)}")
 
-    metadata['categories'] = [cat.strip() for cat in metadata['categories'].split(',') if cat]
-    metadata['keywords'] = [kw.strip() for kw in metadata['keywords'].split(',') if kw]
+    metadata['categories'] = [cat.strip() for cat in metadata['categories'].split(',') if cat.strip()]
+    metadata['keywords'] = [kw.strip() for kw in metadata['keywords'].split(',') if kw.strip()]
 
-    return metadata, '\n'.join(body_lines).lstrip()
+    return metadata, body.lstrip()
 
 
 def process_file(file_id: str, slug: str) -> BlogPost:
@@ -111,7 +114,7 @@ def process_file(file_id: str, slug: str) -> BlogPost:
 
     Raises:
         BlogPostDuplicateError: If a post with the same slug or title already exists.
-        ValueError: If the file is malformed or required metadata is missing.
+        ValueError: If the file is missing required metadata or is malformed. Also when the file is not found.
         PermissionError: If access to the file is denied.
         RuntimeError: For unexpected errors.
     """
@@ -140,7 +143,7 @@ def process_file(file_id: str, slug: str) -> BlogPost:
             "html_content": sanitized_content,
             "drive_file_id": file_id,
             "categories": metadata["categories"],
-            "seo_keywords": metadata["keywords"],
+            "keywords": metadata["keywords"],
             "meta_description": metadata["meta description"],
             "read_time_minutes": read_time,
         })
@@ -159,6 +162,10 @@ def process_file(file_id: str, slug: str) -> BlogPost:
     except GoogleDrivePermissionError as e:
         logger.error(f"Permission denied for file ID {file_id}: {str(e)}")
         raise PermissionError("Permission denied on Google Drive")
+
+    except ValueError as e:
+        logger.error(f"Malformed file for file ID {file_id}: {str(e)}")
+        raise ValueError("File is malformed or missing required metadata: " + str(e))
 
     except Exception as e:
         logger.error(f"Unexpected error for file ID {file_id}: {str(e)}")

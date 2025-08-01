@@ -12,6 +12,12 @@ Test Classes and Functions:
             Verifies proper handling when attempting to save a duplicate blog post.
         - test_process_file_file_not_found:
             Verifies ValueError is raised when the file is not found on Google Drive.
+        - test_process_file_malformed_metadata:
+            Verifies ValueError is raised when the file metadata is malformed.
+        - test_process_file_missing_delimiter:
+            Verifies ValueError is raised when the metadata block is missing a delimiter.
+        - test_process_file_missing_required_metadata:
+            Verifies ValueError is raised when required metadata fields are missing.
         - test_process_file_permission_error:
             Verifies PermissionError is raised when Drive access is denied.
         - test_process_file_success:
@@ -49,6 +55,15 @@ from app.exceptions import GoogleDriveFileNotFoundError, GoogleDrivePermissionEr
 from app.models.repositories.blog_post_repository import BlogPostRepository
 from app.services.file_processing_service import process_file
 
+RETURN_MARKDOWN = (
+    "Title: Test Post\n"
+    "Categories: New\n"
+    "Meta Description: A description.\n"
+    "Keywords: test\n\n"
+    "+++\n\n"
+    "This is a mock file content body for testing."
+)
+
 
 @pytest.mark.admin_upload_blog_posts
 class TestProcessFileMockedAPI:
@@ -62,44 +77,99 @@ class TestProcessFileMockedAPI:
     def test_process_file_duplicate_error(self, mock_google_drive_service, test_drive_file_metadata_map, session):
         """Tests the case where a duplicate blog post is detected."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
-        process_file(file_data['file_id'], file_data['title'], file_data['slug'])
-        mock_google_drive_service.read_file.return_value = "Categories: Testing\nThis is a mock file content"
+
+        # First creation (should succeed)
+        process_file(file_data['file_id'], file_data['slug'])
+
+        # Simulate a second file read with the same metadata to trigger duplicate error
+        mock_google_drive_service.read_file.return_value = RETURN_MARKDOWN
+
         with pytest.raises(BlogPostDuplicateError, match="drive_file_id.*already exists"):
-            process_file(file_data['file_id'], file_data['title'], file_data['slug'])
+            process_file(file_data['file_id'], file_data['slug'])
 
     def test_process_file_file_not_found(self, mock_google_drive_service, test_drive_file_metadata_map):
         """Tests the case where the file is not found on Google Drive."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
         mock_google_drive_service.read_file.side_effect = GoogleDriveFileNotFoundError("File not found")
         with pytest.raises(ValueError, match="File not found on Google Drive"):
-            process_file(file_data['file_id'], file_data['title'], file_data['slug'])
+            process_file(file_data['file_id'], file_data['slug'])
+
+    def test_process_file_malformed_metadata(self, mock_google_drive_service, test_drive_file_metadata_map):
+        """Tests that a malformed metadata line causes ValueError."""
+        file_data = test_drive_file_metadata_map["markdown_to_html"]
+        mock_google_drive_service.read_file.return_value = (
+            "Title=Broken Format\n"
+            "Categories: Testing\n"
+            "Meta Description: Fine.\n"
+            "Keywords: test\n\n"
+            "+++"
+            "\nBody here."
+        )
+        match_line = ("File is malformed or missing required metadata: "
+                      "Malformed metadata line: 'Title=Broken Format'")
+        with pytest.raises(ValueError, match=match_line):
+            process_file(file_data['file_id'], file_data['slug'])
+
+    def test_process_file_missing_delimiter(self, mock_google_drive_service, test_drive_file_metadata_map):
+        """Tests that absence of delimiter raises ValueError."""
+        file_data = test_drive_file_metadata_map["markdown_to_html"]
+        mock_google_drive_service.read_file.return_value = (
+            "Title: No Delimiter\n"
+            "Categories: Example\n"
+            "Meta Description: Missing delimiter.\n"
+            "Keywords: example\n\n"
+            "# No separator used here"
+        )
+        match_line = (
+            r"File is malformed or missing required metadata: "
+            r"Expected metadata block followed by '\+\+\+' delimiter."
+        )
+        with pytest.raises(ValueError, match=match_line):
+            process_file(file_data['file_id'], file_data['slug'])
+
+    def test_process_file_missing_required_metadata(self, mock_google_drive_service, test_drive_file_metadata_map):
+        """Tests that missing required metadata fields raise ValueError."""
+        file_data = test_drive_file_metadata_map["markdown_to_html"]
+        mock_google_drive_service.read_file.return_value = (
+            "Title: Incomplete Post\n"
+            "Meta Description: Oops\n\n"
+            "+++\nSome body text"
+        )
+        match_line = (".*File is malformed or missing required metadata: "
+                      "Missing required metadata fields: categories, keywords")
+        with pytest.raises(ValueError, match=match_line):
+            process_file(file_data['file_id'], file_data['slug'])
 
     def test_process_file_permission_error(self, mock_google_drive_service, test_drive_file_metadata_map):
         """Tests the case where there is a permission error on Google Drive."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
         mock_google_drive_service.read_file.side_effect = GoogleDrivePermissionError("Permission denied")
         with pytest.raises(PermissionError, match="Permission denied on Google Drive"):
-            process_file(file_data['file_id'], file_data['title'], file_data['slug'])
+            process_file(file_data['file_id'], file_data['slug'])
 
     def test_process_file_success(self, mock_google_drive_service, test_drive_file_metadata_map, app, session):
         """Tests the happy path of processing a blog post file."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
-        mock_google_drive_service.read_file.return_value = "Categories: Testing\nThis is a mock file content"
-        process_file(file_id=file_data['file_id'], title=file_data['title'], slug=file_data['slug'])
+        mock_google_drive_service.read_file.return_value = RETURN_MARKDOWN
+        process_file(file_id=file_data['file_id'], slug=file_data['slug'])
 
         repo = BlogPostRepository(session)
         saved_post = repo.fetch_blog_post_by_slug(file_data['slug'])
         assert saved_post is not None
-        assert saved_post.title == file_data['title']
+        assert saved_post.title == 'Test Post'
         assert saved_post.slug == file_data['slug']
-        assert saved_post.html_content == "<p>This is a mock file content</p>"
+        assert saved_post.html_content == "<p>This is a mock file content body for testing.</p>"
         assert saved_post.drive_file_id == file_data['file_id']
+        assert saved_post.categories == ['New']
+        assert saved_post.meta_description == 'A description.'
+        assert saved_post.keywords == ['test']
+        assert saved_post.read_time_minutes == 1
         assert saved_post.created_at is not None
 
     def test_process_file_unexpected_error(self, mock_google_drive_service, test_drive_file_metadata_map, monkeypatch):
         """Tests the case where an unexpected error occurs during saving."""
         file_data = test_drive_file_metadata_map["markdown_to_html"]
-        mock_google_drive_service.read_file.return_value = "This is a mock file content"
+        mock_google_drive_service.read_file.return_value = RETURN_MARKDOWN
 
         def raise_unexpected_error():
             raise Exception("Unexpected error")
@@ -107,7 +177,7 @@ class TestProcessFileMockedAPI:
         monkeypatch.setattr("app.services.file_processing_service.save_blog_post", raise_unexpected_error)
 
         with pytest.raises(RuntimeError, match="Unexpected error occurred"):
-            process_file(file_data['file_id'], file_data['title'], file_data['slug'])
+            process_file(file_data['file_id'], file_data['slug'])
 
 
 @pytest.mark.admin_upload_blog_posts
@@ -140,25 +210,21 @@ class TestProcessFileRealDriveAPI:
             process_file(**duplicate_slug_metadata)
 
     def test_duplicate_title_raises_duplicate_error(self, app, session, test_drive_file_metadata_map):
-        """Tests that using the same title with a different file raises a duplicate error."""
-        first = test_drive_file_metadata_map["design_principles"]
-        second = test_drive_file_metadata_map["value_objects"]
+        """Tests that using the same title with a different file raises a duplicate error.
 
-        process_file(**first)
-
-        duplicate_title_metadata = second.copy()
-        duplicate_title_metadata["title"] = first["title"]
-
+        Prerequisite: The 'value-objects' file needs to have the same title assigned in the metadata block
+        as the 'design-principles' file.
+        """
+        process_file(**test_drive_file_metadata_map["design_principles"])
         with pytest.raises(BlogPostDuplicateError, match="title.*already exists"):
-            process_file(**duplicate_title_metadata)
+            process_file(**test_drive_file_metadata_map["value_objects"])
 
     def test_file_not_found_error(self, app):
         """Tests handling of non-existent file IDs."""
         fake_file_id = "nonexistent123abc"
-        title = "Missing File"
         slug = "missing-file"
         with pytest.raises(ValueError, match="File not found on Google Drive"):
-            process_file(fake_file_id, title, slug)
+            process_file(fake_file_id, slug)
 
     def test_process_file_real_drive_not_found_due_to_missing_permission(self, app, test_drive_file_metadata_map):
         """Tests processing a file that is not shared with the bot account, expecting a 404."""
@@ -172,18 +238,30 @@ class TestProcessFileRealDriveAPI:
         metadata = test_drive_file_metadata_map["design_principles"]
         blog_post = process_file(**metadata)
 
-        assert blog_post.title == metadata["title"]
         assert blog_post.slug == metadata["slug"]
+        assert blog_post.title == "Six Essential Object-Oriented Design Principles from Matthias Noback's \"Object Design Style Guide\""
+        assert blog_post.keywords == ['object-oriented design principles', 'matthias noback',
+                                      'object design style guide', 'python design patterns',
+                                      'composition over inheritance', 'named constructors python',
+                                      'code maintainability', 'clean architecture python',
+                                      'object-oriented programming tips', 'design principles for beginners',
+                                      'class responsibility assignment', 'domain modeling techniques']
+        assert blog_post.meta_description == (
+            "Discover six essential object-oriented design principles from "
+            "Matthias Noback's 'Object Design Style Guide'—timeless strategies for writing clean, maintainable "
+            "code across any programming language, illustrated with Python examples.")
         assert blog_post.drive_file_id == metadata["file_id"]
         assert isinstance(blog_post.html_content, str)
         assert len(blog_post.html_content.strip()) > 0
+        assert blog_post.categories == ['Design', 'Python', 'Object-Oriented Programming']
+        assert blog_post.read_time_minutes > 10
         assert blog_post.created_at is not None
 
     def test_unexpected_error_during_sanitization(self, mock_google_drive_service, test_drive_file_metadata_map,
                                                   monkeypatch):
         """Test unexpected error raised from sanitize_html is wrapped in RuntimeError."""
         metadata = test_drive_file_metadata_map["design_principles"]
-        mock_google_drive_service.read_file.return_value = "This is a mock file content"
+        mock_google_drive_service.read_file.return_value = RETURN_MARKDOWN
 
         def raise_unexpected_error():
             raise Exception("Boom during sanitization")

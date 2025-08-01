@@ -28,7 +28,14 @@ def mock_google_drive_service(mocker, request) -> MagicMock:
     mock_service.list_folder_contents.return_value = [
         {"id": "1", "name": "Mock File", "mimeType": "application/vnd.google-apps.document"}
     ]
-    mock_service.read_file.return_value = "Categories: Testing\nMock file content"
+    mock_service.read_file.return_value = (
+        "Title: Test Post\n"
+        "Categories: Testing\n"
+        "Meta Description: A description.\n"
+        "Keywords: test\n\n"
+        "+++\n\n"
+        "Mock file content."
+    )
 
     if "read_file_side_effect" in param:
         mock_service.read_file.side_effect = param["read_file_side_effect"]
@@ -59,27 +66,22 @@ def test_drive_file_metadata_map():
         "design_principles": {
             "file_id": "1p5jpGiSa1KyXbQrAEJ44NEBP4pgsLqpsdgYUkMgy3Vo",
             "slug": "six-essential-object-oriented-design-principles-from-matthias-nobacks-object-design-style-guide",
-            "title": "Six Essential Object Oriented Design Principles From Matthias Nobacks Object Design Style Guide",
         },
         "value_objects": {
             "file_id": "187rlFKQsACliz_ta-niIgK9ZDOwsR9a3YmfrkbX_R1E",
             "slug": "value-objects",
-            "title": "Value Objects",
         },
         "value_objects_test": {
             "file_id": "1e8CUUM6S3ZXRXIhoE0oxM_4O5eqH1mr5YyoiWzjpWxI",
             "slug": "value-objects-test",
-            "title": "Value Objects Test",
         },
         "markdown_to_html": {
             "file_id": "1zZM1zY6qmOIuXh2Fb-6oQ3lZ_ETRvEnlnl75Pw3WecE",
             "slug": "markdown-to-html-test",
-            "title": "Markdown To Html Test",
         },
         "restricted": {
             "file_id": "1LafXfqIfye5PLvwnXpAs0brp8C3qvh81sDI--rG7eSk",
             "slug": "test-restricted-access",
-            "title": "Test Restricted Access",
         },
     }
 

@@ -15,6 +15,7 @@ Tests included:
         the "Key: Value" format.
     - test_extract_metadata_missing_block_entirely: Verifies that content without any metadata block raises
         error for missing fields.
+    - test_extract_metadata_missing_delimiter_raises_error: Raises ValueError if the '+++' delimiter is missing.
     - test_extract_metadata_missing_required_field: Verifies that missing required fields raise errors.
     - test_extract_metadata_non_string_field_values: Verifies behavior when field values are not plain strings.
     - test_extract_metadata_removes_bom: Verifies removal of BOM character from content.
@@ -32,6 +33,8 @@ def test_extract_metadata_all_fields_present() -> None:
 Categories: Python, Web Development
 Meta Description: A short summary.
 Keywords: python, flask, web
+
++++
 
 Main content here.
 """
@@ -57,6 +60,8 @@ Categories: Python
 Meta Description: Summary.
 Keywords: design, code
 
++++
+
 Content goes here.
 """
     metadata, content = extract_metadata_block(markdown)
@@ -75,6 +80,8 @@ Categories: One, Two
 Meta Description: Description here.
 Keywords:
 
++++
+
 Content starts here.
 """
     metadata, content = extract_metadata_block(markdown)
@@ -91,6 +98,8 @@ Meta Description: Description.
 Keywords: one, two
 Author: Jane Doe
 Reading Time: 5 minutes
+
++++
 
 Text content here.
 """
@@ -111,6 +120,8 @@ Categories:   Python ,  Flask ,   APIs
 Meta Description:   Something about this post.  
 Keywords:   design ,   code , clean   
 
++++
+
 Body content.
 """
     metadata, content = extract_metadata_block(markdown)
@@ -128,6 +139,8 @@ def test_extract_metadata_ignores_case() -> None:
 cAtEgOrIeS: Dev, Testing
 MeTa DeScRiPtIoN: Sample
 kEyWoRdS: foo, bar
+
++++
 
 Paragraph text.
 """
@@ -147,15 +160,19 @@ Categories: Python
 Meta Description: Fine.
 Keywords: stuff
 
++++
+
 Hello world.
 """
-    with pytest.raises(ValueError, match="Missing required metadata fields: title"):
+    with pytest.raises(ValueError, match=r"Malformed metadata line: 'Title=Invalid Format'"):
         extract_metadata_block(markdown)
 
 
 def test_extract_metadata_missing_block_entirely() -> None:
     """Verifies that content without any metadata block raises error for missing fields."""
-    markdown = """Hello.
+    markdown = """+++
+
+Hello.
 This is a post without metadata block.
 
 But it still has good content!
@@ -165,11 +182,26 @@ But it still has good content!
         extract_metadata_block(markdown)
 
 
+def test_extract_metadata_missing_delimiter_raises_error() -> None:
+    """Raises ValueError if the '+++' delimiter is missing."""
+    markdown = """Title: Missing Delimiter
+Categories: Python
+Meta Description: This will fail
+Keywords: example, fail
+
+This should be body content but there's no delimiter.
+"""
+    with pytest.raises(ValueError, match="Expected metadata block followed by '\\+\\+\\+' delimiter."):
+        extract_metadata_block(markdown)
+
+
 def test_extract_metadata_missing_required_field() -> None:
     """Verifies that missing required fields raise errors."""
     incomplete = """Title: Missing Meta
 Categories: Python
 Keywords: keyword1, keyword2
+
++++
 
 Rest of the content.
 """
@@ -183,6 +215,8 @@ def test_extract_metadata_non_string_field_values() -> None:
 Categories: Data, AI
 Meta Description: 9876
 Keywords: 1, 2, 3
+
++++
 
 Content body here.
 """
@@ -201,6 +235,8 @@ Categories: Python
 Meta Description: Clean start.
 Keywords: one, two
 
++++
+
 ## Subtitle
 Something here.
 """
@@ -216,6 +252,8 @@ def test_extract_metadata_trailing_commas_in_keywords() -> None:
 Categories: Python
 Meta Description: Example post
 Keywords: one , two , three,
+
++++
 
 Main paragraph.
 """

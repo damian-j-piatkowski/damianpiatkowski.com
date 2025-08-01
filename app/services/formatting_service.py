@@ -55,8 +55,6 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     # Remove BOM if present
     markdown_text = markdown_text.lstrip('\ufeff')
 
-    first_debug = f"First 100 chars of markdown input: {repr(markdown_text[:100])}"
-
     # Default extensions for technical blog posts
     default_extensions = [
         'fenced_code',  # Code blocks with language specification
@@ -95,7 +93,6 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
         extension_configs=extension_configs,
         output_format='html'
     )
-    second_debug = f"First 100 chars of HTML output: {repr(html_content[:100])}"
 
     return html_content
 

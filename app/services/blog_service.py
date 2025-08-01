@@ -333,7 +333,8 @@ def save_blog_post(validated_data) -> BlogPost:
 
     Args:
         validated_data (dict): Dictionary containing validated blog post data.
-            Expected fields: title, html_content, slug, drive_file_id, categories (optional).
+            Expected fields: title, html_content, slug, drive_file_id, categories,
+                             meta_description, keywords, read_time_minutes
 
     Returns:
         BlogPost: The newly created blog post domain object.
@@ -343,7 +344,16 @@ def save_blog_post(validated_data) -> BlogPost:
         BlogPostDuplicateError: If a duplicate blog post is detected.
         RuntimeError: For other unexpected errors during blog post creation.
     """
-    required_fields = ['title', 'html_content', 'slug', 'drive_file_id']
+    required_fields = [
+        'title',
+        'html_content',
+        'slug',
+        'drive_file_id',
+        'categories',
+        'meta_description',
+        'keywords',
+        'read_time_minutes',
+    ]
 
     # Validate required fields
     logger.info("Validating required fields for blog post.")
@@ -357,17 +367,16 @@ def save_blog_post(validated_data) -> BlogPost:
     blog_post_repo = BlogPostRepository(session)
 
     try:
-        # Extract categories (optional field)
-        categories = validated_data.get('categories', [])
-
-        # Create and save blog post
         logger.info("Saving the blog post to the database.")
         blog_post = blog_post_repo.create_blog_post(
             title=validated_data['title'],
             slug=validated_data['slug'],
-            html_content=validated_data['html_content'],  # Already sanitized earlier
+            html_content=validated_data['html_content'],
             drive_file_id=validated_data['drive_file_id'],
-            categories=categories
+            categories=validated_data['categories'],
+            meta_description=validated_data['meta_description'],
+            keywords=validated_data['keywords'],
+            read_time_minutes=validated_data['read_time_minutes'],
         )
 
         logger.info("Blog post saved successfully with title: %s", blog_post.title)
@@ -376,7 +385,8 @@ def save_blog_post(validated_data) -> BlogPost:
     except BlogPostDuplicateError as e:
         logger.warning(
             f"Duplicate blog post detected: {e.message} (field: {e.field_name}, "
-            f"value: {e.field_value})")
+            f"value: {e.field_value})"
+        )
         raise
 
     except Exception as e:
