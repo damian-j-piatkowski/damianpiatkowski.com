@@ -11,6 +11,7 @@ Routes:
 from flask import Blueprint, render_template, request, current_app
 
 from app.controllers.blog_controller import get_paginated_posts, get_single_post, get_related_posts
+from app.services.formatting_service import format_date
 
 blog_bp = Blueprint("blog", __name__)
 
@@ -68,6 +69,11 @@ def render_blog_posts():
     posts_data = json_response.json["posts"]
     total_pages = json_response.json["total_pages"]
 
+    # Format created_at dates for each post
+    for post in posts_data:
+        if 'created_at' in post:
+            post['formatted_date'] = format_date(post['created_at'])
+
     # Get all categories with counts for the sidebar
     from app.controllers.blog_controller import get_all_categories_with_counts
     categories_response, categories_status = get_all_categories_with_counts()
@@ -119,6 +125,11 @@ def render_category_posts(category_slug: str):
     posts_data = json_response.json["posts"]
     total_pages = json_response.json["total_pages"]
 
+    # Format created_at dates for each post
+    for post in posts_data:
+        if 'created_at' in post:
+            post['formatted_date'] = format_date(post['created_at'])
+
     # Get all categories with counts for the sidebar
     from app.controllers.blog_controller import get_all_categories_with_counts
     categories_response, categories_status = get_all_categories_with_counts()
@@ -155,12 +166,7 @@ def render_single_blog_post(slug: str):
     # Format the created_at date for display
     if 'created_at' in post_data:
         # Format the date - convert "2025-07-22 07:39:58" to "July 22, 2025"
-        from datetime import datetime
-        try:
-            dt = datetime.strptime(post_data['created_at'], '%Y-%m-%d %H:%M:%S')
-            post_data['formatted_date'] = dt.strftime('%B %d, %Y')
-        except ValueError:
-            post_data['formatted_date'] = post_data['created_at'][:10]
+        post_data['formatted_date'] = format_date(post_data['created_at'])
 
     # Fetch related posts if applicable
     related_posts = []
@@ -168,6 +174,9 @@ def render_single_blog_post(slug: str):
         related_response, related_status = get_related_posts(post_data['categories'], slug)
         if related_status == 200:
             related_posts = related_response.json.get('related_posts', [])
+
+        for post in related_posts:
+            post['formatted_date'] = format_date(post['created_at'])
 
     return render_template(
         "single_blog_post.html",

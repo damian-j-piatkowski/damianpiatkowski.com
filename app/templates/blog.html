@@ -42,6 +42,7 @@
 
 {% block links %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog/read_time.css') }}">
 
     <!-- Category-specific canonical URL -->
     {% if current_category and category_slug %}
@@ -179,7 +180,17 @@
 
                                             <div class="card-body">
                                                 <h5 class="card-title">{{ post.title }}</h5>
-                                                <p class="card-text text-muted small">{{ post.created_at }}</p>
+                                                <div class="card-meta d-flex justify-content-between align-items-center mb-2">
+                                                    <p class="card-text text-muted small mb-0">
+                                                        <time datetime="{{ post.created_at }}">{{ post.formatted_date }}</time>
+                                                    </p>
+                                                    {% if post.read_time_minutes %}
+                                                        <span class="read-time-card gradient">
+                                                            <i class="bi bi-clock" aria-hidden="true"></i>
+                                                            {{ post.read_time_minutes }} min read
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
 
                                                 <!-- Category Tags -->
                                                 {% if post.categories %}

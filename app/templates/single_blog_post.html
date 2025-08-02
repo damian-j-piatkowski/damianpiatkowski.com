@@ -8,8 +8,25 @@
     {% endif %}
 {% endblock %}
 
+{% block meta_description %}
+    {{ post.meta_description }}
+{% endblock %}
+
+{% block meta_keywords %}
+    {{ post.keywords | join(', ') }}
+{% endblock %}
+
+{% block og_title %}
+    {{ post.title }} - Damian Piatkowski
+{% endblock %}
+
+{% block og_description %}
+    {{ post.meta_description }}
+{% endblock %}
+
 {% block links %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/single_blog_post.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog/read_time.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -23,6 +40,10 @@
                         <time datetime="{{ post.created_at }}">
                             {{ post.formatted_date }}
                         </time>
+                        <span class="read-time gradient-pill">
+                            <i class="bi bi-clock" aria-hidden="true"></i>
+                            {{ post.read_time_minutes }} min read
+                        </span>
                     </div>
 
                     <!-- Category Tags in Header -->
@@ -109,13 +130,15 @@
                                     {% endif %}
 
                                     <div class="related-post-meta">
-                                        <time class="related-post-date">
-                                            {% set dt = related_post.created_at %}
-                                            {% if dt %}
-                                                {{ dt.strftime('%b %d, %Y') if dt is not string else dt[:10] }}
-                                            {% endif %}
+                                        <time datetime="{{ related_post.created_at }}" class="related-post-date text-muted small">
+                                            {{ related_post.formatted_date }}
                                         </time>
-                                        <span class="read-time">3 min read</span>
+                                        {% if related_post.read_time_minutes %}
+                                            <span class="read-time-card">
+                                                <i class="bi bi-clock" aria-hidden="true"></i>
+                                                {{ related_post.read_time_minutes }} min read
+                                            </span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </article>

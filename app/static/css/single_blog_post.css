@@ -548,11 +548,6 @@
     font-weight: 500;
 }
 
-.read-time {
-    color: #2d5016;
-    font-weight: 600;
-}
-
 /* === Responsive Design for Related Posts === */
 @media (max-width: 768px) {
     .related-posts-section {
@@ -587,11 +582,5 @@
     .related-posts-section {
         padding: 1rem;
         margin: 1.5rem 0.5rem 1.5rem;
-    }
-
-    .related-post-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
     }
 }

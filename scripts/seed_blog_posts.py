@@ -69,7 +69,11 @@ def seed_posts(num_posts: int, base_content: str = None) -> None:
                 slug=f"dev-test-post-{unique_id}",
                 html_content=content,
                 drive_file_id=f"dev-test-file-{unique_id}",
-                categories=categories
+                categories=categories,
+                meta_description="This is a test post for development purposes.",
+                keywords="test, development, blog, post",
+                read_time_minutes=3,
+
             ))
 
             print(f"Created post {post_number}/{num_posts} with categories: {categories}")

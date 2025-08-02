@@ -14,6 +14,10 @@ particularly focusing on blog post content processing. It includes:
    - Smart ellipsis handling
    - Empty content handling
 
+3. Date formatting:
+   - Conversion of datetime strings from the database into human-readable formats
+   - Graceful fallback if parsing fails
+
 The module uses the Python-Markdown library with carefully selected
 extensions to ensure proper rendering of code blocks, tables, and other
 markdown elements commonly used in technical blog posts.
@@ -21,14 +25,16 @@ markdown elements commonly used in technical blog posts.
 Typical usage example:
     html_content = convert_markdown_to_html("# Title\nContent")
     preview = trim_content(html_content, max_length=100)
+    formatted_date = format_date("2025-07-22 07:39:58")
 
 Functions:
     convert_markdown_to_html: Transforms markdown text to HTML with enhanced features
     trim_content: Creates preview versions of content by trimming to specified length
+    format_date: Converts datetime strings into human-readable formats
 """
 
 from typing import List, Optional
-
+from datetime import datetime
 import markdown
 
 
@@ -57,22 +63,20 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
 
     # Default extensions for technical blog posts
     default_extensions = [
-        'fenced_code',  # Code blocks with language specification
-        'codehilite',  # Syntax highlighting
-        'tables',  # Markdown tables
-        'toc',  # Table of contents
-        'def_list',  # Definition lists
-        'footnotes',  # Footnotes support
-        'md_in_html',  # Allow markdown inside HTML
-        'sane_lists',  # Better list handling
-        'smarty',  # Smart quotes, dashes, etc.
-        'attr_list'  # Add HTML attributes to elements
+        'fenced_code',
+        'codehilite',
+        'tables',
+        'toc',
+        'def_list',
+        'footnotes',
+        'md_in_html',
+        'sane_lists',
+        'smarty',
+        'attr_list'
     ]
 
-    # Combine default and custom extensions
     all_extensions = default_extensions + (extensions or [])
 
-    # Extension configuration
     extension_configs = {
         'codehilite': {
             'css_class': 'highlight',
@@ -86,15 +90,12 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
         }
     }
 
-    # Convert markdown to HTML with configured extensions
-    html_content = markdown.markdown(
+    return markdown.markdown(
         markdown_text,
         extensions=all_extensions,
         extension_configs=extension_configs,
         output_format='html'
     )
-
-    return html_content
 
 
 def trim_content(content: str, max_length: int = 200) -> str:
@@ -112,3 +113,26 @@ def trim_content(content: str, max_length: int = 200) -> str:
     if len(content) > max_length:
         return content[:max_length].rstrip() + "..."
     return content
+
+
+def format_date(date_str: str) -> str:
+    """Converts a datetime string from the database into a human-readable format.
+
+    Example:
+        "2025-07-22 07:39:58" -> "July 22, 2025"
+
+    Falls back to YYYY-MM-DD if parsing fails.
+
+    Args:
+        date_str (str): Datetime string in '%Y-%m-%d %H:%M:%S' format.
+
+    Returns:
+        str: A human-readable formatted date string.
+    """
+    if not date_str:
+        return ""
+    try:
+        dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime('%B %d, %Y')
+    except ValueError:
+        return date_str[:10]

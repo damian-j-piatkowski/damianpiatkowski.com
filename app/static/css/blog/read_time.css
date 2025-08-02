@@ -1,0 +1,119 @@
+/* =========================
+   SINGLE BLOG POST BADGE
+   ========================= */
+.read-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: #2d5016; /* dark brand green */
+    color: #fff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #1f3a10;
+}
+.read-time i {
+    font-size: 0.85rem;
+    margin-right: 0.25rem;
+}
+.read-time:hover {
+    background-color: #3b6f24;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    cursor: default;
+}
+
+/* Variant: Gradient */
+.read-time.gradient-pill {
+    background: linear-gradient(135deg, #D0F0C0 0%, #2c7be5 100%);
+    color: #fff;
+    padding: 0.35rem 1rem;
+}
+
+/* Positioning relative to the date (single post) */
+.text-muted .read-time {
+    margin-left: 1rem;
+}
+
+/* Mobile adjustments (single post) */
+@media (max-width: 576px) {
+    .text-muted {
+        flex-wrap: wrap;
+    }
+    .text-muted .read-time {
+        flex-basis: 100%;
+        margin-left: 0;
+        margin-top: 0.4rem;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 15px;
+    }
+}
+
+/* =========================
+   CARD BADGE (Blog & Related)
+   ========================= */
+.read-time-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: linear-gradient(135deg, #D0F0C0 0%, #2c7be5 100%);
+    color: #fff;
+    padding: 0.25rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.read-time-card i {
+    font-size: 0.8rem;
+    margin-right: 0.2rem;
+}
+.read-time-card:hover {
+    transform: translateY(-1px);
+    cursor: default;
+}
+
+/* =========================
+   CARD META (Blog & Related)
+   ========================= */
+.related-post-meta,
+.blog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space between date and badge */
+    flex-wrap: nowrap; /* prevent stacking */
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+.related-post-meta time {
+    display: inline-flex;
+    white-space: nowrap;
+}
+.related-post-meta .read-time {
+    display: inline-flex;
+    white-space: nowrap;
+}
+
+/* Mobile adjustments (related posts) */
+@media (max-width: 576px) {
+    .related-post-meta {
+        gap: 0.4rem;
+    }
+    .related-post-meta time {
+        font-size: 0.7rem;
+    }
+    .related-post-meta .read-time {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 12px;
+    }
+}
