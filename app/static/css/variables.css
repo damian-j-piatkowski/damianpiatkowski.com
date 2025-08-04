@@ -1,0 +1,17 @@
+/* === Common Variables === */
+:root {
+    --blog-bg-color: #ECEFF4;
+    --blog-accent: #D0F0C0;
+    --blog-accent-hover: #a0d08c;
+    --blog-text: #333;
+    --blog-text-muted: #666666;
+    --blog-link: #1a73e8;
+    --blog-border: #e0e0e0;
+    --blog-shadow: rgba(0, 0, 0, 0.05);
+
+    /* Category tag colors */
+    --category-tag-bg: #D0F0C0;
+    --category-tag-hover: #a0d08c;
+    --category-tag-text: #2d5016;
+    --category-tag-border: #a0d08c;
+}

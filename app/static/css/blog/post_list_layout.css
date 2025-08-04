@@ -1,0 +1,194 @@
+/* ============================
+   BLOG LIST VIEW STYLES
+   ============================ */
+
+/* --- Blog Hero Section --- */
+.blog-hero {
+    background-image: url('../../images/home_blog.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 80px 0;
+}
+
+.blog-hero h1,
+.blog-hero p {
+    margin: 0;
+    font-weight: 700;
+}
+
+.blog-hero p {
+    font-size: 1.25rem;
+}
+
+/* --- Blog Post Section --- */
+.blog-posts-section {
+    background-color: var(--blog-bg-color);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 0 5rem;
+}
+
+/* --- Blog Content Container (moved from post_body.css) --- */
+.blog-content-container {
+    background-color: #fff;
+    border: 1px solid var(--blog-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--blog-shadow);
+    padding: 2rem;
+    margin: 0 auto;
+}
+
+/* Mobile container padding */
+@media (max-width: 576px) {
+    .blog-content-container {
+        margin: 0 0.5rem;
+        padding: 1rem;
+    }
+}
+
+/* --- Pagination --- */
+.pagination {
+    margin-top: 3rem;
+}
+
+.pagination .page-item .page-link {
+    color: var(--blog-text);
+    border: 1px solid var(--blog-border);
+    margin: 0 2px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--blog-accent);
+    border-color: var(--blog-accent);
+    color: var(--blog-text);
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--blog-accent-hover);
+    border-color: var(--blog-accent-hover);
+    color: #fff;
+}
+
+/* --- Responsive Blog Hero --- */
+@media (max-width: 768px) {
+    .blog-hero {
+        padding: 60px 0;
+    }
+
+    .blog-hero h1 {
+        font-size: 2rem;
+    }
+
+    .blog-hero p {
+        font-size: 1.1rem;
+    }
+}
+
+
+/* ============================
+   BLOG GRID STYLES
+   ============================ */
+
+.blog-posts-grid {
+    display: grid;
+    gap: 1.5rem;
+    padding: 0;
+    justify-items: center;
+    width: 100%;
+}
+
+/* Default: 3 columns on large screens */
+@media (min-width: 1200px) {
+    .blog-posts-grid {
+        grid-template-columns: repeat(3, minmax(280px, 1fr));
+    }
+}
+
+/* Exception: Short large screens (e.g. Nest Hub Max) – 2 columns */
+@media (min-width: 1200px) and (max-width: 1320px) and (max-height: 900px) {
+    .blog-posts-grid {
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
+}
+
+/* Medium/Large screens – 2 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .blog-posts-grid {
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+    }
+}
+
+/* Small tablets – 1 column, centered */
+@media (min-width: 600px) and (max-width: 767px) {
+    .blog-posts-grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+
+/* Mobile – 1 column */
+@media (max-width: 599px) {
+    .blog-posts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ============================
+   BLOG CARD STYLES
+   ============================ */
+
+.blog-post-card {
+    background-color: #fff;
+    border: 1px solid var(--blog-border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px var(--blog-shadow);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    width: 100%;
+    max-width: 400px;
+}
+
+.blog-post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.blog-thumbnail {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--blog-border);
+}
+
+.blog-post-card .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-post-card .card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--blog-text);
+}
+
+.blog-post-card .blog-summary {
+    font-size: 0.95rem;
+    color: var(--blog-text-muted);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+/* Mobile adjustments for card sizing */
+@media (max-width: 599px) {
+    .blog-post-card {
+        max-width: none;
+    }
+}

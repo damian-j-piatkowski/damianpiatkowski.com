@@ -1,0 +1,32 @@
+/* === Custom Green Button Styling === */
+.btn-custom-green {
+    background-color: var(--category-tag-bg);
+    color: var(--category-tag-text);
+    border: 1px solid var(--category-tag-border);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-custom-green:hover {
+    background-color: var(--category-tag-hover);
+    color: var(--category-tag-text);
+    border-color: var(--category-tag-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+}
+
+.btn-custom-green:focus {
+    background-color: var(--category-tag-hover);
+    color: var(--category-tag-text);
+    border-color: var(--category-tag-hover);
+    box-shadow: 0 0 0 0.2rem rgba(208, 240, 192, 0.25);
+}
+
+.btn-custom-green:active {
+    background-color: var(--category-tag-hover);
+    color: var(--category-tag-text);
+    border-color: var(--category-tag-hover);
+    transform: translateY(0);
+}
