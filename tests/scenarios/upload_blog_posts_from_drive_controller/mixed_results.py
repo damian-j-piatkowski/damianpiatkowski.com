@@ -26,12 +26,12 @@ from app.exceptions import BlogPostDuplicateError, GoogleDriveFileNotFoundError,
 # Scenario 1: 1 failure, then 1 success
 one_failure_then_success = {
     "files": [
-        {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
-        {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
+        {"id": "invalid_file_id", "slug": "invalid-blog-post"},
+        {"id": "valid_file_id", "slug": "valid-blog-post"},
     ],
     "side_effects": [
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="invalid_file_id"),
-        "Categories: Python, AI\n<p>Expected file content.</p>",
+        "\ufeffTitle: Valid Blog Post\nCategories: Python, AI\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nExpected file content.",
     ],
     "expected_status": 207,
     "expected_response": {
@@ -42,6 +42,9 @@ one_failure_then_success = {
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
                 "categories": ["Python", "AI"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -56,11 +59,11 @@ one_failure_then_success = {
 # Scenario 2: 1 success, 1 duplicate failure
 one_success_one_duplicate = {
     "files": [
-        {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
-        {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
+        {"id": "valid_file_id", "slug": "valid-blog-post"},
+        {"id": "valid_file_id", "slug": "valid-blog-post"},
     ],
     "side_effects": [
-        "Categories: Design\n<p>Expected file content.</p>",
+        "\ufeffTitle: Valid Blog Post\nCategories: Design\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nExpected file content.",
         BlogPostDuplicateError(
             "Duplicate blog post: drive_file_id 'valid_file_id' already exists.",
             field_name="drive_file_id",
@@ -76,6 +79,9 @@ one_success_one_duplicate = {
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
                 "categories": ["Design"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -90,11 +96,11 @@ one_success_one_duplicate = {
 # Scenario 3: 1 success, 1 failure
 one_success_one_failure = {
     "files": [
-        {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
-        {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
+        {"id": "valid_file_id", "slug": "valid-blog-post"},
+        {"id": "invalid_file_id", "slug": "invalid-blog-post"},
     ],
     "side_effects": [
-        "Categories: General\n<p>Expected file content.</p>",
+        "\ufeffTitle: Valid Blog Post\nCategories: General\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nExpected file content.",
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="invalid_file_id"),
     ],
     "expected_status": 207,
@@ -106,6 +112,9 @@ one_success_one_failure = {
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
                 "categories": ["General"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -117,14 +126,13 @@ one_success_one_failure = {
 # Scenario 4: 1 success, 3 failures
 one_success_three_failures = {
     "files": [
-        {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
-        {"id": "missing_file_id", "title": "Missing Blog Post", "slug": "missing-blog-post"},
-        {"id": "permission_denied_file_id", "title": "Permission Denied Blog Post",
-         "slug": "permission-denied-blog-post"},
-        {"id": "runtime_error_file_id", "title": "Runtime Error Blog Post", "slug": "runtime-error-blog-post"},
+        {"id": "valid_file_id", "slug": "valid-blog-post"},
+        {"id": "missing_file_id", "slug": "missing-blog-post"},
+        {"id": "permission_denied_file_id", "slug": "permission-denied-blog-post"},
+        {"id": "runtime_error_file_id", "slug": "runtime-error-blog-post"},
     ],
     "side_effects": [
-        "Categories: Testing\n<p>Valid blog post content</p>",
+        "\ufeffTitle: Valid Blog Post\nCategories: Testing\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nValid blog post content",
         GoogleDriveFileNotFoundError("Test error", file_id="missing_file_id"),
         GoogleDrivePermissionError("Test error"),
         RuntimeError("Error saving blog post"),
@@ -138,6 +146,9 @@ one_success_three_failures = {
                 "drive_file_id": "valid_file_id",
                 "slug": "valid-blog-post",
                 "categories": ["Testing"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -159,11 +170,11 @@ long_content = (
 
 one_success_trimmed_long_content_one_failure = {
     "files": [
-        {"id": "long_content_file_id", "title": "Trimmed Blog Post", "slug": "trimmed-blog-post"},
-        {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
+        {"id": "long_content_file_id", "slug": "trimmed-blog-post"},
+        {"id": "invalid_file_id", "slug": "invalid-blog-post"},
     ],
     "side_effects": [
-        "Categories: Writing\n" + long_content,
+        f"\ufeffTitle: Trimmed Blog Post\nCategories: Writing\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\n{long_content}",
         GoogleDriveFileNotFoundError("Test error", file_id="invalid_file_id"),
     ],
     "expected_status": 207,
@@ -175,6 +186,9 @@ one_success_trimmed_long_content_one_failure = {
                 "drive_file_id": "long_content_file_id",
                 "slug": "trimmed-blog-post",
                 "categories": ["Writing"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -187,13 +201,13 @@ one_success_trimmed_long_content_one_failure = {
 five_successes_one_failure = {
     "files": [
         *[
-            {"id": f"valid_file_{i}_id", "title": f"Valid Blog Post {i}", "slug": f"valid-blog-post-{i}"}
+            {"id": f"valid_file_{i}_id", "slug": f"valid-blog-post-{i}"}
             for i in range(5)
         ],
-        {"id": "invalid_file_id", "title": "Invalid Blog Post", "slug": "invalid-blog-post"},
+        {"id": "invalid_file_id", "slug": "invalid-blog-post"},
     ],
     "side_effects": [
-        *[f"Categories: Category{i}, Testing\n<p>Valid blog post content {i}</p>" for i in range(5)],
+        *[f"\ufeffTitle: Valid Blog Post {i}\nCategories: Category{i}, Testing\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nValid blog post content {i}" for i in range(5)],
         GoogleDriveFileNotFoundError("Test error", file_id="invalid_file_id"),
     ],
     "expected_status": 207,
@@ -205,6 +219,9 @@ five_successes_one_failure = {
                 "drive_file_id": f"valid_file_{i}_id",
                 "slug": f"valid-blog-post-{i}",
                 "categories": [f"Category{i}", "Testing"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
             for i in range(5)
         ],

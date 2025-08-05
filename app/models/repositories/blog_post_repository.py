@@ -188,24 +188,27 @@ class BlogPostRepository:
             raise RuntimeError("Failed to fetch categories with counts from the database.") from e
 
     def fetch_all_post_identifiers(self) -> List[dict]:
-        """Fetches slugs and other identifiers of all blog posts from the database.
+        """Fetches minimal metadata of all published blog posts from the database.
 
         Returns:
-            List[dict]: A list of dicts with 'slug', 'title', and 'drive_file_id'.
+            List[dict]: A list of dicts with 'slug', 'title', 'drive_file_id', and 'updated_at'.
         """
         try:
             query = select(
                 blog_posts.c.slug,
                 blog_posts.c.title,
-                blog_posts.c.drive_file_id
+                blog_posts.c.drive_file_id,
+                blog_posts.c.updated_at
             )
+
             result = self.session.execute(query).mappings().all()
 
             return [
                 {
                     "slug": row["slug"],
                     "title": row["title"],
-                    "drive_file_id": row["drive_file_id"]
+                    "drive_file_id": row["drive_file_id"],
+                    "updated_at": row["updated_at"]
                 }
                 for row in result
             ] if result else []

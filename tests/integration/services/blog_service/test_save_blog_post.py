@@ -38,7 +38,11 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
         'title': "First Post",
         'slug': "first-post",
         'html_content': "<p>Content for the first post.</p>",
-        'drive_file_id': "unique_drive_file_id_1"
+        'drive_file_id': "unique_drive_file_id_1",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Create and commit the first blog post
@@ -50,7 +54,11 @@ def test_save_blog_post_duplicate_drive_file_id(session, create_blog_post) -> No
         'title': "Second Post",
         'slug': "second-post",
         'html_content': "<p>Content for the second post.</p>",
-        'drive_file_id': "unique_drive_file_id_1"  # Duplicate drive_file_id
+        'drive_file_id': "unique_drive_file_id_1",  # Duplicate drive_file_id
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Act & Assert: Ensure that calling the service function raises a BlogPostDuplicateError
@@ -74,7 +82,11 @@ def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
         'title': "First Post",
         'slug': "first-post",
         'html_content': "<p>Content for the first post.</p>",
-        'drive_file_id': "unique_drive_file_id_1"
+        'drive_file_id': "unique_drive_file_id_1",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Create and commit the first blog post
@@ -86,7 +98,11 @@ def test_save_blog_post_duplicate_slug(session, create_blog_post) -> None:
         'title': "Second Post",
         'slug': "first-post",  # Duplicate slug
         'html_content': "<p>Content for the second post.</p>",
-        'drive_file_id': "unique_drive_file_id_2"
+        'drive_file_id': "unique_drive_file_id_2",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Act & Assert: Ensure that calling the service function raises a BlogPostDuplicateError
@@ -110,7 +126,11 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
         'title': "First Post",
         'slug': "first-post",
         'html_content': "<p>Content for the first post.</p>",
-        'drive_file_id': "unique_drive_file_id_1"
+        'drive_file_id': "unique_drive_file_id_1",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Create and commit the first blog post
@@ -122,7 +142,11 @@ def test_save_blog_post_duplicate_title(session, create_blog_post) -> None:
         'title': "First Post",  # Duplicate title
         'slug': "first-post-duplicate",
         'html_content': "<p>Content for the second post.</p>",
-        'drive_file_id': "unique_drive_file_id_2"
+        'drive_file_id': "unique_drive_file_id_2",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Act & Assert: Ensure that calling the service function raises a BlogPostDuplicateError
@@ -169,7 +193,11 @@ def test_save_blog_post_success(session) -> None:
         'title': "First Post",
         'slug': "first-post",
         'html_content': "<p>Content for the first post.</p>",
-        'drive_file_id': "unique_drive_file_id_1"
+        'drive_file_id': "unique_drive_file_id_1",
+        'categories': ['Python', 'AI'],
+        'meta_description': 'First post description',
+        'keywords': ['python', 'ai', 'machine learning'],
+        'read_time_minutes': 10,
     }
 
     # Act: Save the blog post using the service function

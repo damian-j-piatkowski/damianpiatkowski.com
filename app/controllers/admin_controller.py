@@ -198,7 +198,8 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
     """Fetches minimal metadata for published blog posts from the database.
 
     This function retrieves all published blog posts from the database and returns
-    a list of dictionaries containing only the title, slug, and associated Google Drive file ID.
+    a list of dictionaries containing only the title, slug, updated_at timestamp,
+    and associated Google Drive file ID.
 
     Returns:
         Tuple[FlaskResponse, int]: A tuple containing:
@@ -206,6 +207,7 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
                 - `title` (str): The title of the blog post.
                 - `slug` (str): The unique slug used in the URL.
                 - `id` (str): The associated Google Drive file ID.
+                - `updated_at` (str): ISO-formatted timestamp of the last update.
             - An HTTP status code.
 
     Raises:
@@ -216,7 +218,8 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
             {
                 "slug": "hello-world",
                 "title": "Hello World",
-                "id": "12345abc"
+                "id": "12345abc",
+                "updated_at": "2025-08-05T12:34:56Z"
             },
             ...
         ]
@@ -225,12 +228,13 @@ def get_published_blog_posts() -> Tuple[FlaskResponse, int]:
         # Retrieve all identifiers for published blog posts from the repository
         db_posts = get_all_blog_post_identifiers()
 
-        # Directly return the minimal metadata in the response
+        # Include updated_at in the metadata returned
         published_posts = [
             {
-                "slug": post['slug'],
-                "title": post['title'],
-                "id": post['drive_file_id']
+                "slug": post["slug"],
+                "title": post["title"],
+                "id": post["drive_file_id"],
+                "updated_at": post["updated_at"].isoformat() if post.get("updated_at") else None
             }
             for post in db_posts
         ]

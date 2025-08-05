@@ -67,11 +67,10 @@ def test_upload_blog_posts_route_with_actual_api(
     with app.app_context():
         file_metadata = test_drive_file_metadata_map["design_principles"]
         file_id = file_metadata["file_id"]
-        title = file_metadata["title"]
         slug = file_metadata["slug"]
 
         payload = {
-            "files": [{"id": file_id, "title": title, "slug": slug}]
+            "files": [{"id": file_id, "slug": slug}]
         }
 
         response = client.post(
@@ -87,7 +86,6 @@ def test_upload_blog_posts_route_with_actual_api(
 
         uploaded_post = response_data["success"][0]
         assert uploaded_post["drive_file_id"] == file_id
-        assert uploaded_post["title"] == title
         assert uploaded_post["slug"] == slug
         assert "html_content" in uploaded_post and uploaded_post["html_content"]
 
@@ -105,7 +103,6 @@ def test_upload_blog_posts_route_with_actual_api(
         from app.models.tables.blog_post import blog_posts
         saved_post = session.query(blog_posts).filter_by(drive_file_id=file_id).one_or_none()
         assert saved_post is not None
-        assert saved_post.title == title
         assert saved_post.slug == slug
         assert saved_post.html_content
 

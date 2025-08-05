@@ -20,7 +20,6 @@ five_files_not_found = {
     "files": [
         {
             "id": f"missing_file_{i}_id",
-            "title": f"Missing Blog Post {i}",
             "slug": f"missing-blog-post-{i}",
         }
         for i in range(5)
@@ -41,7 +40,7 @@ five_files_not_found = {
 
 # Scenario 2: One error (File not found)
 one_file_not_found = {
-    "files": [{"id": "missing_file_id", "title": "Missing Blog Post", "slug": "missing-blog-post"}],
+    "files": [{"id": "missing_file_id", "slug": "missing-blog-post"}],
     "side_effects": [GoogleDriveFileNotFoundError("Test error: file not found", file_id="missing_file_id")],
     "expected_status": 400,
     "expected_response": {
@@ -55,10 +54,9 @@ one_file_not_found = {
 # Scenario 3: Three different errors
 three_different_errors = {
     "files": [
-        {"id": "missing_file_id", "title": "Missing Blog Post", "slug": "missing-blog-post"},
-        {"id": "permission_denied_file_id", "title": "Permission Denied Blog Post",
-         "slug": "permission-denied-blog-post"},
-        {"id": "runtime_error_file_id", "title": "Runtime Error Blog Post", "slug": "runtime-error-blog-post"},
+        {"id": "missing_file_id", "slug": "missing-blog-post"},
+        {"id": "permission_denied_file_id", "slug": "permission-denied-blog-post"},
+        {"id": "runtime_error_file_id", "slug": "runtime-error-blog-post"},
     ],
     "side_effects": [
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="missing_file_id"),

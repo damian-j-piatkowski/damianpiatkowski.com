@@ -23,7 +23,7 @@ one_success = {
         {"id": "valid_file_id", "title": "Valid Blog Post", "slug": "valid-blog-post"},
     ],
     "side_effects": [
-        "Categories: Python, Design\n<p>Valid blog post content</p>",
+        "\ufeffTitle: Valid Blog Post\nCategories: Python, Design\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nValid blog post content",
     ],
     "expected_status": 201,
     "expected_response": {
@@ -34,6 +34,9 @@ one_success = {
                 "html_content": "<p>Valid blog post content</p>",
                 "drive_file_id": "valid_file_id",
                 "categories": ['Python', 'Design'],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             },
         ],
         "errors": [],
@@ -45,13 +48,12 @@ five_successes = {
     "files": [
         {
             "id": f"valid_file_{i}_id",
-            "title": f"Valid Blog Post {i}",
             "slug": f"valid-blog-post-{i}"
         }
         for i in range(5)
     ],
     "side_effects": [
-        f"Categories: TestCategory{i}, General\n<p>Valid blog post content {i}</p>" for i in range(5)
+        f"\ufeffTitle: Valid Blog Post {i}\nCategories: TestCategory {i}, General\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nValid blog post content {i}" for i in range(5)
     ],
     "expected_status": 201,
     "expected_response": {
@@ -61,7 +63,10 @@ five_successes = {
                 "slug": f"valid-blog-post-{i}",
                 "html_content": f"<p>Valid blog post content {i}</p>",
                 "drive_file_id": f"valid_file_{i}_id",
-                "categories": [f'TestCategory{i}', 'General'],
+                "categories": [f'TestCategory {i}', 'General'],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
             for i in range(5)
         ],

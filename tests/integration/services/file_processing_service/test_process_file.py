@@ -217,7 +217,7 @@ class TestProcessFileRealDriveAPI:
         """
         process_file(**test_drive_file_metadata_map["design_principles"])
         with pytest.raises(BlogPostDuplicateError, match="title.*already exists"):
-            process_file(**test_drive_file_metadata_map["value_objects"])
+            process_file(**test_drive_file_metadata_map["markdown_to_html"])
 
     def test_file_not_found_error(self, app):
         """Tests handling of non-existent file IDs."""

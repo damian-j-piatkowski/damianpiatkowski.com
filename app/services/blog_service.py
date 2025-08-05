@@ -133,7 +133,8 @@ def get_all_blog_post_identifiers() -> list[dict]:
     like Google Drive to determine which posts are unpublished.
 
     Returns:
-        list[dict]: A list of dictionaries containing 'slug', 'title', and 'drive_file_id'.
+        list[dict]: A list of dictionaries containing 'slug', 'title',
+            'drive_file_id' and 'updated_at' keys.
 
     Raises:
         RuntimeError: If the repository fails to retrieve the data.

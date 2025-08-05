@@ -77,6 +77,9 @@ def test_get_single_post_success(session, seed_blog_posts) -> None:
     if created_at.tzinfo is None:
         created_at = created_at.replace(tzinfo=UTC)
 
+    # Pop updated_at
+    json_data.pop("updated_at", None)
+
     assert datetime.now(UTC) - created_at < timedelta(minutes=1), "created_at is not recent"
 
     # 2. Compare the remaining fields
@@ -85,6 +88,9 @@ def test_get_single_post_success(session, seed_blog_posts) -> None:
         "slug": expected_post.slug,
         "html_content": expected_post.html_content,
         "drive_file_id": expected_post.drive_file_id,
-        "categories": [],
+        "categories": expected_post.categories,
+        "keywords": expected_post.keywords,
         "hero_base": "/static/blog-images/default/hero",
+        "meta_description": expected_post.meta_description,
+        "read_time_minutes": expected_post.read_time_minutes,
     }

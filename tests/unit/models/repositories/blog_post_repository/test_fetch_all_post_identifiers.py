@@ -14,7 +14,7 @@ Fixtures:
     - seed_blog_posts: Function fixture for seeding a specified number of blog posts.
     - session: Provides a database session.
 """
-
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -56,16 +56,31 @@ def test_fetch_all_post_identifiers_matches_seeded_posts(session, seed_blog_post
     identifiers = repository.fetch_all_post_identifiers()
 
     expected = [
-        {"slug": f"post-{i}", "title": f"Post {i}", "drive_file_id": f"drive_id_{i}"}
+        {
+            "drive_file_id": f"drive_id_{i}",
+            "slug": f"post-{i}",
+            "title": f"Post {i}",
+        }
         for i in range(1, 6)
     ]
-    assert sorted(identifiers, key=lambda x: x["slug"]) == sorted(expected, key=lambda x: x["slug"])
+
+    # Compare dicts without updated_at
+    stripped_identifiers = [
+        {k: v for k, v in identifier.items() if k != "updated_at"}
+        for identifier in identifiers
+    ]
+
+    assert sorted(stripped_identifiers, key=lambda x: x["slug"]) == sorted(expected, key=lambda x: x["slug"])
+
+    # Just check that updated_at is a datetime
+    for identifier in identifiers:
+        assert isinstance(identifier["updated_at"], datetime)
 
 
 @pytest.mark.admin_published_posts
 @pytest.mark.admin_unpublished_posts
 def test_fetch_all_post_identifiers_returns_expected_structure(session, seed_blog_posts):
-    """Verifies that the returned list contains dicts with slug, title, and drive_file_id."""
+    """Verifies that the returned list contains dicts with slug, title, drive_file_id, and updated_at."""
     seed_blog_posts(3)
     session.commit()
     repository = BlogPostRepository(session)
@@ -74,9 +89,10 @@ def test_fetch_all_post_identifiers_returns_expected_structure(session, seed_blo
 
     assert isinstance(identifiers, list)
     assert all(isinstance(item, dict) for item in identifiers)
-    assert all(set(item.keys()) == {"slug", "title", "drive_file_id"} for item in identifiers)
+    assert all(set(item.keys()) == {"slug", "title", "drive_file_id", "updated_at"} for item in identifiers)
 
     for item in identifiers:
         assert isinstance(item["slug"], str)
         assert isinstance(item["title"], str)
         assert isinstance(item["drive_file_id"], str)
+        assert isinstance(item["updated_at"], datetime)

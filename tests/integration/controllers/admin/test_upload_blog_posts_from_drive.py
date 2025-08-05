@@ -111,21 +111,24 @@ class TestUploadBlogPostsMockedAPI:
 
             response_json = response.get_json()
 
-            # Validate created_at fields and remove them before comparison
+            # Validate created_at and updated_at fields and remove them before comparison
             for success_item in response_json.get("success", []):
-                created_at = success_item.pop("created_at", None)
-                assert created_at is not None, "created_at is missing from success item"
-
-                # Parse with custom format and attach UTC timezone
-                parsed = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-                assert isinstance(parsed, datetime)
-
-                # Check that it's within 1 minute of now (UTC)
                 now = datetime.now(timezone.utc)
                 delta = timedelta(minutes=1)
-                assert now - delta <= parsed <= now + delta, f"created_at too far from current time: {created_at}"
 
-            # Final comparison without created_at fields
+                # created_at
+                created_at = success_item.pop("created_at", None)
+                assert created_at is not None, "created_at is missing from success item"
+                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                assert now - delta <= parsed_created <= now + delta, f"created_at too far from current time: {created_at}"
+
+                # updated_at
+                updated_at = success_item.pop("updated_at", None)
+                assert updated_at is not None, "updated_at is missing from success item"
+                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                assert now - delta <= parsed_updated <= now + delta, f"updated_at too far from current time: {updated_at}"
+
+            # Final comparison without created_at/updated_at fields
             assert response_json == scenario["expected_response"]
 
     def test_upload_blog_posts_from_drive_no_files(self, app):
@@ -151,19 +154,26 @@ class TestUploadBlogPostsMockedAPI:
 
             response_json = response.get_json()
 
-            # Validate created_at fields and remove them before comparison
+            # Validate created_at and updated_at fields and remove them before comparison
             for success_item in response_json.get("success", []):
+                # Handle created_at
                 created_at = success_item.pop("created_at", None)
                 assert created_at is not None, "created_at is missing from success item"
 
-                # Parse with custom format and attach UTC timezone
-                parsed = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-                assert isinstance(parsed, datetime)
+                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                assert isinstance(parsed_created, datetime)
 
-                # Check that it's within 1 minute of now (UTC)
                 now = datetime.now(timezone.utc)
                 delta = timedelta(minutes=1)
-                assert now - delta <= parsed <= now + delta, f"created_at too far from current time: {created_at}"
+                assert now - delta <= parsed_created <= now + delta, f"created_at too far from current time: {created_at}"
+
+                # Handle updated_at (same logic)
+                updated_at = success_item.pop("updated_at", None)
+                assert updated_at is not None, "updated_at is missing from success item"
+
+                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                assert isinstance(parsed_updated, datetime)
+                assert now - delta <= parsed_updated <= now + delta, f"updated_at too far from current time: {updated_at}"
 
             # Final comparison without created_at fields
             assert response_json == scenario["expected_response"]
@@ -185,6 +195,10 @@ class TestUploadBlogPostsMockedAPI:
             for success_item in response_json.get("success", []):
                 created_at = success_item.pop("created_at", None)
                 assert created_at is not None, "created_at is missing from success item"
+
+                # updated_at
+                updated_at = success_item.pop("updated_at", None)
+                assert updated_at is not None, "updated_at is missing from success item"
 
             # Final response comparison (created_at is now removed)
             assert response_json == scenario["expected_response"]
@@ -209,10 +223,9 @@ class TestUploadBlogPostsRealDriveAPI:
 
         with app.app_context():
             file_id = metadata["file_id"]
-            title = metadata["title"]
             slug = metadata["slug"]
 
-            files = [{"id": file_id, "title": title, "slug": slug}]
+            files = [{"id": file_id, "slug": slug}]
             response, status_code = upload_blog_posts_from_drive(files)
             response_data = json.loads(response.get_data(as_text=True))
 
@@ -220,15 +233,15 @@ class TestUploadBlogPostsRealDriveAPI:
             assert len(response_data["success"]) == len(files)
 
             uploaded_post = response_data["success"][0]
+            assert uploaded_post["title"] == 'Six Essential Object-Oriented Design Principles from Matthias Noback\'s "Object Design Style Guide"'
+            assert uploaded_post["read_time_minutes"] >= 10
             assert uploaded_post["drive_file_id"] == file_id
-            assert uploaded_post["title"] == title
             assert uploaded_post["slug"] == slug
             assert "html_content" in uploaded_post and uploaded_post["html_content"]
 
             from app.models.tables.blog_post import blog_posts
             saved_post = session.query(blog_posts).filter_by(drive_file_id=file_id).one_or_none()
             assert saved_post is not None
-            assert saved_post.title == title
             assert saved_post.slug == slug
             assert saved_post.html_content
 
@@ -241,8 +254,8 @@ class TestUploadBlogPostsRealDriveAPI:
 
         with app.app_context():
             files = [
-                {"id": metadata_1["file_id"], "title": metadata_1["title"], "slug": metadata_1["slug"]},
-                {"id": metadata_2["file_id"], "title": metadata_2["title"], "slug": metadata_2["slug"]},
+                {"id": metadata_1["file_id"], "slug": metadata_1["slug"]},
+                {"id": metadata_2["file_id"], "slug": metadata_2["slug"]},
             ]
 
             response, status_code = upload_blog_posts_from_drive(files)
@@ -277,6 +290,5 @@ class TestUploadBlogPostsRealDriveAPI:
             for metadata in [metadata_1, metadata_2]:
                 saved_post = session.query(blog_posts).filter_by(drive_file_id=metadata["file_id"]).one_or_none()
                 assert saved_post is not None
-                assert saved_post.title == metadata["title"]
                 assert saved_post.slug == metadata["slug"]
                 assert saved_post.html_content

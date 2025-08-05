@@ -23,8 +23,8 @@ from app.exceptions import GoogleDriveFileNotFoundError
 
 expected_error_then_unexpected_error = {
     "files": [
-        {"id": "expected_error_file_id", "title": "Expected Error Blog Post", "slug": "expected-error-blog-post"},
-        {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post", "slug": "unexpected-error-blog-post"},
+        {"id": "expected_error_file_id", "slug": "expected-error-blog-post"},
+        {"id": "unexpected_error_file_id", "slug": "unexpected-error-blog-post"},
     ],
     "side_effects": [
         GoogleDriveFileNotFoundError("Test error: file not found", file_id="expected_error_file_id"),
@@ -44,10 +44,10 @@ expected_error_then_unexpected_error = {
 one_success_then_unexpected_error = {
     "files": [
         {"id": "success_file_id", "title": "Successful Blog Post", "slug": "successful-blog-post"},
-        {"id": "unexpected_error_file_id", "title": "Unexpected Error Blog Post", "slug": "unexpected-error-blog-post"},
+        {"id": "unexpected_error_file_id", "slug": "unexpected-error-blog-post"},
     ],
     "side_effects": [
-        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
+        "\ufeffTitle: Successful Blog Post\nCategories: Python, Design\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nExpected file content to be a string.",
         Exception("Unexpected error occurred"),
     ],
     "expected_status": 207,
@@ -59,6 +59,9 @@ one_success_then_unexpected_error = {
                 "drive_file_id": "success_file_id",
                 "slug": "successful-blog-post",
                 "categories": ["Python", "Design"],
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                'read_time_minutes': 1,
             }
         ],
         "errors": [
@@ -84,48 +87,48 @@ single_file_unexpected_error = {
     },
 }
 
+success_titles = [
+    ("success_file_id_1", "Successful Blog Post 1", "successful-blog-post-1"),
+    ("success_file_id_2", "Successful Blog Post 2", "successful-blog-post-2"),
+    ("success_file_id_3", "Successful Blog Post 3", "successful-blog-post-3"),
+]
+
 three_successes_then_critical_error = {
     "files": [
-        {"id": "success_file_id_1", "title": "Successful Blog Post 1", "slug": "successful-blog-post-1"},
-        {"id": "success_file_id_2", "title": "Successful Blog Post 2", "slug": "successful-blog-post-2"},
-        {"id": "success_file_id_3", "title": "Successful Blog Post 3", "slug": "successful-blog-post-3"},
+        *[
+            {"id": file_id, "slug": slug}
+            for file_id, title, slug in success_titles
+        ],
         {"id": "critical_error_file_id", "title": "Critical Error Blog Post", "slug": "critical-error-blog-post"},
         {"id": "unprocessed_file_id", "title": "Unprocessed Blog Post", "slug": "unprocessed-blog-post"},
     ],
     "side_effects": [
-        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
-        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
-        "Categories: Python, Design\n<p>Expected file content to be a string.</p>",
+        *[
+            f"\ufeffTitle: {title}\nCategories: Python, Design\nMeta Description: metadata.\nKeywords: testing\n\n+++\n\nExpected file content to be a string."
+            for _, title, _ in success_titles
+        ],
         Exception("Critical error occurred"),
     ],
     "expected_status": 207,
     "expected_response": {
         "success": [
             {
-                "title": "Successful Blog Post 1",
+                "title": title,
                 "html_content": "<p>Expected file content to be a string.</p>",
-                "drive_file_id": "success_file_id_1",
-                "slug": "successful-blog-post-1",
+                "drive_file_id": file_id,
+                "slug": slug,
                 "categories": ["Python", "Design"],
-            },
-            {
-                "title": "Successful Blog Post 2",
-                "html_content": "<p>Expected file content to be a string.</p>",
-                "drive_file_id": "success_file_id_2",
-                "slug": "successful-blog-post-2",
-                "categories": ["Python", "Design"],
-            },
-            {
-                "title": "Successful Blog Post 3",
-                "html_content": "<p>Expected file content to be a string.</p>",
-                "drive_file_id": "success_file_id_3",
-                "slug": "successful-blog-post-3",
-                "categories": ["Python", "Design"],
-            },
+                "keywords": ['testing'],
+                "meta_description": 'metadata.',
+                "read_time_minutes": 1,
+            }
+            for file_id, title, slug in success_titles
         ],
         "errors": [
-            {"file_id": "critical_error_file_id",
-             "error": "Unexpected error occurred: RuntimeError: Unexpected error occurred."},
+            {
+                "file_id": "critical_error_file_id",
+                "error": "Unexpected error occurred: RuntimeError: Unexpected error occurred.",
+            },
         ],
     },
 }

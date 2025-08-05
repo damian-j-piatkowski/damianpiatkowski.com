@@ -47,7 +47,7 @@ def test_find_unpublished_drive_articles_all_articles_published(
     with app.app_context():
         for metadata in test_drive_file_metadata_map.values():
             create_blog_post(
-                title=metadata["title"],
+                title=f'Title for {metadata["slug"]}',
                 slug=metadata["slug"],
                 html_content=f"Content for {metadata['slug']}",
                 drive_file_id=metadata["file_id"],
@@ -141,7 +141,7 @@ def test_find_unpublished_drive_articles_success(app, session, create_blog_post,
     with app.app_context():
         # Stage 1: Insert only the first article into the DB
         create_blog_post(
-            title=real_metadata["title"],
+            title='Title 1`',
             slug=real_metadata["slug"],
             html_content="<p>Sample content for design principles article.</p>",
             drive_file_id=real_metadata["file_id"],
@@ -158,7 +158,7 @@ def test_find_unpublished_drive_articles_success(app, session, create_blog_post,
 
         # Stage 2: Insert the second article too
         create_blog_post(
-            title=another_metadata["title"],
+            title='Another Title',
             slug=another_metadata["slug"],
             html_content="<p>Sample content for value objects article.</p>",
             drive_file_id=another_metadata["file_id"],

@@ -261,7 +261,7 @@ def test_post_date_formatting(client, session, create_blog_post):
     # Find element with all three classes
     date_element = soup.find('p', class_=lambda x: x and all(c in x for c in ['card-text', 'text-muted', 'small']))
     date_text = date_element.text.strip()
-    assert date_text == "2024-07-16 14:30:00"
+    assert date_text == "July 16, 2024"
 
 
 @pytest.mark.render_blog_posts

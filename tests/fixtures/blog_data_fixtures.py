@@ -24,45 +24,64 @@ from app.models.tables.blog_post import blog_posts
 def create_blog_post(session: Session) -> Callable[..., BlogPost]:
     """Creates and persists a BlogPost instance with customizable attributes.
 
-    This fixture creates a BlogPost entry in the database and commits it.
-    It returns a domain-level `BlogPost` object without an ID.
+    This fixture inserts a BlogPost record into the database with required fields,
+    satisfying all NOT NULL and UNIQUE constraints. Returns a domain-level BlogPost
+    object representing the inserted post (without the database ID).
 
     Args:
         session (Session): The SQLAlchemy session for database interactions.
 
     Returns:
-        Callable[..., BlogPost]: A function to create and return a BlogPost object.
+        Callable[..., BlogPost]: A function that inserts and returns a BlogPost object.
     """
 
     def _create_blog_post(
-            title: Optional[str] = 'Test Blog Post',
-            slug: Optional[str] = 'test-blog-post',
-            html_content: Optional[str] = '<p>This is the content of the blog post.</p>',
-            drive_file_id: Optional[str] = 'unique_drive_file_id_1',
-            created_at: Optional[datetime] = None,
-            categories: Optional[List[str]] = None,
+        title: str = 'Test Blog Post',
+        slug: str = 'test-blog-post',
+        html_content: str = '<p>This is the content of the blog post.</p>',
+        drive_file_id: str = 'unique_drive_file_id_1',
+        meta_description: str = 'This is a test meta description.',
+        keywords: Optional[List[str]] = None,
+        categories: Optional[List[str]] = None,
+        read_time_minutes: int = 3,
+        created_at: Optional[datetime] = None,
     ) -> BlogPost:
         if created_at is None:
-            created_at = datetime.now(UTC)  # Use timezone-aware UTC datetime
+            created_at = datetime.now(UTC)
+        if keywords is None:
+            keywords = ['test', 'blog']
+        if categories is None:
+            categories = ['testing', 'demo']
 
         query = blog_posts.insert().values(
             title=title,
             slug=slug,
             html_content=html_content,
             drive_file_id=drive_file_id,
-            created_at=created_at,
+            meta_description=meta_description,
+            keywords=keywords,
+            read_time_minutes=read_time_minutes,
             categories=categories,
+            created_at=created_at
         ).returning(blog_posts.c.id)
         session.execute(query)
         session.commit()
+
+        row = session.execute(
+            blog_posts.select().where(blog_posts.c.title == title)
+        ).fetchone()
 
         return BlogPost(
             title=title,
             slug=slug,
             html_content=html_content,
             drive_file_id=drive_file_id,
+            meta_description=meta_description,
+            keywords=keywords,
+            read_time_minutes=read_time_minutes,
+            categories=categories,
             created_at=created_at,
-            categories=categories
+            updated_at=row.updated_at,
         )
 
     return _create_blog_post

@@ -34,7 +34,7 @@ def test_unpublished_posts_all_articles_published(client, session, create_blog_p
     """Verifies that the route returns an empty list when all Drive files are already published in the database."""
     for metadata in test_drive_file_metadata_map.values():
         create_blog_post(
-            title=metadata["title"],
+            title=f'Title for {metadata["slug"]}',
             slug=metadata["slug"],
             html_content="<p>Some content</p>",
             drive_file_id=metadata["file_id"],
@@ -117,7 +117,6 @@ def test_unpublished_posts_some_articles_unpublished(client, session, create_blo
     value_metadata = test_drive_file_metadata_map["value_objects"]
 
     create_blog_post(
-        title=design_metadata["title"],
         slug=design_metadata["slug"],
         html_content="<p>Already published content.</p>",
         drive_file_id=design_metadata["file_id"]
