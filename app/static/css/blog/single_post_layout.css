@@ -102,6 +102,14 @@
     }
 }
 
+@media (max-width: 480px) {
+    .single-blog-post {
+        padding: 1rem;
+        margin: 1.5rem 0.5rem;
+        border-radius: 6px;
+    }
+}
+
 @media screen and (min-width: 768px) and (max-width: 1024px),
        screen and (min-width: 800px) and (max-width: 900px) {
     .hero-image-container {
