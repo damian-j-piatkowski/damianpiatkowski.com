@@ -9,7 +9,7 @@
     box-shadow: 0 4px 8px var(--blog-shadow);
     padding: 2rem;
     margin-bottom: 3rem;
-    width: 100%;
+    width: auto;
     box-sizing: border-box;
     overflow: hidden;
 }
