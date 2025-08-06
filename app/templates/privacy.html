@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title %}Privacy Notice{% endblock %}
 
 {% block links %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/privacy.css') }}">
+    {{ css_link_bundle("privacy", ENV=ENV) }}
 {% endblock %}
 
 {% block content %}

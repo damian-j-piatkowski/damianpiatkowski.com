@@ -69,4 +69,12 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
             f"Logs: {flask_app.config['LOG_FILE']})"
         )
 
+    # Make FLASK_ENV and VERSION available in all templates
+    @flask_app.context_processor
+    def inject_globals():
+        return {
+            "ENV": flask_app.config["FLASK_ENV"],
+            "VERSION": __version__,
+        }
+
     return flask_app

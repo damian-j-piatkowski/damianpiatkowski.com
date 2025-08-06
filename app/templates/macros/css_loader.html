@@ -1,0 +1,32 @@
+{% macro css_link_bundle(bundle_name, ENV) %}
+    {% set bundle_map = {
+        "global": ["css/variables.css", "css/base.css"],
+        "index": ["css/index.css"],
+        "about-me": ["css/about-me.css"],
+        "resume": ["css/resume.css"],
+        "privacy": ["css/privacy.css"],
+        "blog": [
+            "css/blog/categories.css",
+            "css/blog/post_list_layout.css",
+            "css/blog/post_metadata.css"
+        ],
+        "single_blog_post": [
+            "css/blog/single_post_layout.css",
+            "css/blog/post_metadata.css",
+            "css/blog/post_body.css",
+            "css/blog/categories.css"
+        ]
+    } %}
+
+    {% if ENV == 'development' %}
+        {# Only include page-specific CSS. Assume global is included separately. #}
+        {% if bundle_name in bundle_map %}
+            {% for path in bundle_map[bundle_name] %}
+                <link rel="stylesheet" href="{{ url_for('static', filename=path) }}">
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        {# Just include the relevant minified bundle in production #}
+        <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/' ~ bundle_name ~ '.min.css') }}?v={{ VERSION }}">
+    {% endif %}
+{% endmacro %}

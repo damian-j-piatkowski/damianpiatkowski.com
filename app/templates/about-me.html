@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title %}About Me{% endblock %}
 
 {% block links %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/about-me.css') }}">
+    {{ css_link_bundle("about-me", ENV=ENV) }}
 {% endblock %}
 
 {% block content %}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title %}
     {% if current_category %}
@@ -41,9 +42,7 @@
 {% endblock %}
 
 {% block links %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog/categories.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog/post_list_layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/blog/post_metadata.css') }}">
+    {{ css_link_bundle("blog", ENV=ENV) }}
 
     <!-- Category-specific canonical URL -->
     {% if current_category and category_slug %}
