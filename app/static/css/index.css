@@ -63,6 +63,7 @@
 
 /* Blog section */
 .blog-section {
+    background-image: url("../images/home_blog.jpg");
     position: relative;
     background-size: cover;
     background-position: center center;
