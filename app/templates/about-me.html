@@ -3,6 +3,14 @@
 
 {% block title %}About Me{% endblock %}
 
+{% block og_title %}About Damian Piatkowski{% endblock %}
+{% block og_description %}A more personal side of Damian – from life in Poland and Vietnam to favorite books, games, and minimalist living.{% endblock %}
+{% block og_url %}{{ url_for('about_me_bp.about_me', _external=True) }}{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ url_for('about_me_bp.about_me', _external=True) }}">
+{% endblock %}
+
 {% block links %}
     {{ css_link_bundle("about-me", ENV=ENV) }}
 {% endblock %}

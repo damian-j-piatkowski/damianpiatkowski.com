@@ -43,7 +43,7 @@ def privacy():
     Returns:
         str: Rendered HTML template for the privacy policy page.
     """
-    return render_template('privacy.html')
+    return render_template('privacy.html', include_social_meta=False)
 
 
 @home_bp.route('/robots.txt')

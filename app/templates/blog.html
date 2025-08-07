@@ -1,55 +1,64 @@
 {% extends "base.html" %}
 {% from "macros/css_loader.html" import css_link_bundle %}
 
-{% block title %}
-    {% if current_category %}
+{% block title -%}
+    {% if current_category -%}
         {{ current_category }} Articles - Blog
-    {% else %}
+    {%- else -%}
         Blog
-    {% endif %}
-{% endblock %}
+    {%- endif %}
+{%- endblock %}
 
-{% block meta_description %}
-    {% if current_category %}
-        Explore {{ current_category }} articles and tutorials by Damian Piatkowski. In-depth guides, best practices, and insights on {{ current_category.lower() }} development.
-    {% else %}
-        Explore programming articles, tutorials, and insights by Damian Piatkowski. Topics include Python, Flask, web development, and software engineering best practices.
-    {% endif %}
-{% endblock %}
+{% block og_title -%}
+    {% if current_category -%}
+        {{ current_category }} Articles – Damian Piatkowski’s Blog
+    {%- else -%}
+        Damian Piatkowski’s Blog
+    {%- endif -%}
+{%- endblock %}
 
-{% block meta_keywords %}
-    {% if current_category %}
-        {{ current_category.lower() }}, {{ current_category.lower() }} tutorials, {{ current_category.lower() }} articles, programming, software development, Damian Piatkowski
-    {% else %}
-        programming blog, Python tutorials, Flask development, web development, software engineering, back-end development, Damian Piatkowski
-    {% endif %}
-{% endblock %}
+{% block og_description -%}
+    {% if current_category -%}
+        Read articles and tutorials about {{ current_category.lower() }} by Damian Piatkowski – packed with practical advice and insights.
+    {%- else -%}
+        Damian shares programming articles, tutorials, and best practices on Python, Flask, web development, and software engineering.
+    {%- endif %}
+{%- endblock %}
 
-{% block og_title %}
-    {% if current_category %}
-        {{ current_category }} Articles - Damian Piatkowski
-    {% else %}
-        Programming Blog - Damian Piatkowski
-    {% endif %}
-{% endblock %}
+{% block og_url -%}
+    {% if current_category and category_slug -%}
+        {{ url_for('blog.render_category_posts', category_slug=category_slug, _external=True) }}
+    {%- else -%}
+        {{ url_for('blog.render_blog_posts', _external=True) }}
+    {%- endif %}
+{%- endblock %}
 
-{% block og_description %}
-    {% if current_category %}
-        Discover {{ current_category }} articles and tutorials with practical examples and best practices.
-    {% else %}
-        Professional insights on Python, Flask, web development, and software engineering best practices.
-    {% endif %}
-{% endblock %}
-
-{% block links %}
-    {{ css_link_bundle("blog", ENV=ENV) }}
-
-    <!-- Category-specific canonical URL -->
+{% block canonical %}
     {% if current_category and category_slug %}
         <link rel="canonical" href="{{ url_for('blog.render_category_posts', category_slug=category_slug, _external=True) }}">
     {% else %}
         <link rel="canonical" href="{{ url_for('blog.render_blog_posts', _external=True) }}">
     {% endif %}
+{% endblock %}
+
+{% block meta_description -%}
+    {% if current_category -%}
+        Explore {{ current_category }} articles and tutorials by Damian Piatkowski. In-depth guides, best practices, and insights on {{ current_category.lower() }} development.
+    {%- else -%}
+        Explore programming articles, tutorials, and insights by Damian Piatkowski. Topics include Python, Flask, web development, and software engineering best practices.
+    {%- endif %}
+{%- endblock %}
+
+{% block meta_keywords -%}
+    {% if current_category -%}
+        {{ current_category.lower() }}, {{ current_category.lower() }} tutorials, {{ current_category.lower() }} articles, programming, software development, Damian Piatkowski
+    {%- else -%}
+        programming blog, Python tutorials, Flask development, web development, software engineering, back-end development, Damian Piatkowski
+    {%- endif %}
+{%- endblock %}
+
+{% block links %}
+    {{ css_link_bundle("blog", ENV=ENV) }}
 {% endblock %}
 
 {% block content %}

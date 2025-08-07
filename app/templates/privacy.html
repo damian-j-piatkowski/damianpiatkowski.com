@@ -7,6 +7,10 @@
     {{ css_link_bundle("privacy", ENV=ENV) }}
 {% endblock %}
 
+{% block canonical %}
+    <link rel="canonical" href="{{ url_for('home_bp.privacy', _external=True) }}">
+{% endblock %}
+
 {% block content %}
 <section class="privacy-section open-sans flex-grow-1">
     <div class="container">

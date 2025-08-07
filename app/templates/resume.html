@@ -3,6 +3,14 @@
 
 {% block title %}Resume{% endblock %}
 
+{% block og_title %}Damian Piatkowski | Resume{% endblock %}
+{% block og_description %}A snapshot of my diverse career journey - from teaching and finance to software development.{% endblock %}
+{% block og_url %}{{ url_for('resume_bp.resume', _external=True) }}{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ url_for('resume_bp.resume', _external=True) }}">
+{% endblock %}
+
 {% block links %}
     {{ css_link_bundle("resume", ENV=ENV) }}
 {% endblock %}

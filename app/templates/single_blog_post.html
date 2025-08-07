@@ -9,6 +9,19 @@
     {% endif %}
 {% endblock %}
 
+{% block og_title %}{{ post.title }} - Damian Piatkowski{% endblock %}
+{% block og_description %}{{ post.meta_description }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_url %}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{% endblock %}
+
+
+{% block canonical %}
+    {% if post %}
+        <link rel="canonical" href="{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}">
+    {% endif %}
+{% endblock %}
+
 {% block meta_description %}
     {{ post.meta_description }}
 {% endblock %}
@@ -17,12 +30,38 @@
     {{ post.keywords | join(', ') }}
 {% endblock %}
 
-{% block og_title %}
+
+{% block twitter_title %}
     {{ post.title }} - Damian Piatkowski
 {% endblock %}
 
-{% block og_description %}
+{% block twitter_description %}
     {{ post.meta_description }}
+{% endblock %}
+
+{% block twitter_image %}
+    {{ post.hero_base }}/large.jpg
+{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.title,
+  "description": post.meta_description,
+  "author": {
+    "@type": "Person",
+    "name": "Damian Piatkowski"
+  },
+  "datePublished": post.created_at,
+  "keywords": post.keywords,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": url_for('blog.render_single_blog_post', slug=post.slug, _external=True)
+  }
+} | tojson | safe }}
+</script>
 {% endblock %}
 
 {% block links %}
@@ -30,134 +69,131 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        {% if post %}
-            <article class="single-blog-post">
-                <header class="mb-4">
-                    <h1>{{ post.title }}</h1>
-                    <div class="text-muted mb-3">
-                        <span>by Damian Piatkowski</span> •
-                        <time datetime="{{ post.created_at }}">
-                            {{ post.formatted_date }}
-                        </time>
-                        <span class="read-time gradient-pill">
-                            <i class="bi bi-clock" aria-hidden="true"></i>
-                            {{ post.read_time_minutes }} min read
-                        </span>
-                    </div>
-
-                    <!-- Category Tags in Header -->
-                    {% if post.categories %}
-                        <div class="category-tags-header">
-                            {% for category in post.categories %}
-                                <span class="category-tag category-tag-large">{{ category }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </header>
-
-                {% if post.hero_base %}
-                    <div class="hero-image-container mb-4">
-                        <img src="{{ post.hero_base }}/medium.jpg"
-                             srcset="{{ post.hero_base }}/xs.jpg 480w,
-                                     {{ post.hero_base }}/small.jpg 600w,
-                                     {{ post.hero_base }}/medium.jpg 800w,
-                                     {{ post.hero_base }}/large.jpg 1200w,
-                                     {{ post.hero_base }}/xl.jpg 1600w,
-                                     {{ post.hero_base }}/retina.jpg 1920w"
-                              sizes="(max-width: 575.98px) 100vw,
-                                   (max-width: 767.98px) 100vw,
-                                   (max-width: 991.98px) 696px,
-                                   (max-width: 1199.98px) 960px,
-                                   1140px"
-                             alt="Hero image for {{ post.title }}"
-                             loading="lazy"
-                             class="hero-image">
-                    </div>
-                {% endif %}
-
-                <div class="blog-content">
-                    {{ post.html_content | safe }}
+<div class="container mt-4">
+    {% if post %}
+        <article class="single-blog-post">
+            <header class="mb-4">
+                <h1>{{ post.title }}</h1>
+                <div class="text-muted mb-3">
+                    <span>by Damian Piatkowski</span> •
+                    <time datetime="{{ post.created_at }}">
+                        {{ post.formatted_date }}
+                    </time>
+                    <span class="read-time gradient-pill">
+                        <i class="bi bi-clock" aria-hidden="true"></i>
+                        {{ post.read_time_minutes }} min read
+                    </span>
                 </div>
-            </article>
 
-            <!-- Related Posts Section -->
-            {% if related_posts and related_posts|length > 0 %}
-                <section class="related-posts-section">
-                    <div class="related-posts-header">
-                        <h3>Related Articles</h3>
-                        <p class="related-posts-subtitle">Continue exploring these topics</p>
-                    </div>
-
-                    <div class="related-posts-grid">
-                        {% for related_post in related_posts %}
-                            <article class="related-post-card">
-                                <div class="related-post-thumbnail">
-                                    <img
-                                        src="{{ related_post.thumb_base }}/desktop.jpg"
-                                        srcset="{{ related_post.thumb_base }}/mobile.jpg 283w,
-                                                {{ related_post.thumb_base }}/tablet.jpg 425w,
-                                                {{ related_post.thumb_base }}/desktop.jpg 566w,
-                                                {{ related_post.thumb_base }}/retina.jpg 1132w"
-                                        sizes="(max-width: 575.98px) 100vw,
-                                               (max-width: 991.98px) 50vw,
-                                               33vw"
-                                        alt="Thumbnail for {{ related_post.title }}"
-                                        loading="lazy">
-                                </div>
-
-                                <div class="related-post-content">
-                                    <h4 class="related-post-title">
-                                        <a href="{{ url_for('blog.render_single_blog_post', slug=related_post.slug) }}">
-                                            {{ related_post.title }}
-                                        </a>
-                                    </h4>
-
-                                    <p class="related-post-excerpt">
-                                        {{ related_post.html_content | striptags | truncate(100, True, '...') }}
-                                    </p>
-
-                                    <!-- Category Tags for Related Posts -->
-                                    {% if related_post.categories %}
-                                        <div class="related-post-categories">
-                                            {% for category in related_post.categories[:2] %}
-                                                <span class="category-tag category-tag-small">{{ category }}</span>
-                                            {% endfor %}
-                                            {% if related_post.categories|length > 2 %}
-                                                <span class="category-tag category-tag-small category-tag-more">+{{ related_post.categories|length - 2 }}</span>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-
-                                    <div class="related-post-meta">
-                                        <time datetime="{{ related_post.created_at }}" class="related-post-date text-muted small">
-                                            {{ related_post.formatted_date }}
-                                        </time>
-                                        {% if related_post.read_time_minutes %}
-                                            <span class="read-time-card">
-                                                <i class="bi bi-clock" aria-hidden="true"></i>
-                                                {{ related_post.read_time_minutes }} min read
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </article>
+                {% if post.categories %}
+                    <div class="category-tags-header">
+                        {% for category in post.categories %}
+                            <span class="category-tag category-tag-large">{{ category }}</span>
                         {% endfor %}
                     </div>
-                </section>
+                {% endif %}
+            </header>
+
+            {% if post.hero_base %}
+                <div class="hero-image-container mb-4">
+                    <img src="{{ post.hero_base }}/medium.jpg"
+                         srcset="{{ post.hero_base }}/xs.jpg 480w,
+                                 {{ post.hero_base }}/small.jpg 600w,
+                                 {{ post.hero_base }}/medium.jpg 800w,
+                                 {{ post.hero_base }}/large.jpg 1200w,
+                                 {{ post.hero_base }}/xl.jpg 1600w,
+                                 {{ post.hero_base }}/retina.jpg 1920w"
+                         sizes="(max-width: 575.98px) 100vw,
+                                (max-width: 767.98px) 100vw,
+                                (max-width: 991.98px) 696px,
+                                (max-width: 1199.98px) 960px,
+                                1140px"
+                         alt="Hero image for {{ post.title }}"
+                         loading="lazy"
+                         class="hero-image">
+                </div>
             {% endif %}
 
-        {% else %}
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Post Not Found</h4>
-                <p>The blog post you're looking for could not be found. It might have been moved or deleted.</p>
-                <hr>
-                <p class="mb-0">
-                    <a href="{{ url_for('blog.render_blog_posts') }}" class="alert-link">
-                        Return to Blog Posts
-                    </a>
-                </p>
+            <div class="blog-content">
+                {{ post.html_content | safe }}
             </div>
+        </article>
+
+        {% if related_posts and related_posts|length > 0 %}
+            <section class="related-posts-section">
+                <div class="related-posts-header">
+                    <h3>Related Articles</h3>
+                    <p class="related-posts-subtitle">Continue exploring these topics</p>
+                </div>
+
+                <div class="related-posts-grid">
+                    {% for related_post in related_posts %}
+                        <article class="related-post-card">
+                            <div class="related-post-thumbnail">
+                                <img
+                                    src="{{ related_post.thumb_base }}/desktop.jpg"
+                                    srcset="{{ related_post.thumb_base }}/mobile.jpg 283w,
+                                            {{ related_post.thumb_base }}/tablet.jpg 425w,
+                                            {{ related_post.thumb_base }}/desktop.jpg 566w,
+                                            {{ related_post.thumb_base }}/retina.jpg 1132w"
+                                    sizes="(max-width: 575.98px) 100vw,
+                                           (max-width: 991.98px) 50vw,
+                                           33vw"
+                                    alt="Thumbnail for {{ related_post.title }}"
+                                    loading="lazy">
+                            </div>
+
+                            <div class="related-post-content">
+                                <h4 class="related-post-title">
+                                    <a href="{{ url_for('blog.render_single_blog_post', slug=related_post.slug) }}">
+                                        {{ related_post.title }}
+                                    </a>
+                                </h4>
+
+                                <p class="related-post-excerpt">
+                                    {{ related_post.html_content | striptags | truncate(100, True, '...') }}
+                                </p>
+
+                                {% if related_post.categories %}
+                                    <div class="related-post-categories">
+                                        {% for category in related_post.categories[:2] %}
+                                            <span class="category-tag category-tag-small">{{ category }}</span>
+                                        {% endfor %}
+                                        {% if related_post.categories|length > 2 %}
+                                            <span class="category-tag category-tag-small category-tag-more">+{{ related_post.categories|length - 2 }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="related-post-meta">
+                                    <time datetime="{{ related_post.created_at }}" class="related-post-date text-muted small">
+                                        {{ related_post.formatted_date }}
+                                    </time>
+                                    {% if related_post.read_time_minutes %}
+                                        <span class="read-time-card">
+                                            <i class="bi bi-clock" aria-hidden="true"></i>
+                                            {{ related_post.read_time_minutes }} min read
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
         {% endif %}
-    </div>
+
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Post Not Found</h4>
+            <p>The blog post you're looking for could not be found. It might have been moved or deleted.</p>
+            <hr>
+            <p class="mb-0">
+                <a href="{{ url_for('blog.render_blog_posts') }}" class="alert-link">
+                    Return to Blog Posts
+                </a>
+            </p>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
