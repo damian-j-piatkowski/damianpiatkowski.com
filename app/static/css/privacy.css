@@ -20,13 +20,13 @@
     line-height: 1.5;
 }
 
-.privacy-heading,
-.privacy-description {
-    font-size: 1.5rem;
-    color: var(--color-dark-text);
-    font-weight: bold;
-    margin-bottom: 20px;
-}
+/*.privacy-heading,*/
+/*.privacy-description {*/
+/*    font-size: 1.5rem;*/
+/*    color: var(--color-dark-text);*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 20px;*/
+/*}*/
 
 .privacy-description {
     font-size: 1.25rem;

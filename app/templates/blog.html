@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title -%}
     {% if current_category -%}
@@ -9,20 +8,20 @@
     {%- endif %}
 {%- endblock %}
 
+{% block meta_description -%}
+    {% if current_category -%}
+        Read articles and tutorials about {{ current_category.lower() }} by Damian Piatkowski – packed with practical advice and insights.
+    {%- else -%}
+        Damian shares programming articles, tutorials, and best practices on Python, Flask, web development, and software engineering.
+    {%- endif %}
+{%- endblock %}
+
 {% block og_title -%}
     {% if current_category -%}
         {{ current_category }} Articles – Damian Piatkowski’s Blog
     {%- else -%}
         Damian Piatkowski’s Blog
     {%- endif -%}
-{%- endblock %}
-
-{% block og_description -%}
-    {% if current_category -%}
-        Read articles and tutorials about {{ current_category.lower() }} by Damian Piatkowski – packed with practical advice and insights.
-    {%- else -%}
-        Damian shares programming articles, tutorials, and best practices on Python, Flask, web development, and software engineering.
-    {%- endif %}
 {%- endblock %}
 
 {% block og_url -%}
@@ -40,14 +39,6 @@
         <link rel="canonical" href="{{ url_for('blog.render_blog_posts', _external=True) }}">
     {% endif %}
 {% endblock %}
-
-{% block meta_description -%}
-    {% if current_category -%}
-        Explore {{ current_category }} articles and tutorials by Damian Piatkowski. In-depth guides, best practices, and insights on {{ current_category.lower() }} development.
-    {%- else -%}
-        Explore programming articles, tutorials, and insights by Damian Piatkowski. Topics include Python, Flask, web development, and software engineering best practices.
-    {%- endif %}
-{%- endblock %}
 
 {% block meta_keywords -%}
     {% if current_category -%}

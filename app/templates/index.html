@@ -1,14 +1,28 @@
 {% extends "base.html" %}
-{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title %}Home Page{% endblock %}
 
-{% block og_title %}Damian Piatkowski | Full-Stack Web Developer{% endblock %}
-{% block og_description %}Experienced back-end developer with a focus on Python and Flask, applying clean architecture principles and building robust test suites to ensure code quality. Comfortable delivering full-stack solutions.{% endblock %}
+{% block meta_description %}Experienced back-end developer with a focus on Python and Flask, applying clean architecture principles and building robust test suites to ensure code quality. Comfortable delivering full-stack solutions.{% endblock %}
+
+{% block og_title %}Full-Stack Web Developer{% endblock %}
 {% block og_url %}{{ url_for('home_bp.index', _external=True) }}{% endblock %}
 
 {% block canonical %}
     <link rel="canonical" href="{{ url_for('home_bp.index', _external=True) }}">
+{% endblock %}
+
+{% block structured_data %}
+  {{ sd.json_ld({
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Damian Piatkowski",
+    "url": "https://damianpiatkowski.com",
+    "jobTitle": "Back-End Developer",
+    "sameAs": [
+      "https://github.com/damian-j-piatkowski",
+      "https://www.linkedin.com/in/damian-piatkowski/"
+    ]
+  }) }}
 {% endblock %}
 
 {% block links %}

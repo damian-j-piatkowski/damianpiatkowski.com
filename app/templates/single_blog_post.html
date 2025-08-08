@@ -9,8 +9,9 @@
     {% endif %}
 {% endblock %}
 
+{% block meta_description %}{{ post.meta_description }}{% endblock %}
+
 {% block og_title %}{{ post.title }} - Damian Piatkowski{% endblock %}
-{% block og_description %}{{ post.meta_description }}{% endblock %}
 {% block og_type %}article{% endblock %}
 {% block og_url %}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{% endblock %}
 {% block og_image %}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{% endblock %}
@@ -20,10 +21,6 @@
     {% if post %}
         <link rel="canonical" href="{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}">
     {% endif %}
-{% endblock %}
-
-{% block meta_description %}
-    {{ post.meta_description }}
 {% endblock %}
 
 {% block meta_keywords %}
@@ -43,7 +40,7 @@
     {{ post.hero_base }}/large.jpg
 {% endblock %}
 
-{% block head_extra %}
+{% block structured_data %}
 <script type="application/ld+json">
 {{ {
   "@context": "https://schema.org",

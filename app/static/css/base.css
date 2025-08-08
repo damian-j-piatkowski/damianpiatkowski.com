@@ -15,8 +15,8 @@ body {
 }
 
 /* === Typography === */
-.open-sans {
-    font-family: "Open Sans", sans-serif;
+.lato {
+    font-family: "Lato", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;

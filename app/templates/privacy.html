@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% from "macros/css_loader.html" import css_link_bundle %}
 
 {% block title %}Privacy Notice{% endblock %}
+
+{% block meta_description %}This privacy notice explains what data is collected on damianpiatkowski.com, how it's used, and your rights regarding that information.{% endblock %}
 
 {% block links %}
     {{ css_link_bundle("privacy", ENV=ENV) }}
@@ -12,11 +13,11 @@
 {% endblock %}
 
 {% block content %}
-<section class="privacy-section open-sans flex-grow-1">
+<section class="privacy-section lato flex-grow-1">
     <div class="container">
         <div class="privacy-content">
-            <h3 class="section-title privacy-heading">Privacy Notice</h3>
-            <p class="section-subtitle privacy-description">
+            <h3>Privacy Notice</h3>
+            <p class="section-subtitle">
                 We value your privacy and are committed to protecting your personal data.
                 This privacy notice will inform you about how we handle your personal data
                 when you visit our website.
