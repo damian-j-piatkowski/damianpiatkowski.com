@@ -27,7 +27,7 @@ Columns:
     - updated_at: Timestamp of the most recent update (auto-updated).
 """
 
-from sqlalchemy import Column, Integer, JSON, MetaData, String, Table, Text, TIMESTAMP, func, text
+from sqlalchemy import Column, Integer, JSON, MetaData, String, Table, Text, TIMESTAMP, text, FetchedValue
 
 metadata = MetaData()
 
@@ -42,12 +42,17 @@ blog_posts = Table(
     Column('keywords', JSON, nullable=False, default=[]),  # SEO keywords
     Column('read_time_minutes', Integer, nullable=False),  # Estimated reading time
     Column('categories', JSON, nullable=False, default=[]),  # Optional category tags
-    Column('created_at', TIMESTAMP(timezone=True), nullable=False, server_default=func.now()),
+    Column(
+        'created_at',
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text('CURRENT_TIMESTAMP')
+    ),
     Column(
         'updated_at',
         TIMESTAMP(timezone=True),
+        nullable=False,
         server_default=text('CURRENT_TIMESTAMP'),
-        onupdate=text('CURRENT_TIMESTAMP'),
-        nullable=False
+        server_onupdate=FetchedValue()
     ),
 )
