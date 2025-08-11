@@ -1,5 +1,5 @@
-{% macro json_ld(data) %}
+{% macro json_ld(data) -%}
 <script type="application/ld+json">
 {{ data | tojson | safe }}
 </script>
-{% endmacro %}
+{%- endmacro %}

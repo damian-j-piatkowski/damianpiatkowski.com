@@ -15,7 +15,7 @@
 {% block og_type %}article{% endblock %}
 {% block og_url %}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{% endblock %}
 {% block og_image %}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{% endblock %}
-
+{% block og_image_alt %}Hero image for blog post '{{ post.title }}'{% endblock %}
 
 {% block canonical %}
     {% if post %}
@@ -40,26 +40,25 @@
     {{ post.hero_base }}/large.jpg
 {% endblock %}
 
-{% block structured_data %}
-<script type="application/ld+json">
-{{ {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": post.title,
-  "description": post.meta_description,
-  "author": {
-    "@type": "Person",
-    "name": "Damian Piatkowski"
-  },
-  "datePublished": post.created_at,
-  "keywords": post.keywords,
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": url_for('blog.render_single_blog_post', slug=post.slug, _external=True)
-  }
-} | tojson | safe }}
-</script>
-{% endblock %}
+{% block structured_data -%}
+  {{ sd.json_ld({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.meta_description,
+    "image": url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True),
+    "author": {
+      "@type": "Person",
+      "name": "Damian Piatkowski"
+    },
+    "datePublished": post.created_at,
+    "keywords": post.keywords,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": url_for('blog.render_single_blog_post', slug=post.slug, _external=True)
+    }
+  }) }}
+{%- endblock %}
 
 {% block links %}
     {{ css_link_bundle("single_blog_post", ENV=ENV) }}

@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-    {% from "macros/css_loader.html" import css_link_bundle %}
-    {% import "macros/structured_data.html" as sd %}
+    {%- from "macros/css_loader.html" import css_link_bundle -%}
+    {%- import "macros/structured_data.html" as sd -%}
 
     <!-- Basic Meta -->
     <meta charset="utf-8">
@@ -14,30 +14,32 @@
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="{% block meta_description %}{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}Python developer, Flask, back-end development, web development, programming{% endblock %}">
     <meta name="author" content="Damian Piatkowski">
 
     <!-- Canonical URL -->
-    {% block canonical %}{% endblock %}
+    {%- block canonical -%}{%- endblock %}
 
     <!-- JSON-LD Structured Data -->
-    {% block structured_data %}{% endblock %}
+    {%- block structured_data -%}{%- endblock %}
 
-    {% if include_social_meta is not defined or include_social_meta %}
+    {%- if include_social_meta is not defined or include_social_meta %}
         <!-- Open Graph -->
         <meta property="og:site_name" content="Damian Piatkowski Portfolio">
+        <meta property="og:locale" content="en_US">
         <meta property="og:title" content="{% block og_title %}{% endblock %}">
         <meta property="og:description" content="{% block og_description %}{{ self.meta_description() }}{% endblock %}">
         <meta property="og:type" content="{% block og_type %}website{% endblock %}">
         <meta property="og:url" content="{% block og_url %}{{ request.url }}{% endblock %}">
         <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg', _external=True) }}{% endblock %}">
+        <meta property="og:image:alt" content="{% block og_image_alt %}Portrait of Damian Piatkowski, Full-Stack Python & Flask Developer{% endblock %}">
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
         <meta name="twitter:description" content="{% block twitter_description %}{{ self.meta_description() }}{% endblock %}">
         <meta name="twitter:image" content="{% block twitter_image %}{{ self.og_image() }}{% endblock %}">
-    {% endif %}
+        <meta name="twitter:image:alt" content="Portrait of Damian Piatkowski, Full-Stack Python & Flask Developer">
+    {%- endif %}
 
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
@@ -45,22 +47,20 @@
     <!-- External CSS -->
 
     <!-- Bootstrap CSS (local) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bookstrap/css/bootstrap.min.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
     <!-- Local Font: Lato Regular 400 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
-
     <!-- Bootstrap Icons (local) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
-
     <!-- Font Awesome (local) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/all.min.css') }}">
 
+    <!-- Internal CSS -->
+
     <!-- Global CSS Bundle -->
     {{ css_link_bundle("global", ENV=ENV) }}
-
     <!-- Page-Specific CSS -->
-    {% block links %}{% endblock %}
+    {%- block links -%}{%- endblock %}
 </head>
     <body class="d-flex flex-column min-vh-100 lato">
 
@@ -119,7 +119,7 @@
         </footer>
 
         <!-- JS -->
-        <script src="{{ url_for('static', filename='vendor/bookstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
     </body>
 </html>
