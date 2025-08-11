@@ -1,44 +1,30 @@
-{% extends "base.html" %}
-{% from "macros/css_loader.html" import css_link_bundle %}
+{% extends "base.html" -%}
+{% from "macros/css_loader.html" import css_link_bundle -%}
 
-{% block title %}
-    {% if post %}
-        {{ post.title }} - Blog
-    {% else %}
-        Post Not Found - Blog
-    {% endif %}
-{% endblock %}
+{% block title -%}
+    {% if post -%}
+        Damian Piatkowski Blog | {{ post.title }}
+    {%- else -%}
+        Damian Piatkowski Blog | Post Not Found
+    {%- endif %}
+{%- endblock %}
 
-{% block meta_description %}{{ post.meta_description }}{% endblock %}
+{% block meta_description -%}{{ post.meta_description }}{%- endblock %}
 
-{% block og_title %}{{ post.title }} - Damian Piatkowski{% endblock %}
-{% block og_type %}article{% endblock %}
-{% block og_url %}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{% endblock %}
-{% block og_image %}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{% endblock %}
-{% block og_image_alt %}Hero image for blog post '{{ post.title }}'{% endblock %}
+{% block og_type -%}article{%- endblock %}
+{% block og_url -%}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{%- endblock %}
+{% block og_image -%}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{%- endblock %}
+{% block og_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
 
-{% block canonical %}
-    {% if post %}
+{% block canonical -%}
+    {% if post -%}
         <link rel="canonical" href="{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}">
-    {% endif %}
-{% endblock %}
+    {%- endif %}
+{%- endblock %}
 
-{% block meta_keywords %}
-    {{ post.keywords | join(', ') }}
-{% endblock %}
-
-
-{% block twitter_title %}
-    {{ post.title }} - Damian Piatkowski
-{% endblock %}
-
-{% block twitter_description %}
-    {{ post.meta_description }}
-{% endblock %}
-
-{% block twitter_image %}
-    {{ post.hero_base }}/large.jpg
-{% endblock %}
+{% block twitter_description -%}{{ post.meta_description | trim }}{%- endblock %}
+{% block twitter_image -%}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{%- endblock %}
+{% block twitter_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
 
 {% block structured_data -%}
   {{ sd.json_ld({
@@ -60,9 +46,9 @@
   }) }}
 {%- endblock %}
 
-{% block links %}
+{% block links -%}
     {{ css_link_bundle("single_blog_post", ENV=ENV) }}
-{% endblock %}
+{%- endblock %}
 
 {% block content %}
 <div class="container mt-4">

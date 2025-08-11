@@ -21,9 +21,9 @@
     {%- if ENV == 'development' -%}
         {# Only include page-specific CSS. Assume global is included separately. #}
         {%- if bundle_name in bundle_map -%}
-            {%- for path in bundle_map[bundle_name] -%}
+{%- for path in bundle_map[bundle_name] %}
 <link rel="stylesheet" href="{{ url_for('static', filename=path) }}">
-            {%- endfor -%}
+{%- endfor %}
         {%- endif -%}
     {%- else -%}
         {# Just include the relevant minified bundle in production #}

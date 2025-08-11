@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Privacy Notice{% endblock %}
+{% block title %}Damian Piatkowski | Privacy Notice{% endblock %}
 
 {% block meta_description %}This privacy notice explains what data is collected on damianpiatkowski.com, how it's used, and your rights regarding that information.{% endblock %}
 
 {% block links %}
     {{ css_link_bundle("privacy", ENV=ENV) }}
 {% endblock %}
+
+{# Suppress default Person schema from base.html #}
+{% block structured_data %}{% endblock %}
 
 {% block canonical %}
     <link rel="canonical" href="{{ url_for('home_bp.privacy', _external=True) }}">

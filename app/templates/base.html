@@ -10,7 +10,7 @@
     <meta http-equiv="content-language" content="en">
 
     <!-- Page Title -->
-    <title>Damian Piatkowski | {% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="{% block meta_description %}{% endblock %}">
@@ -19,14 +19,27 @@
     <!-- Canonical URL -->
     {%- block canonical -%}{%- endblock %}
 
-    <!-- JSON-LD Structured Data -->
-    {%- block structured_data -%}{%- endblock %}
+    {%- block structured_data %}
+        <!-- JSON-LD Structured Data -->
+        {{ sd.json_ld({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Damian Piatkowski",
+        "url": "https://damianpiatkowski.com",
+        "jobTitle": "Back-End Developer",
+        "image": "https://damianpiatkowski.com/static/images/about_me/about_me_16x9_1920w.jpg",
+        "sameAs": [
+          "https://github.com/damian-j-piatkowski",
+          "https://www.linkedin.com/in/damian-piatkowski/"
+        ]
+      }) }}
+    {% endblock -%}
 
     {%- if include_social_meta is not defined or include_social_meta %}
         <!-- Open Graph -->
         <meta property="og:site_name" content="Damian Piatkowski Portfolio">
         <meta property="og:locale" content="en_US">
-        <meta property="og:title" content="{% block og_title %}{% endblock %}">
+        <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
         <meta property="og:description" content="{% block og_description %}{{ self.meta_description() }}{% endblock %}">
         <meta property="og:type" content="{% block og_type %}website{% endblock %}">
         <meta property="og:url" content="{% block og_url %}{{ request.url }}{% endblock %}">
@@ -35,7 +48,7 @@
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
+        <meta name="twitter:title" content="{% block twitter_title %}{{ self.title() }}{% endblock %}">
         <meta name="twitter:description" content="{% block twitter_description %}{{ self.meta_description() }}{% endblock %}">
         <meta name="twitter:image" content="{% block twitter_image %}{{ self.og_image() }}{% endblock %}">
         <meta name="twitter:image:alt" content="Portrait of Damian Piatkowski, Full-Stack Python & Flask Developer">
