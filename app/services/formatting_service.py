@@ -9,33 +9,28 @@ particularly focusing on blog post content processing. It includes:
    - Tables, footnotes, and other technical writing elements
    - Configurable extensions system
 
-2. Content manipulation:
+2. Date formatting:
+   - Conversion of datetime strings from the database into human-readable formats
+   - Graceful fallback if parsing fails
+
+3. Content manipulation:
    - Text truncation for previews
    - Smart ellipsis handling
    - Empty content handling
 
-3. Date formatting:
-   - Conversion of datetime strings from the database into human-readable formats
-   - Graceful fallback if parsing fails
-
-The module uses the Python-Markdown library with carefully selected
-extensions to ensure proper rendering of code blocks, tables, and other
-markdown elements commonly used in technical blog posts.
-
-Typical usage example:
-    html_content = convert_markdown_to_html("# Title\nContent")
-    preview = trim_content(html_content, max_length=100)
-    formatted_date = format_date("2025-07-22 07:39:58")
-
 Functions:
     convert_markdown_to_html: Transforms markdown text to HTML with enhanced features
-    trim_content: Creates preview versions of content by trimming to specified length
     format_date: Converts datetime strings into human-readable formats
+    trim_content: Creates preview versions of content by trimming to specified length
 """
 
-from typing import List, Optional
+import logging
 from datetime import datetime
+from typing import List, Optional
+
 import markdown
+
+logger = logging.getLogger(__name__)
 
 
 def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]] = None) -> str:
@@ -58,6 +53,8 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     Returns:
         The HTML content ready for storage in the blog_posts table.
     """
+    logger.debug("convert_markdown_to_html: Starting conversion. Input length=%d", len(markdown_text or ""))
+
     # Remove BOM if present
     markdown_text = markdown_text.lstrip('\ufeff')
 
@@ -76,6 +73,7 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     ]
 
     all_extensions = default_extensions + (extensions or [])
+    logger.debug("convert_markdown_to_html: Using extensions=%s", all_extensions)
 
     extension_configs = {
         'codehilite': {
@@ -90,29 +88,15 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
         }
     }
 
-    return markdown.markdown(
+    html = markdown.markdown(
         markdown_text,
         extensions=all_extensions,
         extension_configs=extension_configs,
         output_format='html'
     )
 
-
-def trim_content(content: str, max_length: int = 200) -> str:
-    """Trims the content to a maximum length for preview purposes.
-
-    Args:
-        content (str): The full content to be trimmed.
-        max_length (int): The maximum number of characters to keep.
-
-    Returns:
-        str: The trimmed content with an ellipsis if truncated.
-    """
-    if not content:
-        return ""
-    if len(content) > max_length:
-        return content[:max_length].rstrip() + "..."
-    return content
+    logger.debug("convert_markdown_to_html: Conversion complete. Output length=%d", len(html or ""))
+    return html
 
 
 def format_date(date_str: str) -> str:
@@ -130,9 +114,39 @@ def format_date(date_str: str) -> str:
         str: A human-readable formatted date string.
     """
     if not date_str:
+        logger.debug("format_date: Empty date string received.")
         return ""
     try:
         dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-        return dt.strftime('%B %d, %Y')
+        formatted = dt.strftime('%B %d, %Y')
+        logger.debug("format_date: Parsed '%s' -> '%s'", date_str, formatted)
+        return formatted
     except ValueError:
-        return date_str[:10]
+        logger.warning("format_date: Failed to parse '%s', using fallback.", date_str)
+        fallback = date_str[:10] if len(date_str) >= 10 else date_str
+        logger.debug("format_date: Fallback result='%s'", fallback)
+        return fallback
+
+
+def trim_content(content: str, max_length: int = 200) -> str:
+    """Trims the content to a maximum length for preview purposes.
+
+    Args:
+        content (str): The full content to be trimmed.
+        max_length (int): The maximum number of characters to keep.
+
+    Returns:
+        str: The trimmed content with an ellipsis if truncated.
+    """
+    if not content:
+        logger.debug("trim_content: Empty content received.")
+        return ""
+    if len(content) > max_length:
+        trimmed = content[:max_length].rstrip() + "..."
+        logger.debug(
+            "trim_content: Content truncated from length=%d to length=%d",
+            len(content), len(trimmed)
+        )
+        return trimmed
+    logger.debug("trim_content: No truncation needed. Length=%d", len(content))
+    return content

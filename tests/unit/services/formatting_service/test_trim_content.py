@@ -20,6 +20,30 @@ def test_trim_content_empty_string() -> None:
 
 
 @pytest.mark.admin_upload_blog_posts
+def test_trim_content_logs_properly(caplog) -> None:
+    """Tests that debug logs are emitted during content trimming."""
+    caplog.set_level("DEBUG")
+
+    # Case 1: Empty content
+    _ = trim_content("")
+    assert any("Empty content received" in msg for msg in caplog.messages), \
+        "Missing log for empty content"
+
+    # Case 2: No truncation needed
+    caplog.clear()
+    _ = trim_content("Short text", max_length=50)
+    assert any("No truncation needed" in msg for msg in caplog.messages), \
+        "Missing log for no truncation"
+
+    # Case 3: Truncation performed
+    caplog.clear()
+    text = "a" * 300
+    _ = trim_content(text, max_length=50)
+    assert any("Content truncated from length=" in msg for msg in caplog.messages), \
+        "Missing log for truncation"
+
+
+@pytest.mark.admin_upload_blog_posts
 def test_trim_content_none() -> None:
     """Returns empty string if input is None."""
     assert trim_content(None) == ""  # type: ignore[arg-type]
