@@ -148,61 +148,46 @@ body {
 }
 
 /* === Footer === */
-footer.custom-gray-bg {
-    background-color: #666666 !important;
-    color: white !important;
-    padding: 20px 0 !important;
-    text-align: center !important;
-    position: relative;
-    z-index: 10;
+footer.custom-footer {
+  background-color: var(--footer-bg) !important;
+  color: var(--footer-text) !important;
+  padding: 20px 0 !important;
+  text-align: center !important;
+  position: relative;
+  z-index: 10;
 }
 
-footer.custom-gray-bg p,
-footer.custom-gray-bg a,
-footer.custom-gray-bg i {
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    margin: 0 !important;
-    color: white !important;
+footer.custom-footer p {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  color: var(--footer-text) !important;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6); /* crisp readability */
 }
 
-footer.custom-gray-bg .container {
-    max-width: 800px !important;
-    padding: 0 20px !important;
-    margin: 0 auto !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important; /* Ensure no box-shadow */
-    background: none !important; /* Ensure no background color */
+footer.custom-footer a,
+footer.custom-footer i {
+  font-size: 16px !important; /* for text links */
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  color: var(--footer-text) !important; /* default = off-white */
+  text-decoration: underline !important;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+  transition: color 0.2s ease-in-out;
 }
 
-footer.custom-gray-bg .row {
-    margin: 0 !important;
+footer.custom-footer a:hover,
+footer.custom-footer i:hover {
+  color: var(--accent-primary-hover) !important; /* brand green */
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6); /* keep crispness */
 }
 
-footer.custom-gray-bg .col-lg-12 {
-    padding: 10px 0 !important;
-    border: none !important; /* Ensure no borders */
+/* Make social icons larger and padded */
+footer.custom-footer .social-icons i {
+  font-size: 32px !important;
+  margin: 0 12px !important; /* horizontal spacing */
 }
 
-footer.custom-gray-bg a.privacy-link {
-    text-decoration: underline !important;
-}
-
-footer.custom-gray-bg a:hover {
-    text-decoration: underline !important;
-}
-
-footer.custom-gray-bg a,
-footer.custom-gray-bg i {
-    box-shadow: none !important; /* Ensure no box shadow on links and icons */
-}
-
-/* Ensure no specific styles override the base icon spacing */
-footer.custom-gray-bg .social-icons i {
-    margin: 0 10px !important; /* Adjust the spacing as needed */
-    font-size: 24px !important;
-}
 
 /* === Global Animations === */
 @keyframes fadeInUp {

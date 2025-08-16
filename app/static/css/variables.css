@@ -36,6 +36,8 @@
     --flash-error-bg: #f8d7da;
 
     /* Footer */
-    --footer-bg: #666666;
-    --footer-text: #fff;
-}
+    --footer-bg: #778899;       /* same as hero background */
+    --footer-text: #F9F9F9;     /* off-white, readable */
+    --footer-link: #D0F0C0;     /* brand accent green */
+    --footer-link-hover: #a0d08c; /* darker green for hover */
+    }
