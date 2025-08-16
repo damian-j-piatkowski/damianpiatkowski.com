@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  web:
+    image: yourdockerhubusername/damianpiatkowski:latest
+    command: >
+      sh -c "mkdir -p /logs/production &&
+             scripts/wait-for-it.sh db:3306 -t 60 -- flask db upgrade &&
+             flask run --host=0.0.0.0 --port=${FLASK_RUN_PORT}"
+    ports:
+      - "5000:5000"
+    volumes:
+      - /home/ubuntu/damianpiatkowski_data/logs:/logs
+    env_file:
+      - .env.prod
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:latest
+    volumes:
+      - /home/ubuntu/damianpiatkowski_data/mysql:/var/lib/mysql
+    env_file:
+      - .env.prod
+    restart: unless-stopped

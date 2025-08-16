@@ -25,16 +25,16 @@ for %%F in (*.jpg *.jpeg *.png) do (
     echo Found: %%F
 
     echo Creating retina.jpg   ^(850x567^) Retina
-    magick "%%F" -resize 850x567^ -gravity center -crop 850x567+0+0 -quality 85 "retina.jpg"
+    magick "%%F" -resize 850x^ -gravity center -crop 850x567+0+0 -strip -quality 92 -sharpen 0x1.0 "retina.jpg"
 
     echo Creating desktop.jpg  ^(640x426^) Desktop
-    magick "%%F" -resize 640x426^ -gravity center -crop 640x426+0+0 -quality 85 "desktop.jpg"
+    magick "%%F" -resize 640x^ -gravity center -crop 640x426+0+0 -strip -quality 92 -sharpen 0x1.0 "desktop.jpg"
 
     echo Creating tablet.jpg   ^(480x320^) Tablet
-    magick "%%F" -resize 480x320^ -gravity center -crop 480x320+0+0 -quality 85 "tablet.jpg"
+    magick "%%F" -resize 480x^ -gravity center -crop 480x320+0+0 -strip -quality 92 -sharpen 0x1.0 "tablet.jpg"
 
     echo Creating mobile.jpg   ^(320x213^) Mobile
-    magick "%%F" -resize 320x213^ -gravity center -crop 320x213+0+0 -quality 85 "mobile.jpg"
+    magick "%%F" -resize 320x^ -gravity center -crop 320x213+0+0 -strip -quality 92 -sharpen 0x1.0 "mobile.jpg"
 
     echo.
     echo Successfully created 3:2 thumbnail images:

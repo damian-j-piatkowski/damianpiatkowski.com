@@ -18,13 +18,6 @@ RUN chmod +x /app/scripts/wait-for-it.sh
 # Install any needed Python packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-## Install Node.js dependencies
-#RUN npm install
-#
-## Build and minify CSS files using Gulp
-#RUN npm install -g gulp-cli
-#RUN gulp minifyBaseCss && gulp minifyIndexCss
-
 # Make port 5000 (or the port specified by FLASK_RUN_PORT) available to the world outside this container
 EXPOSE 5000
 

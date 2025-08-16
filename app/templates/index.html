@@ -14,49 +14,84 @@
     {{ css_link_bundle("index", ENV=ENV) }}
 {% endblock %}
 {% block content %}
-<section class="home-hero">
-    <div class="container">
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <div class="flash-container">
-              {% for category, message in messages %}
-                <div class="alert alert-{{ category }} flash-message">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
-        <!-- End of Flash messages -->
+<section class="landing-hero">
+    <!-- Responsive background image -->
+    <div class="hero-bg">
+        <picture>
+            <!-- Ultra-large desktop (16:9, very wide) -->
+            <source type="image/webp" media="(min-width: 1200px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_2560w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_2560w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 1200px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_2560w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_2560w.jpg', v=VERSION) }} 2x">
 
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <div class="hero-content text-overlay">
-                    <h1>Hi, I'm Damian</h1>
-                    <p>I specialize in crafting robust backends that power seamless user experiences</p>
-                </div>
-                <div class="hero-content">
-                    <a href="/resume" class="btn btn-custom-green" id="view_resume_button">View Resume</a>
-                </div>
-            </div>
-        </div>
+            <!-- Tall tablets in portrait (e.g. iPad, Surface Duo, 3:4 or taller) -->
+            <source type="image/webp" media="(min-width: 768px) and (max-aspect-ratio: 3/4)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_4x5_960w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_4x5_1920w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 768px) and (max-aspect-ratio: 3/4)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_4x5_960w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_4x5_1920w.jpg', v=VERSION) }} 2x">
+
+            <!-- Desktop & landscape tablets (≥992px wide, wider than 3:4) -->
+            <source type="image/webp" media="(min-width: 992px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_1920w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_1920w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 992px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_1920w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_16x9_1920w.jpg', v=VERSION) }} 2x">
+
+            <!-- Mobile (2:3 crop) -->
+            <source type="image/webp" media="(max-width: 767px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_2x3_640w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_2x3_1280w.webp', v=VERSION) }} 2x">
+            <source media="(max-width: 767px)" srcset="
+                {{ url_for('static', filename='images/landing-hero/landing-hero_2x3_640w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/landing-hero/landing-hero_2x3_1280w.jpg', v=VERSION) }} 2x">
+
+            <!-- Fallback -->
+            <img src="{{ url_for('static', filename='images/landing-hero/landing-hero_2x3_640w.jpg', v=VERSION) }}" alt="Portrait of Damian Piatkowski">
+        </picture>
     </div>
-</section>
 
-<!-- Core Skills Section -->
-<section class="core-skills">
-    <div class="container text-center">
-        <h2>Core Skills</h2>
-        <p class="subtitle">Building the backbone of dependable software</p>
-        <div class="skills-list">
-            <span class="skill">Python</span>
-            <span class="skill">Flask</span>
-            <span class="skill">APIs</span>
-            <span class="skill">Databases</span>
-            <span class="skill">Test Suites</span>
-            <span class="skill">Technical Documentation</span>
-        </div>
+     <!-- Wireframe field -->
+    <div class="wirefield" aria-hidden="true">
+      <!-- Wire Sphere -->
+      <svg class="wire wire-sphere" viewBox="0 0 200 200" width="240" height="240">
+        <g stroke="currentColor" fill="none" stroke-width="1">
+          <!-- longitude rings -->
+          <ellipse cx="100" cy="100" rx="70" ry="70"/>
+          <ellipse cx="100" cy="100" rx="70" ry="30" transform="rotate(25 100 100)"/>
+          <ellipse cx="100" cy="100" rx="70" ry="30" transform="rotate(-25 100 100)"/>
+          <ellipse cx="100" cy="100" rx="70" ry="15" transform="rotate(55 100 100)"/>
+          <ellipse cx="100" cy="100" rx="70" ry="15" transform="rotate(-55 100 100)"/>
+          <!-- latitude rings -->
+          <circle  cx="100" cy="100" r="70"/>
+          <circle  cx="100" cy="100" r="50" opacity=".7"/>
+          <circle  cx="100" cy="100" r="30" opacity=".5"/>
+        </g>
+      </svg>
+
+      <!-- Small secondary sphere -->
+      <svg class="wire wire-sphere wire-sphere--sm" viewBox="0 0 200 200" width="140" height="140">
+        <g stroke="currentColor" fill="none" stroke-width="1">
+          <circle  cx="100" cy="100" r="60"/>
+          <ellipse cx="100" cy="100" rx="60" ry="25" transform="rotate(35 100 100)"/>
+          <ellipse cx="100" cy="100" rx="60" ry="25" transform="rotate(-35 100 100)"/>
+          <circle  cx="100" cy="100" r="40" opacity=".7"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Overlay -->
+    <div class="hero-overlay"></div>
+
+    <!-- Hero Text Content -->
+    <div class="hero-text">
+        <h1 class="fade-in-1">I build fast, reliable websites and APIs that power great experiences.</h1>
+        <p class="fade-in-2">Always responsive. Always dependable. Built to deliver seamless experiences every time.</p>
+        <a href="#contact-form" class="btn btn-custom-green btn-lg fade-in-3" id="start_project_button">Start Your Project</a>
     </div>
 </section>
 
@@ -74,7 +109,7 @@
     </div>
 </section>
 
-<section class="contact-section custom-gray-bg">
+<section id="contact-form" class="contact-section custom-gray-bg">
     <div class="container contact-container">
         <div class="row">
             <div class="col-lg-8 offset-lg-2 text-center">
@@ -108,3 +143,14 @@
 
 <!-- Include the flashMessages.js script -->
 <script src="{{ url_for('static', filename='js/flashMessages.js') }}"></script>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
+  });
+});
+</script>

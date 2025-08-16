@@ -25,22 +25,22 @@ for %%F in (*.jpg *.jpeg *.png) do (
     echo Found: %%F
 
     echo Creating xl.jpg      ^(1600x900^) Extra Large Desktop
-    magick "%%F" -resize 1600x900^ -gravity center -crop 1600x900+0+0 -quality 85 "xl.jpg"
+    magick "%%F" -resize 1600x^ -gravity center -crop 1600x900+0+0 -strip -quality 92 -sharpen 0x1.0 "xl.jpg"
 
     echo Creating large.jpg   ^(1200x675^) Large Desktop
-    magick "%%F" -resize 1200x675^ -gravity center -crop 1200x675+0+0 -quality 85 "large.jpg"
+    magick "%%F" -resize 1200x^ -gravity center -crop 1200x675+0+0 -strip -quality 92 -sharpen 0x1.0 "large.jpg"
 
     echo Creating medium.jpg  ^(800x450^) Tablet/Small Laptop
-    magick "%%F" -resize 800x450^ -gravity center -crop 800x450+0+0 -quality 85 "medium.jpg"
+    magick "%%F" -resize 800x^ -gravity center -crop 800x450+0+0 -strip -quality 92 -sharpen 0x1.0 "medium.jpg"
 
     echo Creating small.jpg   ^(600x338^) Large Phone/Small Tablet
-    magick "%%F" -resize 600x338^ -gravity center -crop 600x338+0+0 -quality 85 "small.jpg"
+    magick "%%F" -resize 600x^ -gravity center -crop 600x338+0+0 -strip -quality 92 -sharpen 0x1.0 "small.jpg"
 
     echo Creating xs.jpg      ^(480x270^) Mobile Phone
-    magick "%%F" -resize 480x270^ -gravity center -crop 480x270+0+0 -quality 85 "xs.jpg"
+    magick "%%F" -resize 480x^ -gravity center -crop 480x270+0+0 -strip -quality 92 -sharpen 0x1.0 "xs.jpg"
 
     echo Creating retina.jpg  ^(1920x1080^) Retina / High-DPI
-    magick "%%F" -resize 1920x1080^ -gravity center -crop 1920x1080+0+0 -quality 85 "retina.jpg"
+    magick "%%F" -resize 1920x^ -gravity center -crop 1920x1080+0+0 -strip -quality 92 -sharpen 0x1.0 "retina.jpg"
 
     echo.
     echo Successfully created 16:9 hero images:

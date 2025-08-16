@@ -212,3 +212,31 @@ footer.custom-gray-bg .social-icons i {
 @keyframes fadeOutUp {
     to { opacity: 0; transform: translateY(-20px); }
 }
+
+/* ===== BUTTON HOVER ANIMATIONS ===== */
+.btn-custom-green {
+  background-color: var(--accent-primary);
+  color: var(--button-text-color);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-custom-green:hover {
+  background-color: var(--accent-primary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-outline-dark {
+  border: 2px solid var(--color-dark-text);
+  background: transparent;
+  color: var(--color-dark-text);
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover {
+  background: var(--color-dark-text);
+  color: #fff;
+  transform: translateY(-2px);
+}

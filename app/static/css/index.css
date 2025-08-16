@@ -33,34 +33,6 @@
     text-align: center;
 }
 
-/* Core Skills section */
-.core-skills {
-    background-color: var(--color-light-bg);
-    padding: 50px 0;
-    font-family: 'Open Sans', sans-serif;
-}
-
-.skills-list {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.skill {
-    background-color: var(--accent-primary);
-    color: var(--button-text-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.skill:hover {
-    background-color: var(--accent-primary-hover);
-    color: #fff;
-}
-
 /* Blog section */
 .blog-section {
     background-image: url("../images/home_blog.jpg");
@@ -191,4 +163,296 @@
 .flash-container .alert-danger {
     background-color: var(--flash-error-bg);
     color: #fff;
+}
+
+/* ===== Landing Hero ===== */
+.landing-hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align text to left */
+  padding-left: 5%; /* Push away from edge */
+  text-align: left; /* Text alignment */
+  color: white;
+}
+
+/* Background image container */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg picture,
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Landing Hero Modern ===== */
+.landing-hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 5%;
+  text-align: left;
+  color: white;
+}
+
+/* Background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img,
+.hero-bg picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Default - no overlay */
+.hero-overlay {
+  display: none;
+}
+
+.hero-text {
+  position: relative;
+  z-index: 3;
+  max-width: 800px;
+  padding: 1rem;
+  animation: fadeInUp 1.2s ease-out forwards;
+}
+
+/* Mid-range screens: 1330px → 1000px */
+@media (max-width: 1329px) and (min-width: 1000px) {
+  .hero-text {
+    max-width: 580px;     /* prevent stretching too wide */
+  }
+}
+
+/* Tablet-specific layout (4:5ish screens) */
+@media (min-width: 540px) and (max-width: 1000px) {
+  .landing-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* stack content from top */
+    min-height: 100vh;
+    background-color: #778899; /* sky area */
+    padding-top: 8vh; /* adjustable "sky" height above head */
+    text-align: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: auto 0 0 0;       /* pin to bottom only */
+    height: 70%;             /* image takes only lower part */
+    background-color: #778899;
+  }
+
+  .hero-bg img {
+    object-fit: contain;     /* no cropping */
+    object-position: center bottom;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-text {
+    position: relative;
+    z-index: 2;
+    margin: 0 auto;
+    max-width: 85%;
+  }
+}
+
+.hero-text h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+  font-weight: 700;
+}
+
+.hero-text p {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+}
+
+/* Mobile (<768px) — horizontally centered & slightly above center vertically */
+@media (max-width: 767px) {
+  .landing-hero {
+    min-height: 100svh;       /* works better with mobile browser UI */
+    display: grid;            /* grid lets us center easily */
+    place-items: center;      /* centers horizontally & vertically */
+    padding: 0;               /* reset old left padding */
+    text-align: center;
+    align-content: start;     /* stack toward top instead of middle */
+    padding-top: 2vh;        /* adjust for “above head” look */
+  }
+
+  .hero-overlay {
+    display: none;            /* keep your original overlay setting */
+  }
+
+  .hero-text {
+    position: relative;       /* no more absolute on mobile */
+    top: auto;
+    left: auto;
+    bottom: auto;
+    right: auto;
+    transform: none;
+    max-width: 90%;
+    text-align: center;
+  }
+
+  .hero-text .btn {
+    margin-top: 0.75rem;       /* space between h1 and button */
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-bg {
+    background-color: #778899;   /* matches your theme */
+    display: flex;               /* let us align child image */
+    align-items: flex-end;       /* stick the image to the bottom */
+    justify-content: center;     /* keep centered horizontally */
+  }
+
+  .hero-bg img {
+    object-fit: contain;
+    object-position: center bottom; /* anchor at bottom */
+    width: 100%;
+    height: 100%;
+    background-color: transparent;  /* let parent bg show */
+  }
+}
+
+@media (max-width: 375px) {
+  .landing-hero {
+    min-height: 125vh; /* extra space for narrowest screens */
+  }
+}
+
+/* Super narrow like Galaxy Z Fold 5 */
+@media (max-width: 345px) {
+  .landing-hero {
+    min-height: 95vh; /* extra space for narrowest screens */
+  }
+}
+
+/* Tall / square-ish portrait devices (Surface Duo, Zenbook Fold) */
+@media screen and (max-aspect-ratio: 3/4) {
+  .landing-hero {
+    align-items: flex-start;
+    padding-top: 0vh;
+  }
+  .hero-text {
+    margin-top: 2rem;
+  }
+}
+
+/* iPad Pro portrait (1024x1366 and similar 3:4 tall tablets) */
+@media screen and (min-width: 1000px) and (max-width: 1100px) and (max-aspect-ratio: 3/4) {
+  .landing-hero {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 2vh;             /* breathing room above head */
+    text-align: center;
+    background-color: #778899;    /* fill the "sky" above image */
+  }
+
+  .hero-text {
+    max-width: 80%;
+    margin: 0 auto 2rem auto;     /* centered with spacing below */
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: auto 0 0 0;            /* image pinned to bottom */
+    height: 70%;
+  }
+
+  .hero-bg img {
+    object-fit: contain;
+    object-position: center bottom;
+  }
+}
+
+/* ===== Wireframe Shapes ===== */
+.wirefield {
+  position: absolute;
+  inset: 0;
+  z-index: 2;               /* above bg, below text */
+  pointer-events: none;
+  perspective: 900px;       /* subtle 3D depth for rotations */
+  overflow: hidden;
+}
+
+.wire {
+  position: absolute;
+  color: var(--wire-stroke, #D0F0C0);
+  opacity: 0.28;            /* faint lines */
+  filter: drop-shadow(0 0 8px rgba(208,240,192,0.15));
+  transform-style: preserve-3d;
+  mix-blend-mode: lighten;  /* looks great over #778899 */
+}
+
+/* positions */
+.wire-sphere { top: -40px; left: -30px; }
+.wire-cube   { right: -20px; bottom: -30px; }
+.wire-sphere--sm { top: 35%; left: -50px; opacity: 0.22; }
+
+/* animations */
+.wire-sphere { animation: spinYaw 28s ease-in-out infinite; }
+.wire-sphere--sm { animation: spinYaw 36s ease-in-out infinite reverse; }
+.wire-cube { animation: spinCube 32s ease-in-out infinite; }
+
+/* subtle parallax on hover (optional) */
+.landing-hero:hover .wire-sphere     { animation-duration: 26s; }
+.landing-hero:hover .wire-sphere--sm { animation-duration: 34s; }
+.landing-hero:hover .wire-cube       { animation-duration: 30s; }
+
+@keyframes spinYaw {
+  0%   { transform: translate3d(0,0,0) rotateY(0deg)   rotateX(0deg)   scale(1); }
+  50%  { transform: translate3d(10px,-15px,0) rotateY(25deg) rotateX(6deg)  scale(1.03); }
+  100% { transform: translate3d(0,0,0) rotateY(0deg)   rotateX(0deg)   scale(1); }
+}
+
+@keyframes spinCube {
+  0%   { transform: translate3d(0,0,0) rotateX(0deg)  rotateZ(0deg)  scale(1); }
+  50%  { transform: translate3d(-8px,12px,0) rotateX(18deg) rotateZ(22deg) scale(1.02); }
+  100% { transform: translate3d(0,0,0) rotateX(0deg)  rotateZ(0deg)  scale(1); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .wire { animation: none !important; }
+}
+
+.fade-in-1 { animation: fadeInUp 1s ease-out forwards; }
+.fade-in-2 { animation: fadeInUp 1s ease-out forwards 0.3s; }
+.fade-in-3 { animation: fadeInUp 1s ease-out forwards 0.6s; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

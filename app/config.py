@@ -79,7 +79,7 @@ class ProductionConfig(BaseConfig):
     LOG_FILE = os.environ.get('LOG_FILE', '/logs/production/app.log')
     FALLBACK_LOG_PATH = os.environ.get('FALLBACK_LOG_PATH', '/logs/production/fallback.log')
     LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true'
-    BLOG_IMAGE_BASE_PATH = 'https://prod-bucket.s3.amazonaws.com/images' # adjust #todo
+    BLOG_IMAGE_BASE_PATH = "https://damianpiatkowski-blog.s3.eu-central-1.amazonaws.com"
 
 class TestingConfig(BaseConfig):
     TESTING = True
