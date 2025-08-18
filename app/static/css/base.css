@@ -77,75 +77,159 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+
 /* === Navigation Bar === */
-.navbar-brand img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin: 0 10px;
-}
+
+/* Brand wrapper */
 .navbar-brand {
-    text-decoration: none;
-    color: inherit;
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem; /* larger base size => scales photo + text */
+    letter-spacing: 1px;
+    color: #333;
     transition: color 0.3s ease;
+    display: flex;
+    align-items: center; /* keeps name vertically centered to image */
 }
+
+/* Brand photo scales with font size */
+.navbar-brand img {
+    width: 1.8em;  /* slightly larger ratio */
+    height: 1.8em;
+    border-radius: 0.25em;
+    margin: 0 0.6em;
+    border: 2px solid #778899;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    object-fit: cover;
+}
+
+/* Brand name */
+.navbar-brand .brand-name {
+    font-size: 1em;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Animated brand letters */
+.navbar-brand .brand-name span {
+    opacity: 0;
+    display: inline-block;
+    animation: fadeInLetter 0.4s forwards;
+    white-space: pre;
+}
+
+@keyframes fadeInLetter {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Brand hover */
 .navbar-brand:hover {
-    color: #fff;
+    color: #778899;
 }
+
+/* Navbar background */
 .custom-green-bg {
-    background-color: var(--accent-primary, var(--category-tag-bg));
+    background-color: #D0F0C0;
 }
+
+/* === Nav links === */
 .navbar-nav {
     padding-right: 20px;
+    font-size: 1.1rem; /* base size for links */
 }
+
+.navbar-nav .nav-link {
+    color: #333;
+    font-weight: 700;
+    font-size: 1em; /* relative to .navbar-nav */
+    letter-spacing: 0.7px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    padding: 6px 10px;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #778899;
+    border-bottom: 2px solid #778899; /* underline only */
+    background-color: transparent;    /* no background highlight */
+}
+
+/* Desktop nav item spacing */
 .navbar-nav .nav-item {
     margin-right: 15px;
 }
+
 .navbar-nav .nav-item:last-child {
     margin-right: 10px;
 }
-.navbar-nav .nav-link {
-    transition: color 0.3s ease;
-}
-.navbar-nav .nav-link:hover {
-    color: #fff;
-}
 
-/* Responsive Navbar */
+/* === Responsive Navbar === */
 @media (max-width: 992px) {
+    /* Scale brand */
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+
+    /* Collapse menu links stacked full width */
     .navbar-nav {
+        font-size: 1rem;
         display: flex;
         flex-direction: column;
-        align-items: flex-end;
+        align-items: stretch; /* ensures full width */
     }
+
+    .navbar-nav .nav-item {
+        display: block;
+        width: 100%;
+        margin: 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-nav .nav-link {
+        display: block;
+        width: 100%;
+        text-align: right; /* all links consistently right-aligned */
+        padding: 10px;
+    }
+
+    .navbar-nav .nav-item:first-child {
+        border-top: 1px solid rgba(0, 0, 0, 0.2);
+        margin-top: 10px;
+    }
+
+    .navbar-nav .nav-item:last-child {
+        border-bottom: none;
+    }
+
     .navbar-collapse {
         margin-top: 10px;
         padding-left: 10px;
-        border-left: none;
     }
+
     .navbar-toggler {
         padding-left: 10px;
         margin-right: 10px;
     }
-    .navbar-nav .nav-item {
-        display: block;
-        width: 100%;
-        text-align: right;
-        margin-right: 0;
-        margin-bottom: 10px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-        padding: 10px 10px;
+}
+
+/* Extra-narrow screens (Galaxy Z Fold outer display, older iPhones, etc.) */
+@media (max-width: 360px) {
+    .navbar-brand {
+        font-size: 1.2rem; /* shrink brand name */
     }
-    .navbar-nav .nav-item:first-child {
-        padding-top: 10px;
-        border-top: 1px solid rgba(0, 0, 0, 0.2);
-        margin-top: 10px;
+
+    .navbar-brand img {
+        width: 1.4em;
+        height: 1.4em;
+        margin: 0 0.4em;
     }
-    .navbar-nav .nav-item:last-child {
-        margin-bottom: 0;
-        border-bottom: none;
+
+    .navbar-toggler {
+        margin-right: 5px; /* tighter fit */
+        padding-left: 5px;
     }
 }
+
 
 /* === Footer === */
 footer.custom-footer {
