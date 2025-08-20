@@ -16,7 +16,7 @@ Routes:
 """
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, flash, Response, request
+from flask import Blueprint, render_template, redirect, url_for, flash, Response, request, jsonify
 
 from app.controllers.contact_form_controller import handle_contact_form_submission
 from app.services.blog_service import get_all_blog_post_identifiers
@@ -139,32 +139,55 @@ def sitemap():
     return Response(xml, mimetype='application/xml')
 
 
-@home_bp.route('/submit_contact', methods=['POST'])
+@home_bp.route('/submit-contact', methods=['POST'])
 def submit_contact():
-    """Handles the submission of the contact form.
+    """Handle contact form submission with AJAX support."""
+    # Check if this is an AJAX request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-    Validates the contact form input and delegates processing to the
-    contact form controller. Displays a flash message indicating the
-    success or failure of the submission.
-
-    Args:
-        None: Form data is obtained from the HTTP request context.
-
-    Returns:
-        werkzeug.wrappers.response.Response: A redirect response to the home page.
-    """
-    form = ContactForm()  # Create an instance of the form
-    if form.validate_on_submit():  # This will check CSRF token and validate form data
-        # Delegate to the controller for handling form submission
-        success, flash_message, flash_category = handle_contact_form_submission({
+    form = ContactForm()
+    if form.validate_on_submit():
+        # Get form data
+        form_data = {
             'name': form.name.data,
             'email': form.email.data,
             'message': form.message.data
-        })
+        }
 
-        flash(flash_message, flash_category)
+        # Process the form using your existing controller
+        success, message, category = handle_contact_form_submission(form_data)
+
+        if is_ajax:
+            # Return JSON response for AJAX requests
+            return jsonify({
+                'success': success,
+                'message': message,
+                'category': category
+            })
+        else:
+            # Fallback for non-AJAX requests (regular form submission)
+            flash(message, category)
+            if success:
+                return redirect(url_for('home_bp.index') + '#contact')
+            else:
+                return redirect(url_for('home_bp.index') + '#contact')
+
+    # Handle validation errors
+    if is_ajax:
+        # Collect validation errors for AJAX
+        error_messages = []
+        for field, errors in form.errors.items():
+            for error in errors:
+                error_messages.append(f"{field.title()}: {error}")
+
+        return jsonify({
+            'success': False,
+            'message': '; '.join(error_messages),
+            'category': 'danger'
+        }), 400
     else:
-        # If form validation fails, flash an error message
-        flash('Please check your input and try again.', 'error')
-
-    return redirect(url_for('home_bp.index'))
+        # Flash errors for regular form submission
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field.title()}: {error}", 'danger')
+        return redirect(url_for('home_bp.index') + '#contact')

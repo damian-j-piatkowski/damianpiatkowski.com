@@ -63,5 +63,5 @@ def test_handle_contact_form_submission_with_valid_data(
         success, flash_message, flash_category = handle_contact_form_submission(valid_form_data)
 
         assert success is True
-        assert flash_message == 'Message sent successfully!'
+        assert flash_message == 'I’ll get back to you soon!'
         assert flash_category == 'success'

@@ -38,7 +38,7 @@ def handle_contact_form_submission(form_data: dict) -> tuple[bool, str, str]:
     # 4. Try to send the email
     try:
         send_contact_email(name, email, message)
-        return True, 'Message sent successfully!', 'success'
+        return True, 'I’ll get back to you soon!', 'success'
     except EmailSendError as e:
         # Log the error and return a failure response
         current_app.logger.error(f"Contact form submission failed: {str(e)}")
