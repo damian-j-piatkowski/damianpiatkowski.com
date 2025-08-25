@@ -15,33 +15,72 @@
 {% endblock %}
 
 {% block content %}
-<section id="about" class="about-section">
-    <div class="container-fluid p-0 h-100">
-        <div class="row no-gutters h-100">
-            <div class="col-12 col-lg-6 p-0"> {# Column for the image #}
-                <picture class="w-100 h-100">
-                    <source media="(min-width: 1200px)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_2560w.jpg') }}">
-                    <source media="(min-width: 992px) and (orientation: landscape)" srcset="{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg') }}">
+<section class="about-hero">
+    <!-- Responsive background image -->
+    <div class="about-bg">
+        <picture>
+            <!-- Ultra-large desktop (16:9, very wide) -->
+            <source type="image/webp" media="(min-width: 1200px)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_2560w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_2560w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 1200px)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_2560w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_2560w.jpg', v=VERSION) }} 2x">
 
-                    <source media="(min-width: 1024px) and (max-width: 1199px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_1200w.jpg') }}">
-                    <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_960w.jpg') }}">
+            <!-- Tall tablets in portrait (e.g. iPad, 3:4 or taller) -->
+            <source type="image/webp" media="(min-width: 768px) and (max-aspect-ratio: 3/4)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_960w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_1920w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 768px) and (max-aspect-ratio: 3/4)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_960w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_1920w.jpg', v=VERSION) }} 2x">
 
-                    <source media="(min-width: 320px) and (max-width: 767px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_640w.jpg') }}">
-                    <source media="(max-width: 319px)" srcset="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}">
+            <!-- Desktop & landscape tablets (≥992px wide, wider than 3:4) -->
+            <source type="image/webp" media="(min-width: 992px)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_1920w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_1920w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 992px)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_1920w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_16x9_1920w.jpg', v=VERSION) }} 2x">
 
-                    <img src="{{ url_for('static', filename='images/about_me/about_me_4x5_320w.jpg') }}" class="img-fluid w-100 h-100" alt="About Me">
-                </picture>
-            </div>
-            <div class="col-12 col-lg-6 p-0 position-relative"> {# Column for the content overlay #}
-                <div class="about-content-overlay">
-                    <div class="about-content">
-                        <p>Hello! I'm a passionate back-end developer with a love for crafting efficient and scalable server-side applications. Based and born in Łódź, Poland, I also lived for four unforgettable years in Hanoi, Vietnam.</p>
-                        <p>When I'm not coding, you can find me immersed in the world of gaming, with "Breath of the Wild" and "Hades" being my all-time favorite adventures. I also enjoy getting lost in both fiction and non-fiction books, with favorites including "The Final Empire" trilogy and non-fiction gems like "King Leopold's Ghost" and "The Sixth Extinction".</p>
-                        <p> As a big football enthusiast and minimalist at heart, I find joy in simplicity and the thrill of a good match. Feel free to get in touch to discuss projects or just share your favorite game!</p>
-                    </div>
-                </div>
-            </div>
+            <!-- Surface Duo and similar wide but small devices -->
+            <source type="image/webp" media="(min-width: 480px) and (max-width: 767px) and (min-aspect-ratio: 2.2/1)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_960w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_1920w.webp', v=VERSION) }} 2x">
+            <source media="(min-width: 480px) and (max-width: 767px) and (min-aspect-ratio: 2.2/1)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_960w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_4x5_1920w.jpg', v=VERSION) }} 2x">
+
+            <!-- Regular mobile (2:3 crop) - excludes wide devices -->
+            <source type="image/webp" media="(max-width: 767px) and not (min-aspect-ratio: 2.2/1)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_2x3_640w.webp', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_2x3_1280w.webp', v=VERSION) }} 2x">
+            <source media="(max-width: 767px) and not (min-aspect-ratio: 2.2/1)" srcset="
+                {{ url_for('static', filename='images/about-hero/about-hero_2x3_640w.jpg', v=VERSION) }} 1x,
+                {{ url_for('static', filename='images/about-hero/about-hero_2x3_1280w.jpg', v=VERSION) }} 2x">
+
+            <!-- Fallback -->
+            <img src="{{ url_for('static', filename='images/about-hero/about-hero_2x3_640w.jpg', v=VERSION) }}" alt="Portrait of Damian Piatkowski">
+        </picture>
+    </div>
+
+    <!-- Hero Text Content - positioned in the empty right space -->
+    <div class="about-text">
+        <h1 class="about-title">Inspired by Stories, Driven by Ideas</h1>
+        <div class="about-description">
+            <p>Hello! I'm a passionate full-stack developer with a love for building efficient back-end systems and crafting clean, engaging front-end experiences. Based and born in Łódź, Poland, I also lived for four unforgettable years in Hanoi, Vietnam.</p>
+
+            <p>When I'm not coding, you can find me immersed in the world of gaming, with "Breath of the Wild" and "Hades" being my all-time favorite adventures. I also enjoy getting lost in both fiction and non-fiction books, with favorites including "The Final Empire" trilogy and non-fiction gems like "King Leopold's Ghost" and "The Sixth Extinction".</p>
+
+            <p>As a big football enthusiast and minimalist at heart, I find joy in simplicity and the thrill of a good match. Feel free to get in touch to discuss projects or just share your favorite game!</p>
         </div>
+        <a href="/#contact-form" class="btn btn-custom-green btn-lg" id="lets_connect_button">
+            <span>Let's Connect</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polygon points="22,2 15,22 11,13 2,9 22,2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </a>
     </div>
 </section>
 {% endblock %}
