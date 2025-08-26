@@ -13,7 +13,9 @@
 
 {% block og_type -%}article{%- endblock %}
 {% block og_url -%}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{%- endblock %}
-{% block og_image -%}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{%- endblock %}
+{% block og_image -%}
+    {{ url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True) }}
+{%- endblock %}
 {% block og_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
 
 {% block canonical -%}
@@ -23,7 +25,9 @@
 {%- endblock %}
 
 {% block twitter_description -%}{{ post.meta_description | trim }}{%- endblock %}
-{% block twitter_image -%}{{ url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True) }}{%- endblock %}
+{% block twitter_image -%}
+    {{ url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True) }}
+{%- endblock %}
 {% block twitter_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
 
 {% block structured_data -%}
@@ -32,7 +36,7 @@
     "@type": "BlogPosting",
     "headline": post.title,
     "description": post.meta_description,
-    "image": url_for('static', filename=post.hero_base[8:] ~ '/large.jpg', _external=True),
+    "image": url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True),
     "author": {
       "@type": "Person",
       "name": "Damian Piatkowski"
@@ -78,23 +82,36 @@
 
             {% if post.hero_base %}
                 <div class="hero-image-container mb-4">
-                    <img src="{{ post.hero_base }}/medium.jpg"
-                         srcset="{{ post.hero_base }}/xs.jpg 480w,
-                                 {{ post.hero_base }}/small.jpg 600w,
-                                 {{ post.hero_base }}/medium.jpg 800w,
-                                 {{ post.hero_base }}/large.jpg 1200w,
-                                 {{ post.hero_base }}/xl.jpg 1600w,
-                                 {{ post.hero_base }}/retina.jpg 1920w"
-                         sizes="(max-width: 575.98px) 100vw,
-                                (max-width: 767.98px) 100vw,
-                                (max-width: 991.98px) 696px,
-                                (max-width: 1199.98px) 960px,
-                                1140px"
-                         alt="Hero image for {{ post.title }}"
-                         loading="lazy"
-                         class="hero-image">
+                    <picture>
+                      <!-- Modern browsers: WebP -->
+                      <source
+                        srcset="{{ post.hero_base }}/hero_16x9_1280w.webp 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.webp 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.webp 2560w"
+                        sizes="(max-width: 991.98px) 100vw,
+                               (max-width: 1399.98px) 90vw,
+                               80vw"
+                        type="image/webp">
+
+                      <!-- Fallback: JPEG -->
+                      <source
+                        srcset="{{ post.hero_base }}/hero_16x9_1280w.jpg 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.jpg 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.jpg 2560w"
+                        sizes="(max-width: 991.98px) 100vw,
+                               (max-width: 1399.98px) 90vw,
+                               80vw"
+                        type="image/jpeg">
+
+                      <!-- Default fallback img (old browsers / no srcset support) -->
+                      <img
+                        src="{{ post.hero_base }}/hero_16x9_1920w.jpg"
+                        alt="Hero image for {{ post.title }}"
+                        loading="lazy"
+                        class="hero-image">
+                    </picture>
                 </div>
-            {% endif %}
+                {% endif %}
 
             <div class="blog-content">
                 {{ post.html_content | safe }}

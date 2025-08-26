@@ -112,7 +112,7 @@ def enrich_with_image_paths(
                 blog_image_base,
                 slug,
                 image_type,
-                "retina.jpg"
+                "hero_16x9_1920w.jpg"
             )
 
             if not os.path.exists(image_path):
