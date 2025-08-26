@@ -58,9 +58,43 @@
 {% block content %}
     <div class="blog-page-content-wrapper d-flex flex-column flex-grow-1">
         <section class="blog-hero">
+            <!-- Blog branding graphics -->
+            <div class="blog-graphics" aria-hidden="true">
+                <!-- Blog Logo/Icon (your purple keyboard) -->
+                <div class="blog-icon">
+                    {% include "partials/_keyboard_icon.html" %}
+                </div>
+            </div>
+
+            <!-- Miniature portrait on the right -->
+            <div class="blog-portrait">
+              <picture>
+                <!-- Desktop (≥768px) -->
+                <source type="image/webp" media="(min-width: 768px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_400w.webp', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_800w.webp', v=VERSION) }} 2x">
+                <source media="(min-width: 768px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_400w.jpg', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_800w.jpg', v=VERSION) }} 2x">
+
+                <!-- Mobile (<768px) -->
+                <source type="image/webp" media="(max-width: 767px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_300w.webp', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_600w.webp', v=VERSION) }} 2x">
+                <source media="(max-width: 767px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_300w.jpg', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_600w.jpg', v=VERSION) }} 2x">
+
+                <!-- Fallback -->
+                <img src="{{ url_for('static', filename='images/blog-banner/banner_profile_300w.jpg', v=VERSION) }}"
+                     alt="Portrait of Damian Piatkowski">
+              </picture>
+            </div>
+
+            <!-- Blog Text Content -->
             <div class="container text-center">
-                <h1 class="text-overlay">My Blog</h1>
-                <p class="text-overlay">Insights and articles on software development and more.</p>
+                <h1>Lessons, Logged</h1>
+                <p>Solutions recorded. Insights captured.</p>
             </div>
         </section>
 

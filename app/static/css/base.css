@@ -309,3 +309,19 @@ footer.custom-footer .social-icons i {
   color: #fff;
   transform: translateY(-2px);
 }
+
+@keyframes blogSwing {
+  0%, 100% { transform: translateY(0px) rotate(-3deg); opacity: 0.25; }
+  50% { transform: translateY(-8px) rotate(3deg); opacity: 0.35; }
+}
+
+
+@keyframes blogFloatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.25; }
+  50% { transform: translateY(-15px) rotate(2deg); opacity: 0.35; }
+}
+
+@keyframes blogFloatFast {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+  50% { transform: translateY(-10px) rotate(-1deg); opacity: 0.3; }
+}
