@@ -48,7 +48,7 @@ def test_enrich_with_image_paths_local_fallback(mock_url_for, mock_exists, app):
 
     # Assert that the path corresponding to the post slug was checked for a thumbnail image
     expected_path = os.path.join(
-        app.static_folder, "blog-images", "missing-thumb", "thumbnail", "retina.jpg"
+        app.static_folder, "blog-images", "missing-thumb", "thumbnail", "desktop.jpg"
     )
     mock_exists.assert_called_once_with(expected_path)
 
@@ -65,7 +65,7 @@ def test_enrich_with_image_paths_local_found(mock_url_for, mock_exists, app):
     assert enriched[0]["thumb_base"] == "/static/blog-images/post-1/thumbnail"
 
     expected_path = os.path.join(
-        app.static_folder, "blog-images", "post-1", "thumbnail", "retina.jpg"
+        app.static_folder, "blog-images", "post-1", "thumbnail", "desktop.jpg"
     )
     mock_exists.assert_called_once_with(expected_path)
 
@@ -83,7 +83,7 @@ def test_enrich_with_image_paths_local_hero_fallback(mock_url_for, mock_exists, 
     assert enriched[0]["hero_base"] == "/static/blog-images/default/hero"
 
     expected_path = os.path.join(
-        app.static_folder, "blog-images", "missing-hero", "hero", "retina.jpg"
+        app.static_folder, "blog-images", "missing-hero", "hero", "hero_16x9_1920w.jpg"
     )
     mock_exists.assert_called_once_with(expected_path)
 
@@ -101,7 +101,7 @@ def test_enrich_with_image_paths_local_hero_found(mock_url_for, mock_exists, app
     assert enriched[0]["hero_base"] == "/static/blog-images/post-hero/hero"
 
     expected_path = os.path.join(
-        app.static_folder, "blog-images", "post-hero", "hero", "retina.jpg"
+        app.static_folder, "blog-images", "post-hero", "hero", "hero_16x9_1920w.jpg"
     )
     mock_exists.assert_called_once_with(expected_path)
 

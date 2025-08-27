@@ -276,11 +276,15 @@
 
 .blog-thumbnail {
     width: 100%;
-    aspect-ratio: 3/2;
+    height: auto;
+    aspect-ratio: 3 / 2; /* matches your 800x533, 600x400, etc. */
     object-fit: cover;
+    object-position: center;
+    display: block;
     border-bottom: 1px solid var(--blog-border);
     background-color: #f8f9fa;
-    display: block;
+    image-rendering: -webkit-optimize-contrast; /* helps on Chrome */
+    image-rendering: crisp-edges; /* fallback */
 }
 
 .blog-post-card .card-body {
@@ -310,10 +314,6 @@
 @media (max-width: 599px) {
     .blog-post-card {
         max-width: none;
-    }
-
-    .blog-thumbnail {
-        aspect-ratio: 16/9;
     }
 }
 

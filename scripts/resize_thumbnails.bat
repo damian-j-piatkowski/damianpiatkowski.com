@@ -24,24 +24,28 @@ echo Changed to directory: %input_dir%
 for %%F in (*.jpg *.jpeg *.png) do (
     echo Found: %%F
 
-    echo Creating retina.jpg   ^(850x567^) Retina
-    magick "%%F" -resize 850x^ -gravity center -crop 850x567+0+0 -strip -quality 92 -sharpen 0x1.0 "retina.jpg"
+    echo Creating desktop@2x.jpg ^(640x427^) Desktop Retina
+    magick "%%F" -resize 640x^ -gravity center -crop 640x427+0+0 -strip -quality 90 -unsharp 0x0.75+0.75+0.008 "desktop@2x.jpg"
+    magick "desktop@2x.jpg" -quality 90 "desktop@2x.webp"
 
-    echo Creating desktop.jpg  ^(640x426^) Desktop
-    magick "%%F" -resize 640x^ -gravity center -crop 640x426+0+0 -strip -quality 92 -sharpen 0x1.0 "desktop.jpg"
+    echo Creating desktop.jpg   ^(320x213^) Desktop
+    magick "%%F" -resize 320x^ -gravity center -crop 320x213+0+0 -strip -quality 90 -unsharp 0x0.75+0.75+0.008 "desktop.jpg"
+    magick "desktop.jpg" -quality 90 "desktop.webp"
 
-    echo Creating tablet.jpg   ^(480x320^) Tablet
-    magick "%%F" -resize 480x^ -gravity center -crop 480x320+0+0 -strip -quality 92 -sharpen 0x1.0 "tablet.jpg"
+    echo Creating tablet.jpg    ^(450x300^) Tablet
+    magick "%%F" -resize 450x^ -gravity center -crop 450x300+0+0 -strip -quality 90 -unsharp 0x0.75+0.75+0.008 "tablet.jpg"
+    magick "tablet.jpg" -quality 90 "tablet.webp"
 
-    echo Creating mobile.jpg   ^(320x213^) Mobile
-    magick "%%F" -resize 320x^ -gravity center -crop 320x213+0+0 -strip -quality 92 -sharpen 0x1.0 "mobile.jpg"
+    echo Creating mobile.jpg    ^(350x233^) Mobile
+    magick "%%F" -resize 350x^ -gravity center -crop 350x233+0+0 -strip -quality 90 -unsharp 0x0.75+0.75+0.008 "mobile.jpg"
+    magick "mobile.jpg" -quality 90 "mobile.webp"
 
     echo.
-    echo Successfully created 3:2 thumbnail images:
-    echo    retina.jpg    ^(850x567^) Retina
-    echo    desktop.jpg   ^(640x426^) Desktop
-    echo    tablet.jpg    ^(480x320^) Tablet
-    echo    mobile.jpg    ^(320x213^) Mobile
+    echo Successfully created optimized 3:2 thumbnail images:
+    echo    desktop@2x.jpg ^(640x427^) Retina
+    echo    desktop.jpg    ^(320x213^) Desktop
+    echo    tablet.jpg     ^(450x300^) Tablet
+    echo    mobile.jpg     ^(350x233^) Mobile
     goto :done
 )
 

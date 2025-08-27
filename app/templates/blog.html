@@ -202,18 +202,38 @@
                                 <div class="blog-posts-grid">
                                     {% for post in posts_data %}
                                         <div class="blog-post-card">
-                                            <img
-                                                src="{{ post.thumb_base }}/desktop.jpg"
-                                                srcset="{{ post.thumb_base }}/mobile.jpg 283w,
-                                                        {{ post.thumb_base }}/tablet.jpg 425w,
-                                                        {{ post.thumb_base }}/desktop.jpg 566w,
-                                                        {{ post.thumb_base }}/retina.jpg 850w"
+                                            <picture>
+                                              <!-- WebP first -->
+                                              <source
+                                                srcset="{{ post.thumb_base }}/mobile.webp?v={{ VERSION }} 350w,
+                                                        {{ post.thumb_base }}/tablet.webp?v={{ VERSION }} 450w,
+                                                        {{ post.thumb_base }}/desktop.webp?v={{ VERSION }} 320w,
+                                                        {{ post.thumb_base }}/desktop@2x.webp?v={{ VERSION }} 640w"
                                                 sizes="(max-width: 575.98px) 100vw,
                                                        (max-width: 991.98px) 50vw,
                                                        33vw"
+                                                type="image/webp">
+
+                                              <!-- JPEG fallback -->
+                                              <source
+                                                srcset="{{ post.thumb_base }}/mobile.jpg?v={{ VERSION }} 350w,
+                                                        {{ post.thumb_base }}/tablet.jpg?v={{ VERSION }} 450w,
+                                                        {{ post.thumb_base }}/desktop.jpg?v={{ VERSION }} 320w,
+                                                        {{ post.thumb_base }}/desktop@2x.jpg?v={{ VERSION }} 640w"
+                                                sizes="(max-width: 575.98px) 100vw,
+                                                       (max-width: 991.98px) 50vw,
+                                                       33vw"
+                                                type="image/jpeg">
+
+                                              <!-- Default fallback img -->
+                                              <img
+                                                src="{{ post.thumb_base }}/desktop.jpg?v={{ VERSION }}"
                                                 class="blog-thumbnail"
                                                 alt="Thumbnail for {{ post.title }}"
+                                                width="320" height="213"
                                                 loading="lazy">
+                                            </picture>
+
 
                                             <div class="card-body">
                                                 <h5 class="card-title">{{ post.title }}</h5>
@@ -229,7 +249,6 @@
                                                     {% endif %}
                                                 </div>
 
-                                                <!-- Category Tags -->
                                                 {% if post.categories %}
                                                     <div class="category-tags mb-2">
                                                         {% for category in post.categories %}

@@ -85,27 +85,31 @@
                     <picture>
                       <!-- Modern browsers: WebP -->
                       <source
-                        srcset="{{ post.hero_base }}/hero_16x9_1280w.webp 1280w,
-                                {{ post.hero_base }}/hero_16x9_1920w.webp 1920w,
-                                {{ post.hero_base }}/hero_16x9_2560w.webp 2560w"
-                        sizes="(max-width: 991.98px) 100vw,
+                        srcset="{{ post.hero_base }}/hero_16x9_640w.webp?v={{ VERSION }} 640w,
+                                {{ post.hero_base }}/hero_16x9_1280w.webp?v={{ VERSION }} 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.webp?v={{ VERSION }} 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.webp?v={{ VERSION }} 2560w"
+                        sizes="(max-width: 575.98px) 90vw,
+                               (max-width: 991.98px) 100vw,
                                (max-width: 1399.98px) 90vw,
                                80vw"
                         type="image/webp">
 
                       <!-- Fallback: JPEG -->
                       <source
-                        srcset="{{ post.hero_base }}/hero_16x9_1280w.jpg 1280w,
-                                {{ post.hero_base }}/hero_16x9_1920w.jpg 1920w,
-                                {{ post.hero_base }}/hero_16x9_2560w.jpg 2560w"
-                        sizes="(max-width: 991.98px) 100vw,
-                               (max-width: 1399.98px) 90vw,
-                               80vw"
+                        srcset="{{ post.hero_base }}/hero_16x9_640w.jpg?v={{ VERSION }} 640w,
+                                {{ post.hero_base }}/hero_16x9_1280w.jpg?v={{ VERSION }} 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.jpg?v={{ VERSION }} 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.jpg?v={{ VERSION }} 2560w"
+                        sizes="(max-width: 575.98px) 100vw,   /* small phones full width */
+                               (max-width: 991.98px) 50vw,    /* medium screens half width */
+                               (max-width: 1399.98px) 70vw,   /* large screens */
+                               60vw"
                         type="image/jpeg">
 
-                      <!-- Default fallback img (old browsers / no srcset support) -->
+                      <!-- Fallback img -->
                       <img
-                        src="{{ post.hero_base }}/hero_16x9_1920w.jpg"
+                        src="{{ post.hero_base }}/hero_16x9_1280w.jpg?v={{ VERSION }}"
                         alt="Hero image for {{ post.title }}"
                         loading="lazy"
                         class="hero-image">
@@ -129,18 +133,38 @@
                     {% for related_post in related_posts %}
                         <article class="related-post-card">
                             <div class="related-post-thumbnail">
+                              <picture>
+                                <!-- WebP first -->
+                                <source
+                                  srcset="{{ related_post.thumb_base }}/mobile.webp?v={{ VERSION }} 350w,
+                                          {{ related_post.thumb_base }}/tablet.webp?v={{ VERSION }} 450w,
+                                          {{ related_post.thumb_base }}/desktop.webp?v={{ VERSION }} 320w,
+                                          {{ related_post.thumb_base }}/desktop@2x.webp?v={{ VERSION }} 640w"
+                                  sizes="(max-width: 575.98px) 100vw,
+                                         (max-width: 991.98px) 50vw,
+                                         33vw"
+                                  type="image/webp">
+
+                                <!-- JPEG fallback -->
+                                <source
+                                  srcset="{{ related_post.thumb_base }}/mobile.jpg?v={{ VERSION }} 350w,
+                                          {{ related_post.thumb_base }}/tablet.jpg?v={{ VERSION }} 450w,
+                                          {{ related_post.thumb_base }}/desktop.jpg?v={{ VERSION }} 320w,
+                                          {{ related_post.thumb_base }}/desktop@2x.jpg?v={{ VERSION }} 640w"
+                                  sizes="(max-width: 575.98px) 100vw,
+                                         (max-width: 991.98px) 50vw,
+                                         33vw"
+                                  type="image/jpeg">
+
+                                <!-- Default fallback img -->
                                 <img
-                                    src="{{ related_post.thumb_base }}/desktop.jpg"
-                                    srcset="{{ related_post.thumb_base }}/mobile.jpg 283w,
-                                            {{ related_post.thumb_base }}/tablet.jpg 425w,
-                                            {{ related_post.thumb_base }}/desktop.jpg 566w,
-                                            {{ related_post.thumb_base }}/retina.jpg 1132w"
-                                    sizes="(max-width: 575.98px) 100vw,
-                                           (max-width: 991.98px) 50vw,
-                                           33vw"
-                                    alt="Thumbnail for {{ related_post.title }}"
-                                    loading="lazy">
+                                  src="{{ related_post.thumb_base }}/desktop.jpg?v={{ VERSION }}"
+                                  alt="Thumbnail for {{ related_post.title }}"
+                                  width="320" height="213"
+                                  loading="lazy">
+                              </picture>
                             </div>
+
 
                             <div class="related-post-content">
                                 <h4 class="related-post-title">

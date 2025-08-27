@@ -95,6 +95,7 @@ def enrich_with_image_paths(
     blog_image_base = current_app.config.get("BLOG_IMAGE_BASE_PATH", "images/blog-images")
     fallback_slug = current_app.config.get("FALLBACK_BLOG_IMAGE_BASE", "default")
 
+    file_to_check = "hero_16x9_1920w.jpg" if image_type != 'thumbnail' else 'desktop.jpg'
     for post in posts:
         slug = post.get("slug")
         if not slug:
@@ -112,7 +113,7 @@ def enrich_with_image_paths(
                 blog_image_base,
                 slug,
                 image_type,
-                "hero_16x9_1920w.jpg"
+                file_to_check
             )
 
             if not os.path.exists(image_path):
