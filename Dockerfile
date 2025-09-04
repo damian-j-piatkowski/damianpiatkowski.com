@@ -15,14 +15,17 @@ COPY . /app
 # Make wait-for-it.sh executable
 RUN chmod +x /app/scripts/wait-for-it.sh
 
-# Install any needed Python packages specified in requirements.txt
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 5000 (or the port specified by FLASK_RUN_PORT) available to the world outside this container
-EXPOSE 5000
+# Expose both ports:
+# - 5000 for Flask dev server
+# - 8000 for Gunicorn in production
+EXPOSE 5000 8000
 
-# Set environment variables
-ENV NAME World
+# Environment variables (optional defaults)
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Command to run the Flask app with database migration
-CMD ["sh", "-c", "flask db upgrade && flask run --host=0.0.0.0 --port=${FLASK_RUN_PORT}"]
+# No default CMD — let docker-compose override it for dev/prod
+CMD ["python", "--version"]

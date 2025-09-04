@@ -1,6 +1,7 @@
-import os
-from dotenv import load_dotenv
 import json
+import os
+
+from dotenv import load_dotenv
 
 load_dotenv()  # Load from .env if not already in environment
 
@@ -22,9 +23,8 @@ class BaseConfig:
     GOOGLE_SERVICE_ACCOUNT_JSON = json.loads(os.environ.get('GOOGLE_SERVICE_ACCOUNT_JSON'))
 
     # App-specific
-    BASE_THUMBNAIL_PATH = os.environ.get('BASE_THUMBNAIL_PATH', '')
+    BLOG_IMAGE_BASE_PATH = os.environ.get('BLOG_IMAGE_BASE_PATH', '')
     DOWNLOAD_DIRECTORY = os.environ.get('DOWNLOAD_DIRECTORY', '')
-    BLOG_IMAGE_BASE_PATH = 'blog-images'
     PER_PAGE = 9
 
     # Mail
@@ -79,7 +79,7 @@ class ProductionConfig(BaseConfig):
     LOG_FILE = os.environ.get('LOG_FILE', '/logs/production/app.log')
     FALLBACK_LOG_PATH = os.environ.get('FALLBACK_LOG_PATH', '/logs/production/fallback.log')
     LOG_TO_DB = os.environ.get('LOG_TO_DB', 'True').lower() == 'true'
-    BLOG_IMAGE_BASE_PATH = "https://damianpiatkowski-blog.s3.eu-central-1.amazonaws.com"
+
 
 class TestingConfig(BaseConfig):
     TESTING = True
