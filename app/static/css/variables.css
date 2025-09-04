@@ -1,0 +1,43 @@
+/* === Common Variables === */
+:root {
+    /* Base Colors */
+    --color-light-bg: #ECEFF4;
+    --color-dark-text: #333;
+    --color-muted-text: #666666;
+    --color-link: #1a73e8;
+    --color-border: #e0e0e0;
+    --color-shadow: rgba(0, 0, 0, 0.05);
+
+    /* Brand Accent Colors */
+    --accent-primary: #D0F0C0;
+    --accent-primary-hover: #a0d08c;
+
+    /* Blog Colors */
+    --blog-bg-color: #ECEFF4;
+    --blog-accent: #D0F0C0;
+    --blog-accent-hover: #a0d08c;
+    --blog-text: #333;
+    --blog-text-muted: #666666;
+    --blog-link: #1a73e8;
+    --blog-border: #e0e0e0;
+    --blog-shadow: rgba(0, 0, 0, 0.05);
+
+    /* Category Tag Colors */
+    --category-tag-bg: #D0F0C0;
+    --category-tag-hover: #a0d08c;
+    --category-tag-text: #2d5016;
+    --category-tag-border: #a0d08c;
+
+    /* Buttons */
+    --button-text-color: #000;
+
+    /* Flash Messages */
+    --flash-success-bg: #D0F0C0;
+    --flash-error-bg: #f8d7da;
+
+    /* Footer */
+    --footer-bg: #778899;       /* same as hero background */
+    --footer-text: #F9F9F9;     /* off-white, readable */
+    --footer-link: #D0F0C0;     /* brand accent green */
+    --footer-link-hover: #a0d08c; /* darker green for hover */
+    }

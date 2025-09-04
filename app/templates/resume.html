@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Damian Piatkowski | Resume{% endblock %}
+
+{% block meta_description %}A snapshot of my diverse career journey – from teaching and finance to software development.{% endblock %}
+
+{% block og_url %}{{ url_for('resume_bp.resume', _external=True) }}{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ url_for('resume_bp.resume', _external=True) }}">
+{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("resume", ENV=ENV) }}
+{% endblock %}
+
+{% block content %}
+<section class="download-and-resume">
+    <div class="download-section">
+        <div class="container text-center funky-container">
+            <div class="funky-content">
+                <p>Download a PDF version of my resume:</p>
+                <a id="download_pdf_button" href="{{ url_for('static', filename='files/resume.pdf') }}" class="btn btn-custom-green" download>Download PDF</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="resume-section">
+        <div class="container">
+            <header class="resume-header">
+                <div class="photo-and-info">
+                    <div class="header-info">
+                        <h1>Damian Piatkowski</h1>
+                        <img src="{{ url_for('static', filename='images/resume.jpg') }}" alt="Profile Photo" class="resume-photo">
+                        <div class="contact-info">
+                            <a href="mailto:damian.j.piatkowski@gmail.com"><i class="fas fa-envelope"></i></a>
+                            <a href="tel:+48796216095"><i class="fas fa-phone"></i></a>
+                            <a href="https://github.com/damian-j-piatkowski" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                            <a href="http://damianpiatkowski.com" target="_blank" rel="noopener noreferrer"><i class="fas fa-globe"></i></a>
+                            <a href="https://www.linkedin.com/in/damian-piatkowski/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-description">
+                    <p>Experienced Back-end Python Developer specializing in architecting efficient backend systems. Enthusiastic about Test-Driven Development and exploring optimal design patterns.</p>
+                    <p>Documents lessons from a programming career and books read at <a href="http://damianpiatkowski.com/blog" target="_blank">damianpiatkowski.com/blog</a>.</p>
+                    <p>Possesses high-level interpersonal skills, experienced in working in international environments, and recommended as a professional and reliable person.</p>
+                </div>
+
+            </header>
+
+            <section class="resume-section-content">
+                <h2>EXPERIENCE</h2>
+                <article>
+                    <h3>Back-end Python Developer & Technical Architect - IQVIA (November 2022 - Present)</h3>
+                    <ul>
+                        <li>Continuing hands-on development while advising on architectural decisions</li>
+                        <li>Leading the design and implementation of backend systems for a complex web application using Flask</li>
+                        <li>Developing and maintaining reusable Python libraries to meet the team's needs</li>
+                        <li>Providing technical guidance and conducting code reviews to ensure adherence to best practices and coding standards across the team</li>
+                        <li>Collaborating with business stakeholders to estimate project efforts and costs</li>
+                        <li>Devising and conducting knowledge sharing sessions to improve team skills and knowledge</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>Back-end Python Developer - IQVIA (April 2021 - November 2022)</h3>
+                    <ul>
+                        <li>Automated various business processes using Python, enhancing efficiency and productivity</li>
+                        <li>Developed API wrappers and other utility libraries to promote code reuse across the team</li>
+                        <li>Supported discovery calls with business teams to align technical solutions with business needs</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>RPA Developer - Nordea, Poland (Oct 2018 – April 2021)</h3>
+                    <ul>
+                        <li>Collaborated closely with RPA Analysts and business stakeholders to analyze and understand requirements, and identify potential improvements from an RPA perspective</li>
+                        <li>Developed efficient, well-structured, and scalable automation solutions using Blue Prism</li>
+                        <li>Created technical documentation for automated processes</li>
+                        <li>Participated in interviews alongside a team leader as a technical expert</li>
+                        <li>Maintained existing bots and implemented changes to meet the business's changing demands</li>
+                        <li>Contributed to projects producing 50-100 FTEs back to business</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>Process Officer - Nordea, Poland (Apr 2017 – Sep 2018)</h3>
+                    <ul>
+                        <li>Controlled, updated, and authorized data in banking systems and applications</li>
+                        <li>Coordinated process knowledge handover from Swedish counterparts through training in Stockholm, and shared the acquired process with the team upon returning to Poland</li>
+                        <li>Proposed and implemented changes to increase the efficiency of supported processes</li>
+                        <li>Provided English language training to co-workers</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3>English Teacher - DreamSky, Vietnam (Sep 2013 – Jan 2017)</h3>
+                    <ul>
+                        <li>Delivered English classes in both public and private schools in Hanoi, Vietnam</li>
+                        <li>Managed classrooms ranging from 10 to 50 students</li>
+                        <li>Prepared various materials including exercises, tests, and interactive presentations</li>
+                        <li>Conducted placement tests to evaluate students’ language levels</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="resume-section-content">
+                <div class="education-and-languages-container">
+                    <div class="education-subsection">
+                        <h2>EDUCATION</h2>
+                        <ul>
+                            <li>BP Certified Professional Developer | Oct 2020</li>
+                            <li>BP Certified Developer | Apr 2019</li>
+                            <li>Introduction to Computer Science and Programming using Python | Apr 2018 - MIT, edX</li>
+                            <li>IELTS - overall band score 8.5/9 | Aug 2015</li>
+                            <li>Master's Degree in Sociology | Oct 2011 – Jun 2013 - University of Lodz, Poland</li>
+                            <li>Bachelor's Degree in Sociology | Oct 2008 - Jun 2011 - University of Lodz, Poland</li>
+                        </ul>
+                    </div>
+                    <div class="languages-subsection">
+                        <h2>LANGUAGES</h2>
+                        <ul>
+                            <li>English - fluent</li>
+                            <li>Polish – native speaker</li>
+                            <li>Vietnamese – intermediate</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="resume-section-content">
+                <h2>SKILLS</h2>
+                <div class="skills-container">
+                    <div class="skills-subsection">
+                        <h3>Technical Skills</h3>
+                        <ul>
+                            <li>Flask</li>
+                            <li>HTML & CSS</li>
+                            <li>Linux</li>
+                            <li>Python</li>
+                            <li>RESTful API Design</li>
+                            <li>SQL</li>
+                            <li>Test-Driven Development</li>
+                            <li>Version Control (Git)</li>
+                        </ul>
+                    </div>
+                    <div class="skills-subsection">
+                        <h3>Soft Skills</h3>
+                        <ul>
+                            <li>Adaptability</li>
+                            <li>Attention to Detail</li>
+                            <li>Customer Focus</li>
+                            <li>Effective Communication with Business Stakeholders</li>
+                            <li>Mentoring and Training Team Members</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+# Use the Selenium standalone Chrome image as the base image
+FROM selenium/standalone-chrome:127.0.6533.119
+
+# Switch to root user to install packages
+USER root
+
+# Install necessary packages, dependencies, and Chromedriver in a single RUN command to minimize layers
+RUN apt-get update && \
+    apt-get install -y software-properties-common python3 python3-pip python3-venv curl unzip && \
+    add-apt-repository universe && \
+    curl --retry 5 --max-time 300 -sS -o chromedriver_linux64.zip https://storage.googleapis.com/chrome-for-testing-public/127.0.6533.119/linux64/chromedriver-linux64.zip && \
+    unzip chromedriver_linux64.zip -d /tmp/chromedriver && \
+    mv /tmp/chromedriver/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
+    chmod +x /usr/local/bin/chromedriver && \
+    rm chromedriver_linux64.zip && \
+    rm -f /usr/bin/google-chrome && \
+    echo '#!/bin/sh\n/opt/chrome-linux64/chrome --no-sandbox --disable-dev-shm-usage "$@"\n' > /usr/local/bin/google-chrome && \
+    chmod +x /usr/local/bin/google-chrome && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /app
+
+# Create a Python virtual environment and install Python dependencies
+COPY . /app
+RUN python3 -m venv /app/venv && \
+    . /app/venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Create the screenshots, Downloads, and .pytest_cache directories with the right permissions
+RUN mkdir -p /app/screenshots /home/seluser/Downloads /app/.pytest_cache && \
+    chown -R seluser:seluser /app/screenshots /home/seluser/Downloads /app/.pytest_cache && \
+    chmod -R 755 /app/screenshots /home/seluser/Downloads /app/.pytest_cache
+
+# Add necessary environment variables
+ENV DISPLAY=:99
+ENV CHROME_BIN=/usr/bin/google-chrome
+ENV CHROMEDRIVER_BIN=/usr/local/bin/chromedriver
+ENV PATH="/app/venv/bin:$PATH"
+
+# Switch back to seluser for running the tests
+USER seluser
+
+# This mimics the entrypoint.sh behavior: activate virtual environment and execute pytest
+ENTRYPOINT ["/bin/sh", "-c", ". /app/venv/bin/activate && exec \"$@\"", "--"]

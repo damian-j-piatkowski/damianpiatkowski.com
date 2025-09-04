@@ -1,0 +1,222 @@
+{% extends "base.html" -%}
+{% from "macros/css_loader.html" import css_link_bundle -%}
+
+{% block title -%}
+    {% if post -%}
+        Damian Piatkowski Blog | {{ post.title }}
+    {%- else -%}
+        Damian Piatkowski Blog | Post Not Found
+    {%- endif %}
+{%- endblock %}
+
+{% block meta_description -%}{{ post.meta_description }}{%- endblock %}
+
+{% block og_type -%}article{%- endblock %}
+{% block og_url -%}{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}{%- endblock %}
+{% block og_image -%}
+    {{ url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True) }}
+{%- endblock %}
+{% block og_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
+
+{% block canonical -%}
+    {% if post -%}
+        <link rel="canonical" href="{{ url_for('blog.render_single_blog_post', slug=post.slug, _external=True) }}">
+    {%- endif %}
+{%- endblock %}
+
+{% block twitter_description -%}{{ post.meta_description | trim }}{%- endblock %}
+{% block twitter_image -%}
+    {{ url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True) }}
+{%- endblock %}
+{% block twitter_image_alt -%}Hero image for blog post '{{ post.title }}'{%- endblock %}
+
+{% block structured_data -%}
+  {{ sd.json_ld({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.meta_description,
+    "image": url_for('static', filename=post.hero_base[8:] ~ '/hero_16x9_1920w.jpg', _external=True),
+    "author": {
+      "@type": "Person",
+      "name": "Damian Piatkowski"
+    },
+    "datePublished": post.created_at,
+    "keywords": post.keywords,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": url_for('blog.render_single_blog_post', slug=post.slug, _external=True)
+    }
+  }) }}
+{%- endblock %}
+
+{% block links -%}
+    {{ css_link_bundle("single_blog_post", ENV=ENV) }}
+{%- endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if post %}
+        <article class="single-blog-post">
+            <header class="mb-4">
+                <h1>{{ post.title }}</h1>
+                <div class="text-muted mb-3">
+                    <span>by Damian Piatkowski</span> •
+                    <time datetime="{{ post.created_at }}">
+                        {{ post.formatted_date }}
+                    </time>
+                    <span class="read-time gradient-pill">
+                        <i class="bi bi-clock" aria-hidden="true"></i>
+                        {{ post.read_time_minutes }} min read
+                    </span>
+                </div>
+
+                {% if post.categories %}
+                    <div class="category-tags-header">
+                        {% for category in post.categories %}
+                            <span class="category-tag category-tag-large">{{ category }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </header>
+
+            {% if post.hero_base %}
+                <div class="hero-image-container mb-4">
+                    <picture>
+                      <!-- Modern browsers: WebP -->
+                      <source
+                        srcset="{{ post.hero_base }}/hero_16x9_640w.webp?v={{ VERSION }} 640w,
+                                {{ post.hero_base }}/hero_16x9_1280w.webp?v={{ VERSION }} 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.webp?v={{ VERSION }} 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.webp?v={{ VERSION }} 2560w"
+                        sizes="(max-width: 575.98px) 90vw,
+                               (max-width: 991.98px) 100vw,
+                               (max-width: 1399.98px) 90vw,
+                               80vw"
+                        type="image/webp">
+
+                      <!-- Fallback: JPEG -->
+                      <source
+                        srcset="{{ post.hero_base }}/hero_16x9_640w.jpg?v={{ VERSION }} 640w,
+                                {{ post.hero_base }}/hero_16x9_1280w.jpg?v={{ VERSION }} 1280w,
+                                {{ post.hero_base }}/hero_16x9_1920w.jpg?v={{ VERSION }} 1920w,
+                                {{ post.hero_base }}/hero_16x9_2560w.jpg?v={{ VERSION }} 2560w"
+                        sizes="(max-width: 575.98px) 100vw,   /* small phones full width */
+                               (max-width: 991.98px) 50vw,    /* medium screens half width */
+                               (max-width: 1399.98px) 70vw,   /* large screens */
+                               60vw"
+                        type="image/jpeg">
+
+                      <!-- Fallback img -->
+                      <img
+                        src="{{ post.hero_base }}/hero_16x9_1280w.jpg?v={{ VERSION }}"
+                        alt="Hero image for {{ post.title }}"
+                        loading="lazy"
+                        class="hero-image">
+                    </picture>
+                </div>
+                {% endif %}
+
+            <div class="blog-content">
+                {{ post.html_content | safe }}
+            </div>
+        </article>
+
+        {% if related_posts and related_posts|length > 0 %}
+            <section class="related-posts-section">
+                <div class="related-posts-header">
+                    <h3>Related Articles</h3>
+                    <p class="related-posts-subtitle">Continue exploring these topics</p>
+                </div>
+
+                <div class="related-posts-grid">
+                    {% for related_post in related_posts %}
+                        <article class="related-post-card">
+                            <div class="related-post-thumbnail">
+                              <picture>
+                                <!-- WebP first -->
+                                <source
+                                  srcset="{{ related_post.thumb_base }}/mobile.webp?v={{ VERSION }} 350w,
+                                          {{ related_post.thumb_base }}/tablet.webp?v={{ VERSION }} 450w,
+                                          {{ related_post.thumb_base }}/desktop.webp?v={{ VERSION }} 320w,
+                                          {{ related_post.thumb_base }}/desktop@2x.webp?v={{ VERSION }} 640w"
+                                  sizes="(max-width: 575.98px) 100vw,
+                                         (max-width: 991.98px) 50vw,
+                                         33vw"
+                                  type="image/webp">
+
+                                <!-- JPEG fallback -->
+                                <source
+                                  srcset="{{ related_post.thumb_base }}/mobile.jpg?v={{ VERSION }} 350w,
+                                          {{ related_post.thumb_base }}/tablet.jpg?v={{ VERSION }} 450w,
+                                          {{ related_post.thumb_base }}/desktop.jpg?v={{ VERSION }} 320w,
+                                          {{ related_post.thumb_base }}/desktop@2x.jpg?v={{ VERSION }} 640w"
+                                  sizes="(max-width: 575.98px) 100vw,
+                                         (max-width: 991.98px) 50vw,
+                                         33vw"
+                                  type="image/jpeg">
+
+                                <!-- Default fallback img -->
+                                <img
+                                  src="{{ related_post.thumb_base }}/desktop.jpg?v={{ VERSION }}"
+                                  alt="Thumbnail for {{ related_post.title }}"
+                                  width="320" height="213"
+                                  loading="lazy">
+                              </picture>
+                            </div>
+
+
+                            <div class="related-post-content">
+                                <h4 class="related-post-title">
+                                    <a href="{{ url_for('blog.render_single_blog_post', slug=related_post.slug) }}">
+                                        {{ related_post.title }}
+                                    </a>
+                                </h4>
+
+                                <p class="related-post-excerpt">
+                                    {{ related_post.html_content | striptags | truncate(100, True, '...') }}
+                                </p>
+
+                                {% if related_post.categories %}
+                                    <div class="related-post-categories">
+                                        {% for category in related_post.categories[:2] %}
+                                            <span class="category-tag category-tag-small">{{ category }}</span>
+                                        {% endfor %}
+                                        {% if related_post.categories|length > 2 %}
+                                            <span class="category-tag category-tag-small category-tag-more">+{{ related_post.categories|length - 2 }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="related-post-meta">
+                                    <time datetime="{{ related_post.created_at }}" class="related-post-date text-muted small">
+                                        {{ related_post.formatted_date }}
+                                    </time>
+                                    {% if related_post.read_time_minutes %}
+                                        <span class="read-time-card">
+                                            <i class="bi bi-clock" aria-hidden="true"></i>
+                                            {{ related_post.read_time_minutes }} min read
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Post Not Found</h4>
+            <p>The blog post you're looking for could not be found. It might have been moved or deleted.</p>
+            <hr>
+            <p class="mb-0">
+                <a href="{{ url_for('blog.render_blog_posts') }}" class="alert-link">
+                    Return to Blog Posts
+                </a>
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

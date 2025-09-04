@@ -1,0 +1,45 @@
+x-env-file: &default-env
+  env_file:
+    - /home/ubuntu/portfolio-app/.env.prod
+
+services:
+  web:
+    <<: *default-env
+    image: 925228416487.dkr.ecr.eu-central-1.amazonaws.com/damianpiatkowski-com:latest
+    command: >
+      sh -c "scripts/wait-for-it.sh db:3306 -t 120 -- flask db upgrade &&
+             gunicorn -w 4 -b 0.0.0.0:8000 app:create_app"
+    expose:
+      - "8000"  # Gunicorn inside container
+    volumes:
+      - /home/ubuntu/portfolio-app/logs:/logs
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    <<: *default-env
+    image: mysql:latest
+    volumes:
+      - /home/ubuntu/portfolio-app/mysql:/var/lib/mysql
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certbot:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./nginx/certbot:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot

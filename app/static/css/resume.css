@@ -1,0 +1,349 @@
+/* Reset box-sizing for consistent box model */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Resume Section */
+.resume-section {
+    background-color: #ECEFF4;
+    padding: 50px 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Download PDF Section */
+.download-section {
+    background-color: #f0f0f0;
+    padding: 20px 0;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.funky-container {
+    position: relative;
+    padding: 20px;
+    background: linear-gradient(135deg, #FFC371, #FF5F6D);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    color: #fff;
+}
+
+.funky-content {
+    position: relative;
+    z-index: 2;
+}
+
+.funky-container::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.funky-container::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.download-section p {
+    margin-bottom: 10px;
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+.btn-custom-green {
+    background-color: #D0F0C0;
+    border-color: #D0F0C0;
+    color: var(--button-text-color, black); /* Ensure the correct color */
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-custom-green:hover {
+    background-color: #a0d08c;
+    border-color: #a0d08c;
+    color: #fff; /* Change text color to white on hover */
+}
+
+/* Resume Header */
+.resume-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    background-color: #D0F0C0;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.photo-and-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 40px; /* More space between photo and description */
+}
+
+.header-info {
+    text-align: left; /* Align text to the left */
+    margin-bottom: 10px;
+}
+
+.header-info h1 {
+    font-size: 1.5rem; /* Smaller font size */
+    margin-bottom: 10px; /* Add padding between the name and the rest */
+}
+
+.header-info .resume-photo {
+    width: 80px; /* Smaller size */
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px; /* Space between the photo and the icons */
+}
+
+.contact-info {
+    text-align: left;
+    padding-top: 10px; /* Add some space above icons */
+    display: flex;
+    flex-wrap: wrap; /* Allow icons to wrap if needed */
+    gap: 10px; /* Add some space between icons */
+}
+
+.contact-info a {
+    font-size: 1.5rem; /* Adjust icon size */
+    color: #333333;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+    color: darkgray; /* Optional: change color on hover */
+}
+
+.profile-description {
+    flex: 1; /* Ensure description takes the remaining space */
+    text-align: left;
+    color: #333;
+    margin-top: 0; /* Remove top margin */
+    margin-bottom: 0; /* Remove bottom margin */
+    margin-left: 40px; /* Ensure space from the photo section */
+}
+
+.profile-description p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Responsive design for mobile views */
+@media (max-width: 768px) {
+    .resume-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .photo-and-info {
+        align-items: center;
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 10px; /* Add some space below for mobile view */
+    }
+
+    .header-info {
+        text-align: center;
+    }
+
+    .contact-info {
+        justify-content: center;
+        text-align: center;
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
+
+    .contact-info a {
+        margin-right: 10px; /* Add margin between each contact icon */
+    }
+
+    .contact-info a:last-child {
+        margin-right: 0; /* Remove margin from the last element */
+    }
+
+    .profile-description {
+        text-align: center;
+        margin-left: 0; /* Reset margin for mobile view */
+    }
+}
+
+/* Layout adjustments for large screens */
+@media (min-width: 769px) {
+    .resume-header {
+        flex-direction: row;
+    }
+
+    .photo-and-info {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-right: 40px; /* More space between photo and description */
+    }
+
+    .profile-description {
+        text-align: left;
+        margin-left: 40px; /* Ensure space from the photo section */
+    }
+}
+
+/* Resume Section Content */
+.resume-section-content {
+    margin-bottom: 30px;
+    background-color: #FFF;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.resume-section-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.resume-section-content h3 {
+    font-size: 1.25rem;
+    margin-top: 20px;
+    color: #333;
+}
+
+.resume-section-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    color: #666666;
+}
+
+.resume-section-content li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+/* Ensure there's enough space for the footer */
+.resume-section {
+    padding-bottom: 150px;
+}
+
+/* Education and Languages Section */
+.education-and-languages-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.education-subsection, .languages-subsection {
+    flex: 1;
+    min-width: 300px; /* Ensure minimum width for each subsection */
+    margin-right: 20px; /* Add some space between subsections */
+}
+
+.education-subsection ul, .languages-subsection ul {
+    list-style-type: none;
+    padding-left: 0; /* Remove default padding */
+    color: #666666;
+}
+
+.education-subsection li, .languages-subsection li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.education-subsection h2, .languages-subsection h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+/* Adjustments for mobile views */
+@media (max-width: 768px) {
+    .education-and-languages-container {
+        flex-direction: column;
+    }
+
+    .education-subsection, .languages-subsection {
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 20px; /* Add space below each subsection */
+    }
+}
+
+/* Skills Section */
+.skills-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.skills-subsection {
+    flex: 1;
+    min-width: 200px; /* Ensure minimum width for each subsection */
+    margin-right: 20px; /* Add some space between subsections */
+}
+
+.skills-subsection h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #007bff; /* Color for subsection headers */
+}
+
+.skills-subsection ul {
+    list-style-type: none;
+    padding-left: 0; /* Remove default padding */
+    color: #666666;
+}
+
+.skills-subsection li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.skills-subsection ul li::before {
+    content: '•'; /* Add bullet points */
+    color: #007bff; /* Color for bullet points */
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* Adjustments for mobile views */
+@media (max-width: 768px) {
+    .skills-container {
+        flex-direction: column;
+    }
+
+    .skills-subsection {
+        margin-right: 0; /* Remove margin for mobile view */
+        margin-bottom: 20px; /* Add space below each subsection */
+    }
+}
+

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Damian Piatkowski | Privacy Notice{% endblock %}
+
+{% block meta_description %}This privacy notice explains what data is collected on damianpiatkowski.com, how it's used, and your rights regarding that information.{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("privacy", ENV=ENV) }}
+{% endblock %}
+
+{# Suppress default Person schema from base.html #}
+{% block structured_data %}{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ url_for('home_bp.privacy', _external=True) }}">
+{% endblock %}
+
+{% block content %}
+    <section class="privacy-section lato flex-grow-1">
+        <div class="container">
+            <!-- Main intro block -->
+            <div class="privacy-intro">
+                <h2>Privacy Notice</h2>
+                <p>
+                    Your privacy matters to me. I’m committed to keeping your personal data safe and handling it responsibly.
+                    This notice explains, in clear terms, what information I collect when you visit my website, how I use it,
+                    and the choices you have about your data.
+                </p>
+            </div>
+
+            <!-- Cards for sections -->
+            <div class="privacy-cards">
+                <div class="privacy-card">
+                    <h3><i class="bi bi-shield-lock"></i> Information I Collect</h3>
+                    <p>
+                        I use Google Analytics to collect information about your use of my website.
+                        Google Analytics collects data such as your IP address, browser type, referring/exit pages, and operating system.
+                        This information is used to analyze trends, administer the site, and track user movements around the site.
+                    </p>
+                </div>
+
+                <div class="privacy-card">
+                    <h3><i class="bi bi-envelope"></i> Contact Form Submissions</h3>
+                    <p>
+                        I do not log or store any personal data such as email addresses, names, or message contents from the Contact section submissions.
+                        This data is solely used for responding to your inquiries and is not retained.
+                    </p>
+                </div>
+
+                <div class="privacy-card">
+                    <h3><i class="bi bi-person-check"></i> Your Rights</h3>
+                    <p>
+                        If you have any concerns about the data collected through Google Analytics or wish to exercise
+                        any rights related to this data, please contact me at the email address provided in the Contact section.
+                    </p>
+                </div>
+
+                <div class="privacy-card">
+                    <h3><i class="bi bi-arrow-repeat"></i> Changes to This Privacy Notice</h3>
+                    <p>
+                        I may update this privacy notice in the future.
+                        Any changes will be posted on this page, and I will notify you of significant changes
+                        through a prominent notice on my website.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
