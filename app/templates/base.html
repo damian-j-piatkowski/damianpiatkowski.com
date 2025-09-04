@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {%- from "macros/css_loader.html" import css_link_bundle -%}
+    {%- import "macros/structured_data.html" as sd -%}
+
+    <!-- Basic Meta -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="content-language" content="en">
+
+    <!-- Page Title -->
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block meta_description %}{% endblock %}">
+    <meta name="author" content="Damian Piatkowski">
+
+    <!-- Canonical URL -->
+    {%- block canonical -%}{%- endblock %}
+
+    {%- block structured_data %}
+        <!-- JSON-LD Structured Data -->
+        {{ sd.json_ld({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Damian Piatkowski",
+        "url": "https://damianpiatkowski.com",
+        "jobTitle": "Back-End Developer",
+        "image": "https://damianpiatkowski.com/static/images/about_me/about_me_16x9_1920w.jpg",
+        "sameAs": [
+          "https://github.com/damian-j-piatkowski",
+          "https://www.linkedin.com/in/damian-piatkowski/"
+        ]
+      }) }}
+    {% endblock -%}
+
+    {%- if include_social_meta is not defined or include_social_meta %}
+        <!-- Open Graph -->
+        <meta property="og:site_name" content="Damian Piatkowski Portfolio">
+        <meta property="og:locale" content="en_US">
+        <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}{{ self.meta_description() }}{% endblock %}">
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+        <meta property="og:url" content="{% block og_url %}{{ request.url }}{% endblock %}">
+        <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/about_me/about_me_16x9_1920w.jpg', _external=True) }}{% endblock %}">
+        <meta property="og:image:alt" content="{% block og_image_alt %}Portrait of Damian Piatkowski, Full-Stack Python & Flask Developer{% endblock %}">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{% block twitter_title %}{{ self.title() }}{% endblock %}">
+        <meta name="twitter:description" content="{% block twitter_description %}{{ self.meta_description() }}{% endblock %}">
+        <meta name="twitter:image" content="{% block twitter_image %}{{ self.og_image() }}{% endblock %}">
+        <meta name="twitter:image:alt" content="Portrait of Damian Piatkowski, Full-Stack Python & Flask Developer">
+    {%- endif %}
+
+    <!-- Favicon -->
+
+    <!-- Favicon for browsers -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon/favicon.ico') }}" type="image/x-icon" sizes="16x16 32x32">
+
+    <!-- Apple Touch Icon (iOS home screen) -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon/apple-touch-icon.png') }}" sizes="180x180">
+
+    <!-- Android/Chrome icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='images/favicon/favicon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='images/favicon/favicon-512.png') }}">
+
+    <!-- Optional PWA manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
+
+    <!-- External CSS -->
+
+    <!-- Bootstrap CSS (local) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+    <!-- Local Font: Lato Regular 400 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <!-- Bootstrap Icons (local) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+    <!-- Font Awesome (local) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome/css/all.min.css') }}">
+
+    <!-- Internal CSS -->
+
+    <!-- Global CSS Bundle -->
+    {{ css_link_bundle("global", ENV=ENV) }}
+    <!-- Page-Specific CSS -->
+    {%- block links -%}{%- endblock %}
+</head>
+    <body class="d-flex flex-column min-vh-100 lato">
+
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light custom-green-bg">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='images/navbar-brand.webp') }}" alt="Damian Piatkowski profile photo" width="60" height="60">
+                <span id="brand" class="brand-name">Damian Piatkowski</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav" aria-controls="navbarNav"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.index') }}" id="home_link">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('about_me_bp.about_me') }}" id="about_link">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('blog.render_blog_posts') }}" id="blog_link">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('resume_bp.resume') }}" id="resume_link">Resume</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow-1 d-flex flex-column">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="custom-footer mt-auto">
+            <div class="footer-container">
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <div class="social-icons">
+                            <a href="https://github.com/damian-j-piatkowski" class="me-4 text-reset">
+                                <i class="bi bi-github fs-3"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/in/damian-piatkowski/" class="me-4 text-reset">
+                                <i class="bi bi-linkedin fs-3"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <p class="privacy-text">&copy; 2025 Damian Piatkowski. All rights reserved.</p>
+                        <p class="privacy-text">
+                            <a href="{{ url_for('home_bp.privacy') }}" class="privacy-link" id="privacy_notice_link">
+                                Privacy Notice
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- JS -->
+        <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/brand.js') }}"></script>
+
+    </body>
+</html>

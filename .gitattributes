@@ -1,0 +1,11 @@
+# Ensure all text files use LF for consistency
+* text=auto
+
+# Override for specific file types if needed
+*.py text eol=lf
+*.sh text eol=lf
+
+# Binary files should not have line ending conversion
+*.jpg binary
+*.png binary
+*.gif binary

@@ -1,0 +1,25 @@
+{
+  "name": "Damian Piatkowski",
+  "short_name": "DP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#778899",
+  "theme_color": "#778899",
+  "icons": [
+    {
+      "src": "/static/images/favicon/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/favicon/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

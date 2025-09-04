@@ -1,0 +1,38 @@
+services:
+  web:
+    build:
+      context: .
+    command: >
+      sh -c "mkdir -p /logs/development /logs/production &&
+             scripts/wait-for-it.sh db:3306 -t 120 -- flask db upgrade &&
+             flask run --host=0.0.0.0 --port=${FLASK_RUN_PORT}"
+    ports:
+      - "5000:5000"
+      - "5678:5678"  # Debugger
+    volumes:
+      - .:/app
+      - log_data:/logs  # Log files stored in Docker volume
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_RUN_PORT=5000
+      - MYSQL_HOST=db
+    depends_on:
+      - db
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - mysql_backup:/backups
+
+volumes:
+  mysql_data:  # Persistent storage for MySQL data
+  mysql_backup:  # Persistent storage for MySQL backups
+  log_data:  # Persistent storage for logs

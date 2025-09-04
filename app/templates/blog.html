@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title -%}
+    {% if current_category -%}
+        Damian Piatkowski Blog | {{ current_category }} Articles
+    {%- else -%}
+        Damian Piatkowski Blog
+    {%- endif %}
+{%- endblock %}
+
+{% block meta_description -%}
+    {% if current_category -%}
+        Read articles and tutorials about {{ current_category.lower() }} by Damian Piatkowski – packed with practical advice and insights.
+    {%- else -%}
+        Damian shares programming articles, tutorials, and best practices on Python, Flask, web development, and software engineering.
+    {%- endif %}
+{%- endblock %}
+
+{% block og_url -%}
+    {% if current_category and category_slug -%}
+        {{ url_for('blog.render_category_posts', category_slug=category_slug, _external=True) }}
+    {%- else -%}
+        {{ url_for('blog.render_blog_posts', _external=True) }}
+    {%- endif %}
+{%- endblock %}
+
+{% block canonical %}
+    {% if current_category and category_slug %}
+        <link rel="canonical" href="{{ url_for('blog.render_category_posts', category_slug=category_slug, _external=True) }}">
+    {% else %}
+        <link rel="canonical" href="{{ url_for('blog.render_blog_posts', _external=True) }}">
+    {% endif %}
+{% endblock %}
+
+{% block structured_data %}
+  {{ sd.json_ld({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Damian Piatkowski’s Blog",
+    "url": "{{ url_for('blog.render_blog_posts', _external=True) }}",
+    "description": "Insights and articles on software development, programming tutorials, and best practices by Damian Piatkowski.",
+    "publisher": {
+      "@type": "Person",
+      "name": "Damian Piatkowski",
+      "url": "https://damianpiatkowski.com",
+      "sameAs": [
+        "https://github.com/damian-j-piatkowski",
+        "https://www.linkedin.com/in/damian-piatkowski/"
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("blog", ENV=ENV) }}
+{% endblock %}
+
+{% block content %}
+    <div class="blog-page-content-wrapper d-flex flex-column flex-grow-1">
+        <section class="blog-hero">
+            <!-- Blog branding graphics -->
+            <div class="blog-graphics" aria-hidden="true">
+                <!-- Blog Logo/Icon (your purple keyboard) -->
+                <div class="blog-icon">
+                    {% include "partials/_keyboard_icon.html" %}
+                </div>
+            </div>
+
+            <!-- Miniature portrait on the right -->
+            <div class="blog-portrait">
+              <picture>
+                <!-- Desktop (≥768px) -->
+                <source type="image/webp" media="(min-width: 768px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_400w.webp', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_800w.webp', v=VERSION) }} 2x">
+                <source media="(min-width: 768px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_400w.jpg', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_800w.jpg', v=VERSION) }} 2x">
+
+                <!-- Mobile (<768px) -->
+                <source type="image/webp" media="(max-width: 767px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_300w.webp', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_600w.webp', v=VERSION) }} 2x">
+                <source media="(max-width: 767px)" srcset="
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_300w.jpg', v=VERSION) }} 1x,
+                  {{ url_for('static', filename='images/blog-banner/banner_profile_600w.jpg', v=VERSION) }} 2x">
+
+                <!-- Fallback -->
+                <img src="{{ url_for('static', filename='images/blog-banner/banner_profile_300w.jpg', v=VERSION) }}"
+                     alt="Portrait of Damian Piatkowski">
+              </picture>
+            </div>
+
+            <!-- Blog Text Content -->
+            <div class="container text-center">
+                <h1>Lessons, Logged</h1>
+                <p>Solutions recorded. Insights captured.</p>
+            </div>
+        </section>
+
+        <!-- Category Filter Section -->
+        <section class="category-filter-section">
+            <div class="container">
+                {% if current_category %}
+                    <div class="active-filter-bar">
+                        <div class="filter-info">
+                            <span class="filter-label">Showing posts in:</span>
+                            <span class="active-category-badge">{{ current_category }}</span>
+                            <a href="{{ url_for('blog.render_blog_posts') }}" class="clear-filter-btn">
+                                <i class="fas fa-times"></i> Clear Filter
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Mobile Category Navigation - Always Visible Stats -->
+        {% if all_categories and all_categories|length > 0 %}
+            <section class="category-mobile-section d-lg-none">
+                <div class="container">
+                    <!-- Always visible stats summary -->
+                    <div class="blog-stats-summary">
+                        <div class="stats-content">
+                            <h6 class="stats-title">
+                                <i class="fas fa-chart-bar"></i> Blog Overview
+                            </h6>
+                            <p class="stats-description">
+                                There are <strong>{{ total_posts }} posts</strong>
+                                total in <strong>{{ all_categories|length }} different categories</strong>
+                            </p>
+                            <button class="btn btn-custom-green btn-sm stats-browse-btn"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#categoryMobileList"
+                                    aria-expanded="false"
+                                    aria-controls="categoryMobileList">
+                                <i class="fas fa-folder-open"></i> Browse All Categories
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible category list -->
+                    <div class="collapse mt-3" id="categoryMobileList">
+                        <div class="category-mobile-list">
+                            <!-- All Posts Link -->
+                            <a href="{{ url_for('blog.render_blog_posts') }}"
+                               class="category-mobile-item {% if not current_category %}active{% endif %}">
+                                <span>All Posts</span>
+                                <span class="badge">{{ total_posts }}</span>
+                            </a>
+
+                            <!-- Category Links -->
+                            {% for category in all_categories %}
+                                <a href="{{ url_for('blog.render_category_posts', category_slug=category.slug) }}"
+                                   class="category-mobile-item {% if current_category == category.name %}active{% endif %}">
+                                    <span>{{ category.name }}</span>
+                                    <span class="badge">{{ category.count }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        <!-- Main Content Section -->
+        <section class="blog-posts-section">
+            <div class="container-fluid px-4">
+                <div class="row justify-content-center">
+                    <!-- Desktop Category Sidebar -->
+                    {% if all_categories and all_categories|length > 0 %}
+                        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+                            <div class="category-sidebar sticky-top">
+                                <div class="category-sidebar-header">
+                                    <h5><i class="fas fa-folder-open"></i> Categories</h5>
+                                </div>
+                                <div class="category-list">
+                                    <!-- All Posts Link -->
+                                    <a href="{{ url_for('blog.render_blog_posts') }}"
+                                       class="category-item {% if not current_category %}active{% endif %}">
+                                        <span class="category-name">All Posts</span>
+                                        <span class="category-count">{{ total_posts }}</span>
+                                    </a>
+
+                                    <!-- Category Links -->
+                                    {% for category in all_categories %}
+                                        <a href="{{ url_for('blog.render_category_posts', category_slug=category.slug) }}"
+                                           class="category-item {% if current_category == category.name %}active{% endif %}">
+                                            <span class="category-name">{{ category.name }}</span>
+                                            <span class="category-count">{{ category.count }}</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Blog Posts Content -->
+                    <div class="{% if all_categories and all_categories|length > 0 %}col-xl-8 col-lg-9{% else %}col-xl-10{% endif %}">
+                        <div class="blog-content-container">
+                            {% if posts_data %}
+                                <div class="blog-posts-grid">
+                                    {% for post in posts_data %}
+                                        <div class="blog-post-card">
+                                            <picture>
+                                              <!-- WebP first -->
+                                              <source
+                                                srcset="{{ post.thumb_base }}/mobile.webp?v={{ VERSION }} 350w,
+                                                        {{ post.thumb_base }}/tablet.webp?v={{ VERSION }} 450w,
+                                                        {{ post.thumb_base }}/desktop.webp?v={{ VERSION }} 320w,
+                                                        {{ post.thumb_base }}/desktop@2x.webp?v={{ VERSION }} 640w"
+                                                sizes="(max-width: 575.98px) 100vw,
+                                                       (max-width: 991.98px) 50vw,
+                                                       33vw"
+                                                type="image/webp">
+
+                                              <!-- JPEG fallback -->
+                                              <source
+                                                srcset="{{ post.thumb_base }}/mobile.jpg?v={{ VERSION }} 350w,
+                                                        {{ post.thumb_base }}/tablet.jpg?v={{ VERSION }} 450w,
+                                                        {{ post.thumb_base }}/desktop.jpg?v={{ VERSION }} 320w,
+                                                        {{ post.thumb_base }}/desktop@2x.jpg?v={{ VERSION }} 640w"
+                                                sizes="(max-width: 575.98px) 100vw,
+                                                       (max-width: 991.98px) 50vw,
+                                                       33vw"
+                                                type="image/jpeg">
+
+                                              <!-- Default fallback img -->
+                                              <img
+                                                src="{{ post.thumb_base }}/desktop.jpg?v={{ VERSION }}"
+                                                class="blog-thumbnail"
+                                                alt="Thumbnail for {{ post.title }}"
+                                                width="320" height="213"
+                                                loading="lazy">
+                                            </picture>
+
+
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ post.title }}</h5>
+                                                <div class="card-meta d-flex justify-content-between align-items-center mb-2">
+                                                    <p class="card-text text-muted small mb-0">
+                                                        <time datetime="{{ post.created_at }}">{{ post.formatted_date }}</time>
+                                                    </p>
+                                                    {% if post.read_time_minutes %}
+                                                        <span class="read-time-card gradient">
+                                                            <i class="bi bi-clock" aria-hidden="true"></i>
+                                                            {{ post.read_time_minutes }} min read
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+
+                                                {% if post.categories %}
+                                                    <div class="category-tags mb-2">
+                                                        {% for category in post.categories %}
+                                                            {% set category_slug = category.lower().replace(' ', '-') %}
+                                                            <a href="{{ url_for('blog.render_category_posts', category_slug=category_slug) }}"
+                                                               class="category-tag {% if current_category == category %}category-tag-active{% endif %}">
+                                                                {{ category }}
+                                                            </a>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+
+                                                <p class="blog-summary">{{ post.html_content | striptags | truncate(150, True, '...') }}</p>
+                                                <div class="mt-auto">
+                                                    <a href="{{ url_for('blog.render_single_blog_post', slug=post.slug) }}"
+                                                       class="btn btn-custom-green btn-sm">Read Full Article</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if total_pages > 1 %}
+                                    <nav aria-label="Page navigation" class="mt-5">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item {{ 'disabled' if page == 1 }}">
+                                                {% if current_category and category_slug %}
+                                                    <a class="page-link"
+                                                       href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=(page - 1)) if page > 1 else '#' }}"
+                                                       aria-label="Previous"
+                                                            {{ 'tabindex="-1" aria-disabled="true"' if page == 1 }}>
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                {% else %}
+                                                    <a class="page-link"
+                                                       href="{{ url_for('blog.render_blog_posts', page=(page - 1)) if page > 1 else '#' }}"
+                                                       aria-label="Previous"
+                                                            {{ 'tabindex="-1" aria-disabled="true"' if page == 1 }}>
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                {% endif %}
+                                            </li>
+
+                                            {% for p in range(1, total_pages + 1) %}
+                                                <li class="page-item {{ 'active' if p == page }}">
+                                                    {% if current_category and category_slug %}
+                                                        <a class="page-link"
+                                                           href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=p) }}">
+                                                            {{ p }}
+                                                        </a>
+                                                    {% else %}
+                                                        <a class="page-link"
+                                                           href="{{ url_for('blog.render_blog_posts', page=p) }}">
+                                                            {{ p }}
+                                                        </a>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+
+                                            <li class="page-item {{ 'disabled' if page == total_pages }}">
+                                                {% if current_category and category_slug %}
+                                                    <a class="page-link"
+                                                       href="{{ url_for('blog.render_category_posts', category_slug=category_slug, page=(page + 1)) if page < total_pages else '#' }}"
+                                                       aria-label="Next"
+                                                            {{ 'tabindex="-1" aria-disabled="true"' if page == total_pages }}>
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                {% else %}
+                                                    <a class="page-link"
+                                                       href="{{ url_for('blog.render_blog_posts', page=(page + 1)) if page < total_pages else '#' }}"
+                                                       aria-label="Next"
+                                                            {{ 'tabindex="-1" aria-disabled="true"' if page == total_pages }}>
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                {% endif %}
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-info text-center" role="alert">
+                                    {% if current_category %}
+                                        No blog posts found in the "{{ current_category }}" category.
+                                        <a href="{{ url_for('blog.render_blog_posts') }}" class="alert-link">View all posts</a> instead.
+                                    {% else %}
+                                        No blog posts found yet. Check back soon!
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if all_categories and all_categories|length > 0 %}
+                        <div class="col-xl-2 d-none d-xl-block">
+                            <!-- Future content area -->
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

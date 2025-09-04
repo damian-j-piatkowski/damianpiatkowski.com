@@ -1,0 +1,118 @@
+"""Integration tests for the get_paginated_blog_posts service function.
+
+This module contains integration tests for the get_paginated_blog_posts service,
+verifying its behavior in retrieving paginated blog posts from the database under various conditions.
+
+Tests included:
+    - test_get_paginated_blog_posts_custom_per_page: Ensures pagination works with non-default per_page values.
+    - test_get_paginated_blog_posts_empty: Ensures that requesting pagination when no posts exist returns an empty list.
+    - test_get_paginated_blog_posts_invalid_page: Checks that requesting page=0 or negative page numbers defaults to page 1.
+    - test_get_paginated_blog_posts_multiple_pages: Verifies pagination across multiple pages, ensuring correct ordering.
+    - test_get_paginated_blog_posts_multiple_pages_custom_per_page: Verifies pagination with custom per_page values.
+    - test_get_paginated_blog_posts_out_of_range: Ensures requesting a page beyond the total available pages returns an empty list.
+    - test_get_paginated_blog_posts_single_page: Verifies pagination when all posts fit within a single page.
+
+Fixtures:
+    - create_blog_post: Fixture to create blog posts in the database.
+    - session: Provides a session object for database interactions.
+"""
+
+import pytest
+
+from app.services.blog_service import get_paginated_blog_posts
+from tests.fixtures.blog_data_fixtures import seed_blog_posts
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_custom_per_page(session, seed_blog_posts) -> None:
+    """Ensures pagination works with non-default per_page values."""
+    seed_blog_posts(20)
+    session.commit()
+
+    posts, total_pages = get_paginated_blog_posts(page=1, per_page=5)
+    assert len(posts) == 5
+    assert total_pages == 4
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_empty(session) -> None:
+    """Ensures requesting pagination when no posts exist returns an empty list."""
+    posts, total_pages = get_paginated_blog_posts(page=1, per_page=10)
+    assert posts == []
+    assert total_pages == 0
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_invalid_page(session, seed_blog_posts) -> None:
+    """Checks that requesting page=0 or negative page numbers defaults to page 1."""
+    seed_blog_posts(2)
+    session.commit()
+
+    posts_zero, total_pages_zero = get_paginated_blog_posts(page=0, per_page=10)
+    posts_negative, total_pages_negative = get_paginated_blog_posts(page=-5, per_page=10)
+
+    assert total_pages_zero == total_pages_negative
+    assert len(posts_zero) == 2
+    assert total_pages_zero == 1
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_multiple_pages(session, seed_blog_posts) -> None:
+    """Verifies pagination across multiple pages, ensuring correct ordering."""
+    seed_blog_posts(32)
+    session.commit()
+
+    page_1_posts, total_pages = get_paginated_blog_posts(page=1, per_page=10)
+    page_2_posts, _ = get_paginated_blog_posts(page=2, per_page=10)
+    page_3_posts, _ = get_paginated_blog_posts(page=3, per_page=10)
+    page_4_posts, _ = get_paginated_blog_posts(page=4, per_page=10)
+
+    assert total_pages == 4
+    assert len(page_1_posts) == 10
+    assert len(page_2_posts) == 10
+    assert len(page_3_posts) == 10
+    assert len(page_4_posts) == 2
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_multiple_pages_custom_per_page(session, seed_blog_posts) -> None:
+    """Verifies pagination with custom per_page values."""
+    seed_blog_posts(25)
+    session.commit()
+
+    page_1_posts, total_pages = get_paginated_blog_posts(page=1, per_page=7)
+    page_2_posts, _ = get_paginated_blog_posts(page=2, per_page=7)
+    page_3_posts, _ = get_paginated_blog_posts(page=3, per_page=7)
+    page_4_posts, _ = get_paginated_blog_posts(page=4, per_page=7)
+
+    assert total_pages == 4
+    assert len(page_1_posts) == 7
+    assert len(page_2_posts) == 7
+    assert len(page_3_posts) == 7
+    assert len(page_4_posts) == 4
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_out_of_range(session, seed_blog_posts) -> None:
+    """Ensures requesting a page beyond the total available pages returns an empty list."""
+    seed_blog_posts(15)
+    session.commit()
+
+    posts, total_pages = get_paginated_blog_posts(page=5, per_page=10)
+
+    assert total_pages == 2  # Only 2 pages exist
+    assert posts == []
+
+
+@pytest.mark.render_blog_posts
+def test_get_paginated_blog_posts_single_page(session, seed_blog_posts) -> None:
+    """Verifies pagination when all posts fit within a single page."""
+    seed_blog_posts(7)
+    session.commit()
+
+    posts, total_pages = get_paginated_blog_posts(page=1, per_page=10)
+
+    assert len(posts) == 7
+    assert total_pages == 1
+    assert posts[0].title == "Post 1"
+    assert posts[-1].title == "Post 7"
