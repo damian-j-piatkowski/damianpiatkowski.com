@@ -3,7 +3,9 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv()  # Load from .env if not already in environment
+# Only try to load .env if not already provided by systemd or env
+if not os.getenv("FLASK_ENV"):
+    load_dotenv()  # Will load from .env in project root if present
 
 
 class BaseConfig:

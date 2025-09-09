@@ -3,8 +3,8 @@ r"""Script for uploading blog posts to the database from Google Drive.
 Usage:
     python -m scripts.upload_blog_posts --env dev --file-id "google_drive_file_id" --slug "post-slug"
 
-Docker:
-    docker-compose exec web python -m scripts.upload_blog_posts --env prod --file-id "google_drive_file_id" --slug "post-slug"
+For example:
+    python -m scripts.upload_blog_posts --env prod --file-id "1ZtTMn_kt08At3BUgWQIa23bv5r6S3SOoBC9JVmN5UOA" --slug "six-essential-object-oriented-design-principles-from-matthias-nobacks-object-design-style-guide"
 """
 
 import argparse
