@@ -12,25 +12,39 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [1.0.0] - 2025-08-14
+## [1.0.1] - 2025-09-09
+### Fixes
+- **Environment configuration**  
+  Updated `config.py` to load `.env` only when `FLASK_ENV` is not already set, ensuring production systemd service variables are respected.
+
+### Refactors
+- **Blog hero image resizer utility**  
+  - Replaced hardcoded `landing-hero_source_16x9.jpg` with automatic detection of the first `.jpg`/`.jpeg` file in the target folder.  
+  - Standardized output naming to `hero_16x9_<width>w.*`.  
+  - Added detailed header with purpose, requirements, usage instructions, and example input/output.  
+  - Script now exits gracefully if no source JPG is found.
+
+- **Thumbnail resizer utility**  
+  Updated `resize_thumbnails.bat` with structured header and conventions matching the hero image resizer for readability and maintainability.
+
+- **Blog and landing hero styles (index.css)**  
+  - Updated `.blog-bg` images to use `object-fit: cover` and `object-position: center bottom` with consistent background color.  
+  - Increased `.blog-hero` min-height and `.blog-bg` height on tablets.  
+  - Adjusted mobile `.blog-hero` and `.landing-hero` min-heights for better content fit.  
+  - Reduced `.contact-form-card.in-view` transition delay from 3.3s to 2.3s.
+
+---
+
+## [1.0.0] - 2025-09-05
 ### Initial Release
 
-The first production release of my personal website, launching with:
+The first production release of damianpiatkowski.com website, launching with:
 
-- **Home Page (`/`)**  
-  Overview of my work, personal brand, and latest updates.
-
-- **Privacy Policy (`/privacy`)**  
-  Clear and concise explanation of how visitor data is handled.
-
-- **About Me (`/about-me`)**  
-  A personal introduction — focusing on my story, values, and life outside of projects.
-
-- **Resume (`/resume`)**  
-  Downloadable CV for professional opportunities.
-
-- **Blog (`/blog`)**  
-  Fully functional blogging engine with pagination and individual post pages.  
+- **Home Page (`/`)**
+- **Privacy Policy (`/privacy`)**
+- **About Me (`/about-me`)**
+- **Resume (`/resume`)**
+- **Blog (`/blog`)**
 
   **Technical note:**  
   Blog content originates as Google Docs using Markdown conventions.  
