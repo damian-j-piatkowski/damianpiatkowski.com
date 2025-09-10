@@ -84,7 +84,7 @@
     <!-- Internal CSS -->
 
     <!-- Global CSS Bundle -->
-    {{ css_link_bundle("global", ENV=ENV) }}
+    {{ css_link_bundle("global", ENV=ENV, VERSION=VERSION) }}
     <!-- Page-Specific CSS -->
     {%- block links -%}{%- endblock %}
 </head>

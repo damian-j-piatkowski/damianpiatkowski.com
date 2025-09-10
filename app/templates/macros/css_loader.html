@@ -1,4 +1,4 @@
-{% macro css_link_bundle(bundle_name, ENV) -%}
+{% macro css_link_bundle(bundle_name, ENV, VERSION) -%}
     {%- set bundle_map = {
         "global": ["css/variables.css", "css/base.css"],
         "index": ["css/index.css"],

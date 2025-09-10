@@ -95,7 +95,7 @@ The Jinja macro `css_link_bundle` in `macros/css_loader.html` decides which CSS 
 Usage in a template:
 
 ```jinja
-{{ css_link_bundle("index", ENV=ENV) }}
+{{ css_link_bundle("index", ENV=ENV, VERSION=VERSION) }}
 ```
 
 > **Note**
