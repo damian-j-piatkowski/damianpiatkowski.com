@@ -942,6 +942,39 @@ button:disabled, input:disabled {
   }
 }
 
+/* Phones in landscape mode */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .landing-hero,
+    .blog-hero {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2rem 5%;
+        text-align: left;
+    }
+
+    .landing-hero .hero-text,
+    .blog-hero .hero-text,
+    .blog-hero .blog-text {   /* added blog-text here */
+        max-width: 55%;
+        text-align: left;     /* overrides the center */
+        margin: 0;            /* kills the auto-centering */
+    }
+
+    .landing-hero .hero-bg img,
+    .blog-hero .blog-bg img {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        max-height: 100vh;
+        object-fit: contain;
+        object-position: right bottom;
+    }
+}
+
 /* ===== Wireframe Shapes ===== */
 .wirefield {
   position: absolute;
