@@ -1,5 +1,5 @@
 import os
-from csscompressor import compress
+from rcssmin import cssmin
 
 CSS_BUNDLES = {
     "global.min.css": [
@@ -39,7 +39,7 @@ def minify_bundle(output_file, input_files):
     for path in input_files:
         with open(path, "r", encoding="utf-8") as f:
             combined_css += f.read() + "\n"
-    minified = compress(combined_css)
+    minified = cssmin(combined_css)
     with open(os.path.join(OUTPUT_DIR, output_file), "w", encoding="utf-8") as f:
         f.write(minified)
     print(f"Built {output_file}")

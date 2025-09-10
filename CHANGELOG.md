@@ -12,6 +12,27 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.0.2] - 2025-09-10
+### Added
+- **Responsive support for mobile landscape mode**  
+  - Added `<source>` entries in `picture` markup for `(max-height: 500px) and (orientation: landscape)`.  
+  - Introduced CSS rules for `.landing-hero` and `.blog-hero` in phone landscape orientation.  
+  - Ensures hero layout adapts with side-by-side text and image on wide but short screens.  
+  - Updated `.blog-text` styling to align left and avoid auto-centering in landscape mode.
+
+- **Footer version display**  
+  Added `v{{ VERSION }}` to footer as muted small text for quick confirmation of deployed build version.
+
+### Fixed
+- **Template cache busting**  
+  Updated `css_link_bundle` macro to correctly receive and use `VERSION`, ensuring CSS bundles include `?v={{ VERSION }}` query param in production.
+
+### Changed
+- **Build process**  
+  Replaced `csscompressor` with `rcssmin` for CSS minification, improving reliability and preserving media query syntax and color values.
+
+---
+
 ## [1.0.1] - 2025-09-09
 ### Fixes
 - **Environment configuration**  
