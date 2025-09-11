@@ -96,7 +96,7 @@
 /* Mobile devices */
 @media (max-width: 767px) {
   .about-hero {
-    min-height: 185vh;
+    min-height: 200vh;
     display: grid;
     place-items: center;
     padding: 0;
@@ -178,6 +178,69 @@
   .about-bg img {
     object-fit: contain;
     object-position: center bottom;
+  }
+}
+
+/* === Landscape tablets & laptops (short screens) === */
+@media screen and (max-height: 500px) and (orientation: landscape) and (min-width: 751px) {
+  .about-hero {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 5%;
+    text-align: left;
+    min-height: 100vh;
+  }
+
+  .about-text {
+    max-width: 55%;
+    text-align: left;
+    margin: 0;
+    padding: 2rem;
+  }
+
+  .about-bg img {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 150vh;
+    object-fit: contain;
+    object-position: right bottom;
+  }
+}
+
+/* === Small phones in landscape (iPhone SE, Galaxy S8, Surface Duo) === */
+@media screen and (max-width: 750px) and (orientation: landscape) {
+  .about-hero {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 100vh;
+  }
+
+  .about-text {
+    max-width: 45%;
+    margin: 2rem 0 0 auto;  /* pushes text block to the right */
+    text-align: right;
+    padding: 2rem 1rem;
+    align-self: flex-end;
+  }
+
+  .about-bg {
+    inset: auto 0 0 0;
+    height: 55%;
+  }
+
+  .about-bg img {
+    object-fit: contain;
+    object-position: center bottom;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
   }
 }
 

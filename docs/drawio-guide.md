@@ -1,6 +1,6 @@
 # Draw.io Diagramming Guide
 
-This guide outlines the best practices and recommended settings for creating and exporting diagrams using Draw.io (app.diagrams.net) for this project's documentation, particularly for architecture diagrams.
+This guide outlines the best practices and recommended settings for creating and exporting diagrams using Draw\.io (app.diagrams.net) for this project's documentation, particularly for architecture diagrams.
 
 ---
 
@@ -17,100 +17,121 @@ This guide outlines the best practices and recommended settings for creating and
 
 ## 1. Tool and Access
 
-* **Tool:** Draw.io (also known as diagrams.net)
-* **Access:** [app.diagrams.net](https://app.diagrams.net/) or integrated desktop application.
+* **Tool:** Draw\.io (also known as diagrams.net)
+* **Access:** [app.diagrams.net](https://app.diagrams.net/) or the desktop application.
 * **Source Files:** All editable `.drawio` diagram source files are stored in the `docs/architecture/` directory.
+
+---
 
 ## 2. General Diagramming Principles
 
-* **Clarity over Complexity:** Aim for diagrams that are easy to understand at a glance.
-* **Consistent Layout:** Maintain consistent spacing, alignment, and sizing of similar components.
-* **Visual Hierarchy:** Use container shapes effectively to show containment and relationships.
+* **Clarity over Complexity:** Keep diagrams simple and understandable at a glance.
+* **Consistent Layout:** Use consistent spacing, alignment, and sizing for related components.
+* **Visual Hierarchy:** Use containers to group related systems (e.g., EC2 instance vs external services).
+
+---
 
 ## 3. Recommended Styling Conventions
 
 * **Component Coloring:**
-    The key principle for coloring is **consistency and clear differentiation**. Use a distinct color for each of the following groups to visually separate them, ensuring that elements within a group share the same color.
+  Use consistent colors to distinguish between these groups:
 
-    1.  **External Services (Non-Controlled Systems):**
-        * **Purpose:** Systems outside of your direct AWS EC2 instance, not managed by you (e.g., Browser/User Client, Google Authentication, GitHub Actions, Google Drive API, Google SMTP).
-        * **Border:** Use a `Dotted` or `Dashed` line style to emphasize external ownership/boundary.
+  1. **External Services (Non-Controlled Systems):**
 
-    2.  **AWS EC2 Instance:**
-        * **Purpose:** The main cloud virtual server hosting your application.
+     * Examples: Browser/User Client, Google Authentication, GitHub Actions, Google Drive API, Google SMTP.
+     * **Border:** Use a `Dotted` or `Dashed` line to emphasize external ownership.
 
-    3.  **Docker (Engine / Host):**
-        * **Purpose:** The container runtime environment within your EC2 instance.
+  2. **AWS EC2 Instance:**
 
-    4.  **Flask App Container and Internal Components:**
-        * **Purpose:** The Flask application container and all its internal layers (Routes, Controllers, Services, Repositories). These logically belong together as part of "your application code."
+     * The main virtual server hosting your application stack.
 
-    5.  **MySQL Container:**
-        * **Purpose:** The database server software.
+  3. **Application Layer (Flask App + Internal Components):**
 
-    6.  **Persistent Storage (DB Volume):**
-        * **Purpose:** The physical storage volume for your database.
+     * Routes, Controllers, Services, Repositories.
+     * Group them under a container labeled “Flask Application.”
 
-* **Consistent Sizing:** Maintain consistent sizing for similar components (e.g., Width: 160, Height: 30 for Repositories, Services, Controllers).
+  4. **System Services on EC2:**
+
+     * **Nginx (reverse proxy)**
+     * **Gunicorn/Flask runtime**
+     * **MySQL server**
+
+  5. **Persistent Storage (Database Data):**
+
+     * Logical box representing MySQL’s persisted data.
+
+* **Consistent Sizing:** Same width/height for similar elements (e.g., Controllers, Services).
+
 * **Text/Labels:**
-    * **Font:** Stick to a readable sans-serif font (e.g., `Helvetica`, `Arial`, `Open Sans`).
-    * **Font Size:** Use larger for main containers, smaller for internal components and arrow labels.
-    * **Internal Notes:** For contextual notes within a shape (e.g., Admin Routes), embed text directly and use `Shift + Enter` for line breaks.
+
+  * Font: `Helvetica`, `Arial`, or `Open Sans`.
+  * Larger text for main containers, smaller for internals.
+  * Notes: inline text inside a shape with `Shift+Enter` for line breaks.
+
+---
 
 ## 4. Arrow and Connection Styling
 
 * **Internal Function Calls (within Flask App):**
-    * Arrow: Unidirectional
-    * Label: `Function Calls` (e.g., Routes to Controllers, Controllers to Services)
-* **Internal Data Access Calls (Services to Repositories):**
-    * Arrow: Unidirectional
-    * Label: `Data Access Calls`
-* **Database Persistent Storage (MySQL Container to DB Volume):**
-    * Arrow: **Bidirectional**
-    * Label: `File I/O (Persistent Data)`
-* **External Traffic (Browser to Nginx Waypoint):**
-    * Arrow: Unidirectional
-    * Label: `HTTP/HTTPS (All App Traffic)`
-* **External API Calls (Services to Google Drive API, Google SMTP):**
-    * Arrow: Unidirectional
-    * Labels: `HTTP/S API Calls`, `SMTP Calls`
-* **OAuth Flow Initiation (Browser to Google Authentication):**
-    * Arrow: Unidirectional
-    * Label: `HTTP/HTTPS (Admin Login OAuth Flow)`
-* **CI/CD Deployment (GitHub Actions to Docker):**
-    * Arrow: Unidirectional
-    * Label: `CI/CD Pipeline / Deployment`
-    * *Optional:* Consider making this arrow a dashed or thicker line to visually distinguish it from data flows.
-* **Waypoints:** Use sparingly for clean bends, avoid sharp angles.
+
+  * Unidirectional arrow, labeled `Function Calls`.
+
+* **Data Access Calls (Services → Repositories → MySQL):**
+
+  * Unidirectional arrow, labeled `Data Access Calls`.
+
+* **Database Persistent Storage (MySQL ↔ Data):**
+
+  * **Bidirectional** arrow, labeled `File I/O (Persistent Data)`.
+
+* **External Traffic (Browser → Nginx):**
+
+  * Unidirectional, labeled `HTTP/HTTPS (All App Traffic)`.
+
+* **External API Calls (Flask Services → Google APIs/SMTP):**
+
+  * Unidirectional, labeled `HTTP/S API Calls` or `SMTP Calls`.
+
+* **OAuth Flow (Browser → Google Authentication):**
+
+  * Unidirectional, labeled `OAuth Flow`.
+
+* **CI/CD Deployment (GitHub Actions → EC2 Instance):**
+
+  * Unidirectional arrow, labeled `CI/CD Deployment`.
+  * Style: dashed or bold line to distinguish it from runtime data flows.
+
+* **Waypoints:** Use only when needed for clean arrow routing.
+
+---
 
 ## 5. Export Settings for `README.md`
 
-When exporting your `.drawio` diagram for embedding in `README.md` (or other Markdown files), use the following settings for optimal display on desktop and mobile.
+When exporting `.drawio` diagrams for embedding in Markdown:
 
 **Save Location & Filename:**
-* Save the exported SVG file as: `docs/architecture/high_level_architecture.svg`
 
-**Export Options (File > Export as > SVG...):**
+* `docs/architecture/high_level_architecture.svg`
+
+**Export Options (File → Export as → SVG…):**
 
 * **Zoom:** `100%` (SVG scales inherently, so no need to adjust this here).
 * **Border Width:** `10` (pixels) - Adds a small, clean white border around your diagram.
-* **Transparent Background:** **CHECKED** (Ensures the diagram background is transparent, allowing it to blend with your README).
+* **Transparent Background:** ✅ (Ensures the diagram background is transparent, allowing it to blend with your README).
 * **Appearance (Dropdown):** **`Light`** (Crucial for consistent rendering across different previewers and IDEs like PyCharm which might have light backgrounds).
-* **Include a copy of my diagram:** **UNCHECKED** (because the source XML for the diagram is already stored and version-controlled under `docs/architecture/high_level.drawio`).
-* **Embed Images:** **CHECKED** (Ensures all visual assets are self-contained).
-* **Embed Fonts:** **CHECKED** (Guarantees font consistency across devices).
+* **Include a copy of my diagram:** ❌ (because the source XML for the diagram is already stored and version-controlled under `docs/architecture/high_level.drawio`).
+* **Embed Images:** ✅ (Ensures all visual assets are self-contained).
+* **Embed Fonts:** ✅ (Guarantees font consistency across devices).
 * **Links (Dropdown):** `Automatic` (This is fine as there are no explicit links in the diagram; it won't create any).
 
 ## 6. Editing and Updating Diagrams
 
-To make changes to an existing diagram:
-
-1.  **Open the Source File:** Open the `.drawio` source file (e.g., `docs/architecture/high_level.drawio`) directly in Draw.io (either online at `app.diagrams.net` or using the desktop application).
-2.  **Make Your Changes:** Edit the diagram as needed.
-3.  **Save the Source:** **Save the `.drawio` file** in Draw.io. This is crucial for version control.
-4.  **Version Control:** Commit the updated `.drawio` file to your Git repository.
-5.  **Re-Export SVG:** Follow the **"5. Export Settings for `README.md`"** steps above to re-export the diagram as an SVG file.
-6.  **Replace Existing SVG:** Save the new SVG file, overwriting the old one (e.g., `docs/architecture/high_level_architecture.svg`).
-7.  **Commit Updated SVG:** Commit the newly exported `.svg` file to your Git repository.
+1. Open the `.drawio` source file (e.g., `docs/architecture/high_level.drawio`).
+2. Make edits in Draw\.io.
+3. Save the updated `.drawio` file.
+4. Commit the `.drawio` source file to Git.
+5. Export a new SVG (see Section 5).
+6. Overwrite the existing `high_level_architecture.svg`.
+7. Commit the updated `.svg` file.
 
 By following this process, both your editable source diagram and its rendered image in the README will always be up-to-date and in sync.
