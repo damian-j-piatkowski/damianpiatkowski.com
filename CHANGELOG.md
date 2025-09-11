@@ -12,6 +12,30 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.0.3] - 2025-09-11
+### Changed
+- **Infrastructure & deployment**  
+  - Removed all Docker dependencies and configs (`docker-compose.*`, `Dockerfile*`, `scripts/wait-for-it.sh`).  
+  - Migrated to a dockerless setup using Python `venv` and `systemd` on EC2.  
+  - Updated `README.md` with new local setup and deployment workflow.  
+  - Refined architecture description to reflect non-containerized MySQL and direct EC2 deployment.  
+
+- **Documentation & diagrams**  
+  - Updated `docs/database-guide.md` for non-Docker DB setup.  
+  - Adjusted `docs/drawio-guide.md` to align with new diagrams.  
+  - Revised `docs/architecture/high_level.drawio` and exported `.svg` to remove Docker layers and clarify direct EC2 deployment flow.  
+
+### Added
+- **Responsive improvements for About Hero**  
+  - Increased `.about-hero` mobile min-height from 185vh → 200vh.  
+  - Added landscape-specific breakpoints for short/wide screens:  
+    - `(max-height: 500px) and (orientation: landscape) and (min-width: 751px)` → side-by-side layout with left-aligned text.  
+    - `(max-width: 750px) and (orientation: landscape)` → stacked layout with right-shifted text for small phones.  
+  - Adjusted `.about-text` sizing/padding across new breakpoints.  
+  - Improved `.about-bg img` containment and positioning in wide-but-short screens.
+
+---
+
 ## [1.0.2] - 2025-09-10
 ### Added
 - **Responsive support for mobile landscape mode**  
