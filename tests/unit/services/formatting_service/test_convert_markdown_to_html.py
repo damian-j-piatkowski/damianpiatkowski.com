@@ -66,9 +66,8 @@ def test_convert_markdown_to_html_code_block() -> None:
     html = convert_markdown_to_html(text)
 
     # Check structural elements are present
-    assert 'highlight' in html  # Verify highlight class is present
     assert '<pre>' in html  # Verify preformatted block
-    assert '<code>' in html  # Verify code block
+    assert 'class="language-python"' in html
 
     # Check code content is present, accounting for HTML entities
     assert "print" in html
@@ -98,7 +97,6 @@ def example():
     assert ">Subtitle<" in html  # Check subheader content
 
     # Check structural elements
-    assert "highlight" in html  # Code block styling
     assert "<blockquote>" in html  # Quote block
     assert "<ul>" in html  # Unordered list
 
@@ -182,7 +180,7 @@ def test_convert_markdown_to_html_logs_properly(caplog) -> None:
 
     # Check logged extensions
     ext_log = next(msg for msg in messages if "Using extensions" in msg)
-    expected_extensions = ['fenced_code', 'codehilite', 'tables', 'toc']
+    expected_extensions = ['fenced_code', 'tables', 'toc']
     assert all(ext in ext_log for ext in expected_extensions)
 
     # Check output length in log

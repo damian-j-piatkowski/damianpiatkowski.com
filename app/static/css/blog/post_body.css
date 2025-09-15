@@ -86,50 +86,80 @@
     border: 1px solid #e9ecef;
 }
 
-/* --- Code Blocks --- */
+/* --- Code Blocks (generic) --- */
 .single-blog-post .blog-content pre {
-    background-color: #D0F0C0 !important;
-    border: 1px solid #a0d08c;
-    border-radius: 8px;
-    padding: 1.5rem;
+    position: relative;
     margin: 1.5rem 0;
     overflow-x: auto;
-    position: relative;
+    border-radius: 8px;
+    background-color: #D0F0C0; /* default block bg */
+    border: 1px solid #a0d08c;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.single-blog-post .blog-content pre > code[class*="language-"] {
+    display: block;
+    min-width: 100%; /* ensures background fills scroll */
+    padding: 2rem 1.5rem 1.5rem; /* top padding for label */
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #2c3e50;
-}
-
-.single-blog-post .blog-content pre code {
-    background: none !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    color: inherit;
     white-space: pre;
-    font-family: inherit;
+    color: #2c3e50;
+    background: none; /* let <pre> handle background */
+    border: none;     /* avoid double borders */
+    margin-top: 1rem;
 }
 
 /* --- Code Block Labels --- */
-.single-blog-post .blog-content pre::before {
-    content: '';
+.single-blog-post .blog-content pre > code[class*="language-"]::before {
     position: absolute;
     top: 0;
-    right: 0;
-    background-color: #a0d08c;
-    color: white;
-    padding: 0.25rem 0.75rem;
+    left: 0; /* label on left */
+    padding: 0.15rem 0.75rem;
     font-size: 0.75rem;
-    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
     font-weight: 500;
+    color: #fff;
+    background-color: #a0d08c; /* same for all labels */
+    content: attr(class); /* fallback */
 }
 
-.single-blog-post .blog-content pre.language-python::before { content: 'Python'; }
-.single-blog-post .blog-content pre.language-javascript::before { content: 'JavaScript'; }
-.single-blog-post .blog-content pre.language-html::before { content: 'HTML'; }
-.single-blog-post .blog-content pre.language-css::before { content: 'CSS'; }
+/* Prettier labels */
+.single-blog-post .blog-content pre > code.language-python::before { content: 'Python'; }
+.single-blog-post .blog-content pre > code.language-javascript::before { content: 'JavaScript'; }
+.single-blog-post .blog-content pre > code.language-html::before { content: 'HTML'; }
+.single-blog-post .blog-content pre > code.language-css::before { content: 'CSS'; }
+.single-blog-post .blog-content pre > code.language-bash::before { content: 'Bash'; }
+
+/* --- Terminal Blocks (Bash) --- */
+.single-blog-post .blog-content pre > code.language-bash {
+    background-color: #111; /* dark bg */
+    color: #eee;
+    display: block;
+    padding: 2rem 1.5rem 1.5rem; /* add top space for label */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    white-space: pre;
+}
+
+/* Match <pre> background for Bash to prevent green scroll bar */
+.single-blog-post .blog-content pre:has(> code.language-bash) {
+    background-color: #111 !important;
+    border: 1px solid #D0F0C0;
+}
+
+/* --- Terminal Syntax Colors (manual spans) --- */
+.single-blog-post .blog-content code.language-bash .prompt {
+  color: #6fdb95;   /* soft green prompt */
+  font-weight: 600;
+}
+.single-blog-post .blog-content code.language-bash .command {
+  color: #fff;      /* bright white commands */
+}
+.single-blog-post .blog-content code.language-bash .output {
+  color: #aaa;      /* muted gray for output */
+}
 
 /* --- Links --- */
 .single-blog-post .blog-content a {
@@ -161,9 +191,12 @@
 @media (max-width: 768px) {
     .single-blog-post .blog-content { font-size: 1rem; }
 
-    .single-blog-post .blog-content pre {
-        padding: 1rem;
+    .single-blog-post .blog-content pre > code[class*="language-"] {
+        padding: 1.75rem 1rem 1rem; /* keep extra space for label */
         font-size: 0.8rem;
+    }
+
+    .single-blog-post .blog-content pre {
         margin: 1rem 0;
         scrollbar-width: thin;
         scrollbar-color: #a0d08c transparent;
@@ -172,11 +205,9 @@
     .single-blog-post .blog-content pre::-webkit-scrollbar {
         height: 6px;
     }
-
     .single-blog-post .blog-content pre::-webkit-scrollbar-track {
         background: transparent;
     }
-
     .single-blog-post .blog-content pre::-webkit-scrollbar-thumb {
         background-color: #a0d08c;
         border-radius: 3px;
@@ -184,9 +215,11 @@
 }
 
 @media (max-width: 480px) {
-    .single-blog-post .blog-content pre {
+    .single-blog-post .blog-content pre > code[class*="language-"] {
         font-size: 0.75rem;
-        padding: 0.75rem;
+        padding: 1.5rem 0.75rem 0.75rem; /* space for label */
+    }
+    .single-blog-post .blog-content pre {
         margin: 0.75rem 0;
     }
 }
