@@ -12,6 +12,33 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.1.0] - 2025-09-15
+### Added
+- **Blog syntax highlighting improvements**
+  - Preserved `language-*` classes in `<pre><code>` blocks for client-side highlighters.
+  - Introduced lightweight Bash syntax highlighting script:
+    - Escapes raw HTML before applying styles for safety.
+    - Distinguishes prompt, command, and output via styled `<span>` wrappers.
+  - Added automatic language labels above code blocks with pretty overrides per language.
+  - Implemented dark “terminal” theme for Bash blocks with styled prompt and output.
+
+### Changed
+- **Code block rendering & sanitization**
+  - Removed server-side `codehilite` extension to delegate styling fully to client-side.
+  - Allowed `class` attributes on `<pre>` and `<code>` tags while maintaining XSS protection.
+  - Refactored CSS for code blocks:
+    - Unified under `<pre><code class="language-...">`.
+    - Moved label placement from `<pre>::before` → `<code>::before` for cleaner semantics.
+    - Synced `<pre>` and `<code>` backgrounds to avoid scrollbar color mismatches.
+  - Adjusted spacing/padding for readability on desktop, tablet, and mobile.
+
+### Documentation
+- Updated docstrings to clarify support for `<pre><code>` attributes (`language-*`) and explain separation of concerns:
+  - Markdown provides language hints.
+  - Client-side handles syntax highlighting and styling.
+
+---
+
 ## [1.0.3] - 2025-09-11
 ### Changed
 - **Infrastructure & deployment**  
