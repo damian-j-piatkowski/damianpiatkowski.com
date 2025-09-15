@@ -95,7 +95,8 @@ def sanitize_html(content: str) -> str:
     1. Removes dangerous <script> tags and their content
     2. Filters HTML to allow only safe tags for blog content
     3. Normalizes whitespace and formatting (but preserves code block formatting)
-    4. Removes pilcrow symbols (¶) from headings
+    4. Preserves <pre><code> blocks with attributes (e.g., class="language-python")
+    5. Removes pilcrow symbols (¶) from headings
 
     Args:
         content: Raw HTML content to be sanitized.
@@ -134,20 +135,28 @@ def sanitize_html(content: str) -> str:
         tags=allowed_tags,
         attributes={
             'a': ['href', 'title'],
-            'img': ['src', 'alt', 'title']
+            'img': ['src', 'alt', 'title'],
+            'code': ['class'],  # allow syntax highlighting classes
+            'pre': ['class'],  # optional styling on <pre>
         },
         strip=True
     )
 
     # Extract code blocks before whitespace normalization to preserve their formatting
     code_blocks = []
+
     def preserve_code_block(match):
         placeholder = f"__CODE_BLOCK_{len(code_blocks)}__"
         code_blocks.append(match.group(0))
         return placeholder
 
-    # Temporarily replace code blocks with placeholders
-    sanitized_content = re.sub(r'<pre><code>.*?</code></pre>', preserve_code_block, sanitized_content, flags=re.DOTALL)
+    # Match <pre><code> with optional attributes
+    sanitized_content = re.sub(
+        r'<pre><code[^>]*>.*?</code></pre>',
+        preserve_code_block,
+        sanitized_content,
+        flags=re.DOTALL
+    )
 
     # Now safely normalize whitespace outside of code blocks
     sanitized_content = re.sub(r'\s+</', '</', sanitized_content)  # Trim space before closing tags
