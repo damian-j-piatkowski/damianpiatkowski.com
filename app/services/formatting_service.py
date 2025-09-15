@@ -37,7 +37,8 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     """Converts markdown-formatted text to HTML with enhanced features.
 
     Supports advanced markdown features like:
-    - Fenced code blocks with syntax highlighting
+    - Fenced code blocks with language classes preserved (e.g., ``language-python``, ``language-bash``)
+      for use with client-side syntax highlighters
     - Tables
     - Line breaks
     - Task lists
@@ -58,10 +59,9 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     # Remove BOM if present
     markdown_text = markdown_text.lstrip('\ufeff')
 
-    # Default extensions for technical blog posts
+    # Default extensions for technical blog posts (without codehilite)
     default_extensions = [
-        'fenced_code',
-        'codehilite',
+        'fenced_code',  # preserves language-* classes
         'tables',
         'toc',
         'def_list',
@@ -76,12 +76,6 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     logger.debug("convert_markdown_to_html: Using extensions=%s", all_extensions)
 
     extension_configs = {
-        'codehilite': {
-            'css_class': 'highlight',
-            'use_pygments': True,
-            'noclasses': False,
-            'linenums': False
-        },
         'toc': {
             'permalink': True,
             'baselevel': 1
