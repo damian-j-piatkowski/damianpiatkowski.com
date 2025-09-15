@@ -12,6 +12,13 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.1.1] - 2025-09-15
+### Fixed
+- **Build artifacts**
+  - Minified `app/static/dist/css/single_blog_post.min.css` to include latest code block styling and language label updates.
+
+---
+
 ## [1.1.0] - 2025-09-15
 ### Added
 - **Blog syntax highlighting improvements**
