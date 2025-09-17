@@ -149,7 +149,8 @@
     border: 1px solid #D0F0C0;
 }
 
-/* --- Terminal Syntax Colors (manual spans) --- */
+/* --- Syntax Highlighting (manual spans) --- */
+/* Bash-specific */
 .single-blog-post .blog-content code.language-bash .prompt {
   color: #6fdb95;   /* soft green prompt */
   font-weight: 600;
@@ -159,6 +160,27 @@
 }
 .single-blog-post .blog-content code.language-bash .output {
   color: #aaa;      /* muted gray for output */
+}
+
+/* Generic spans (Python, JS, etc.) */
+.single-blog-post .blog-content code .keyword {
+  color: darkcyan; /* def, if, class, return, etc. */
+  font-weight: bold;
+}
+.single-blog-post .blog-content code .decorator {
+  color: #ff8c00; /* funky orange */
+  font-weight: bold;
+}
+.single-blog-post .blog-content code .comment {
+  color: #6a5acd; /* purple */
+  font-style: italic;
+}
+.single-blog-post .blog-content code .error-block {
+  color: #9400d3; /* deep purple */
+  font-weight: bold;
+}
+.single-blog-post .blog-content code .string {
+  color: mediumvioletred;
 }
 
 /* --- Links --- */
