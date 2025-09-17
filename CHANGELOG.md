@@ -12,6 +12,16 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.0] - 2025-09-17
+### Added
+- **Blog syntax highlighting (Python)**
+  - Introduced lightweight client-side Python syntax highlighter in `app/static/js/highlight.js`.
+  - Implemented regex-based parsing for Python tokens (keywords, strings, comments, decorators, errors).
+  - Added dedicated CSS rules in `app/static/css/blog/post_body.css` for styled token classes.
+  - Preserved Bash highlighting and introduced generic span classes to enable future language support.
+
+---
+
 ## [1.1.1] - 2025-09-15
 ### Fixed
 - **Build artifacts**
