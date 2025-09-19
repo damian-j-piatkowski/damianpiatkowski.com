@@ -12,6 +12,19 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.1] - 2025-09-19
+### Added
+- **Blog content styling**
+  - Introduced brand-accent underline for `h3` headings with purple `#5A31F4`.
+  - Added special emphasis styling for book titles (`em` inside blog content) with
+    a soft green gradient highlight.
+  - Introduced custom styling for inline bold text (`strong`) to create a
+    purple highlight effect without using actual bold weight.
+  - Improved blockquote attributions (`em` in last paragraph) with right-aligned
+    text and prefixed em-dash.
+
+---
+
 ## [1.2.0] - 2025-09-17
 ### Added
 - **Blog syntax highlighting (Python)**
