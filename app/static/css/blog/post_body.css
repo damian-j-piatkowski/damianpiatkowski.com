@@ -31,6 +31,11 @@
 
 .single-blog-post .blog-content h3 {
     margin-top: 1.5rem;
+    margin-bottom: 0.85rem;
+    color: #333;
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid #AFA2FA;
+    position: relative;
 }
 
 /* --- Paragraphs --- */
@@ -46,7 +51,12 @@
     margin: 1.5rem 0;
 }
 
-/* --- Blockquotes --- */
+/* --- Blockquotes ---
+   General styling for quoted text blocks.
+   - Adds a soft green left border to visually indicate a quote.
+   - Light gray background for contrast against body text.
+   - Slight padding and rounded corners for readability and subtle emphasis.
+*/
 .single-blog-post .blog-content blockquote {
     border-left: 4px solid #D0F0C0;
     background-color: #f8f9fa;
@@ -56,8 +66,59 @@
     border-radius: 0 4px 4px 0;
 }
 
-.single-blog-post .blog-content blockquote p:last-child {
-    margin-bottom: 0;
+/* --- Blockquote Attribution ---
+   Styles for the *last paragraph's <em>* inside a blockquote,
+   often used to indicate the source or author of the quote.
+   - Right-aligned to visually separate attribution from the quote body.
+   - Muted text color and slightly smaller font for subtlety.
+   - Prefixed with an em-dash (—) to match common citation style.
+*/
+blockquote p:last-of-type em {
+    text-align: right;
+    color: #666;
+    font-size: 0.95em;
+}
+
+blockquote p:last-of-type em::before {
+    content: "— ";
+}
+
+/* --- Book Titles (inline <em> inside blog content) ---
+   Special emphasis style for inline <em> elements that represent book titles.
+   - Uses italic with medium weight to distinguish from normal italic emphasis.
+   - Darker text color for stronger visual anchor.
+   - Adds a soft green highlight under the text via a gradient background.
+   - Slight horizontal padding and rounded corners create a "highlighted" effect.
+*/
+.single-blog-post .blog-content em {
+    font-style: italic;
+    font-weight: 500;
+    color: #2c3e50;
+    background: linear-gradient(
+        to top,
+        #D0F0C0 0.35em,   /* how tall the highlight is */
+        transparent 0.35em
+    );
+    padding: 0 0.1em;   /* small horizontal breathing space */
+    border-radius: 2px;
+}
+
+/* --- Custom Bold Styling (inline <strong> inside blog content) ---
+   Special emphasis style for inline <strong> elements.
+   - Keeps bold weight for emphasis.
+   - Light purple text color for distinction.
+   - Adds a subtle purple highlight background for visual pop.
+   - Gentle padding + rounded corners for readability.
+*/
+.single-blog-post .blog-content strong {
+    font-weight: normal; /* 👈 removes the bold */
+    background: linear-gradient(
+        to top,
+        rgba(175, 162, 250, 0.4) 0.15em,  /* lighter, semi-transparent */
+        transparent 0.35em
+    );
+    padding: 0 0.1em;
+    border-radius: 2px;
 }
 
 /* --- Lists --- */
@@ -84,6 +145,7 @@
     font-size: 0.9em;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     border: 1px solid #e9ecef;
+    margin: 0 0.2rem;
 }
 
 /* --- Code Blocks (generic) --- */
