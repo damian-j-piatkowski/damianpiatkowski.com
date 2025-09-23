@@ -19,7 +19,7 @@ Methods:
 """
 
 import json
-from typing import List, Optional
+from typing import List
 
 from sqlalchemy import delete, insert, select, func, column, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -264,7 +264,7 @@ class BlogPostRepository:
             total_posts = self.count_total_blog_posts()
             total_pages = (total_posts + per_page - 1) // per_page
             offset = (page - 1) * per_page
-            query = select(blog_posts).limit(per_page).offset(offset)
+            query = select(blog_posts).order_by(blog_posts.c.created_at.desc()).limit(per_page).offset(offset)
             result = self.session.execute(query).mappings().all()
 
             posts = [self._hydrate_blog_post(dict(row)) for row in result] if result else []

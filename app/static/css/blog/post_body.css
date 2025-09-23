@@ -53,9 +53,10 @@
 
 /* --- Blockquotes ---
    General styling for quoted text blocks.
-   - Adds a soft green left border to visually indicate a quote.
-   - Light gray background for contrast against body text.
-   - Slight padding and rounded corners for readability and subtle emphasis.
+   - Soft green left border for visual cue.
+   - Light gray background for contrast.
+   - Padding and rounded corners for readability.
+   - Italicized body text for quotation feel.
 */
 .single-blog-post .blog-content blockquote {
     border-left: 4px solid #D0F0C0;
@@ -67,28 +68,45 @@
 }
 
 /* --- Blockquote Attribution ---
-   Styles for the *last paragraph's <em>* inside a blockquote,
-   often used to indicate the source or author of the quote.
-   - Right-aligned to visually separate attribution from the quote body.
-   - Muted text color and slightly smaller font for subtlety.
-   - Prefixed with an em-dash (—) to match common citation style.
+   Styles the <footer> inside blockquotes.
+   - Right-aligned to visually separate from the quote.
+   - Normal (non-italic) font by default.
+   - Slightly smaller and muted color.
+   - Automatically prefixed with an em-dash.
 */
-blockquote p:last-of-type em {
+.single-blog-post .blog-content blockquote footer.attribution {
+    margin-top: 0.75rem;
     text-align: right;
-    color: #666;
+    font-style: normal;
     font-size: 0.95em;
+    color: #666;
 }
 
-blockquote p:last-of-type em::before {
+.single-blog-post .blog-content blockquote footer.attribution::before {
     content: "— ";
 }
 
-/* --- Book Titles (inline <em> inside blog content) ---
-   Special emphasis style for inline <em> elements that represent book titles.
-   - Uses italic with medium weight to distinguish from normal italic emphasis.
-   - Darker text color for stronger visual anchor.
-   - Adds a soft green highlight under the text via a gradient background.
-   - Slight horizontal padding and rounded corners create a "highlighted" effect.
+/* --- Author ---
+   Normal weight, not italic, no underline.
+*/
+.single-blog-post .blog-content blockquote footer.attribution .author {
+    font-style: normal;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* --- Book ---
+   Kept italic to distinguish from author.
+*/
+.single-blog-post .blog-content blockquote footer.attribution .book {
+    font-style: italic;
+    font-weight: normal;
+}
+
+/* --- Inline Book Titles (elsewhere in content) ---
+   Styling for <em> that represent book titles outside blockquotes.
+   - Medium italic weight, dark color.
+   - Soft green highlight underline via gradient.
 */
 .single-blog-post .blog-content em {
     font-style: italic;
@@ -96,26 +114,53 @@ blockquote p:last-of-type em::before {
     color: #2c3e50;
     background: linear-gradient(
         to top,
-        #D0F0C0 0.35em,   /* how tall the highlight is */
+        #D0F0C0 0.35em,
         transparent 0.35em
     );
-    padding: 0 0.1em;   /* small horizontal breathing space */
+    padding: 0 0.1em;
     border-radius: 2px;
 }
 
 /* --- Custom Bold Styling (inline <strong> inside blog content) ---
    Special emphasis style for inline <strong> elements.
-   - Keeps bold weight for emphasis.
    - Light purple text color for distinction.
    - Adds a subtle purple highlight background for visual pop.
    - Gentle padding + rounded corners for readability.
 */
 .single-blog-post .blog-content strong {
-    font-weight: normal; /* 👈 removes the bold */
+    font-weight: normal;
     background: linear-gradient(
         to top,
         rgba(175, 162, 250, 0.4) 0.15em,  /* lighter, semi-transparent */
         transparent 0.35em
+    );
+    padding: 0 0.1em;
+    border-radius: 2px;
+}
+
+/* --- Link Styling --- */
+.single-blog-post .blog-content a.link {
+    color: #2c3e50;
+    background: linear-gradient(
+        to top,
+        #fff3cd 0.95em, /* pale yellow highlight */
+        transparent 0.95em
+    );
+    padding: 0 0.1em;
+    border-radius: 2px;
+    position: relative;
+    text-decoration: none; /* remove default underline */
+}
+
+/* --- References to My Own Domain --- */
+.single-blog-post .blog-content .site-ref {
+    font-style: italic;
+    font-weight: 500;
+    color: #2c3e50;
+    background: linear-gradient(
+        to top,
+        #D0F0C0 0.95em,
+        transparent 0.95em
     );
     padding: 0 0.1em;
     border-radius: 2px;
