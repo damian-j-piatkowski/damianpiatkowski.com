@@ -12,6 +12,21 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.2] - 2025-09-23
+### Changed
+- **Blog post ordering**
+  - Updated repository query in `blog_post_repository.py` to order posts
+    by `created_at` in descending order, ensuring newest posts appear first
+    across paginated views.
+
+- **Blog content styling**
+  - Refined blockquote attribution formatting in Markdown-to-HTML conversion:
+    - Removed stray commas before book titles.
+    - Ensured consistent `<footer class="attribution">` structure with
+      `<span class="author">` and `<em class="book">`.
+
+---
+
 ## [1.2.1] - 2025-09-19
 ### Added
 - **Blog content styling**

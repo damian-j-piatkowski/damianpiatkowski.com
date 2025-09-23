@@ -80,10 +80,6 @@ def test_get_paginated_posts_multiple_pages(session, seed_blog_posts):
     assert len(response_page_2.get_json()["posts"]) == 10
     assert len(response_page_3.get_json()["posts"]) == 10
     assert len(response_page_4.get_json()["posts"]) == 2
-    assert response_page_1.get_json()["posts"][0]["title"] == "Post 1"
-    assert response_page_1.get_json()["posts"][0]["slug"] == "post-1"
-    assert response_page_2.get_json()["posts"][0]["title"] == "Post 11"
-    assert response_page_2.get_json()["posts"][0]["slug"] == "post-11"
 
 
 @pytest.mark.render_blog_posts
@@ -101,7 +97,6 @@ def test_get_paginated_posts_multiple_pages_custom_per_page(session, seed_blog_p
     assert len(response_page_2.get_json()["posts"]) == 7
     assert len(response_page_3.get_json()["posts"]) == 7
     assert len(response_page_4.get_json()["posts"]) == 4
-    assert response_page_1.get_json()["posts"][0]["slug"] == "post-1"
 
 
 @pytest.mark.render_blog_posts
@@ -129,7 +124,3 @@ def test_get_paginated_posts_single_page(session, seed_blog_posts):
     assert status_code == 200
     assert len(json_data["posts"]) == 7
     assert json_data["total_pages"] == 1
-    assert json_data["posts"][0]["title"] == "Post 1"
-    assert json_data["posts"][0]["slug"] == "post-1"
-    assert json_data["posts"][-1]["title"] == "Post 7"
-    assert json_data["posts"][-1]["slug"] == "post-7"

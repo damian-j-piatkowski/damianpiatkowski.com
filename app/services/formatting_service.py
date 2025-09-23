@@ -25,10 +25,12 @@ Functions:
 """
 
 import logging
+import re
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional, List
 
 import markdown
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -36,60 +38,118 @@ logger = logging.getLogger(__name__)
 def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]] = None) -> str:
     """Converts markdown-formatted text to HTML with enhanced features.
 
-    Supports advanced markdown features like:
-    - Fenced code blocks with language classes preserved (e.g., ``language-python``, ``language-bash``)
-      for use with client-side syntax highlighters
-    - Tables
-    - Line breaks
-    - Task lists
-    - Table of contents
-    - Definition lists
-    - Footnotes
-
-    Args:
-        markdown_text: The article content in markdown format.
-        extensions: Optional list of additional markdown extensions to use.
-            Defaults to None, using the standard set of extensions.
-
-    Returns:
-        The HTML content ready for storage in the blog_posts table.
+    Customizations:
+    - Wraps '#damianpiatkowski.com#' in <span class="site-ref"> for styling
+    - Adds 'link' class to all <a> tags, except auto-generated heading permalinks (class="headerlink")
+    - Formats blockquote attribution into:
+        <footer class="attribution"><span class="author">Author</span>, <em class="book">Book Title</em></footer>
+      Rules:
+        * If there is additional attribution text after the author (e.g., "quoted in …"), it is preserved after the comma.
+        * If there is only a trailing comma before the book title, the comma is preserved.
     """
     logger.debug("convert_markdown_to_html: Starting conversion. Input length=%d", len(markdown_text or ""))
 
-    # Remove BOM if present
     markdown_text = markdown_text.lstrip('\ufeff')
 
-    # Default extensions for technical blog posts (without codehilite)
     default_extensions = [
-        'fenced_code',  # preserves language-* classes
-        'tables',
-        'toc',
-        'def_list',
-        'footnotes',
-        'md_in_html',
-        'sane_lists',
-        'smarty',
-        'attr_list'
+        "fenced_code",
+        "tables",
+        "toc",
+        "def_list",
+        "footnotes",
+        "md_in_html",
+        "sane_lists",
+        "smarty",
+        "attr_list",
     ]
 
     all_extensions = default_extensions + (extensions or [])
-    logger.debug("convert_markdown_to_html: Using extensions=%s", all_extensions)
+    extension_configs = {"toc": {"permalink": True, "baselevel": 1}}
 
-    extension_configs = {
-        'toc': {
-            'permalink': True,
-            'baselevel': 1
-        }
-    }
-
+    # Convert Markdown
     html = markdown.markdown(
         markdown_text,
         extensions=all_extensions,
         extension_configs=extension_configs,
-        output_format='html'
+        output_format="html",
     )
 
+    soup = BeautifulSoup(html, "html.parser")
+
+    # --- Style links ---
+    for a in soup.find_all("a", href=True):
+        if "headerlink" in a.get("class", []):
+            continue  # skip permalinks
+        a["class"] = (a.get("class", []) + ["link"])
+
+    # --- Wrap '#damianpiatkowski.com#' in <span> ---
+    domain_pattern = re.compile(r"#(damianpiatkowski\.com)#", re.IGNORECASE)
+    for node in soup.find_all(string=True):
+        if domain_pattern.search(node):
+            new_html = domain_pattern.sub(
+                r'<span class="site-ref">\1</span>', node
+            )
+            new_nodes = BeautifulSoup(new_html, "html.parser")
+            node.replace_with(new_nodes)
+
+    # --- Blockquote attribution ---
+    for bq in soup.find_all("blockquote"):
+        p_tags = bq.find_all("p")
+        if not p_tags:
+            continue
+        last_p = p_tags[-1]
+
+        if last_p.find("em"):  # looks like an attribution
+            book_tag = last_p.find("em")
+
+            # Extract text parts before and after <em>
+            before_em = []
+            after_em = []
+            seen_book = False
+            for c in last_p.contents:
+                if c == book_tag:
+                    seen_book = True
+                    continue
+                if not seen_book:
+                    before_em.append(c)
+                else:
+                    after_em.append(c)
+
+            # First chunk of before_em = author (first phrase before comma)
+            before_text = "".join(str(c) for c in before_em).strip()
+
+            if "," in before_text:
+                parts = [p.strip() for p in before_text.split(",", 1)]
+                author_text = parts[0]
+                rest_text = parts[1] if len(parts) > 1 and parts[1] else None
+                had_comma = True
+            else:
+                author_text, rest_text = before_text, None
+                had_comma = False
+
+            # Build footer
+            new_footer = soup.new_tag("footer", attrs={"class": "attribution"})
+
+            author_tag = soup.new_tag("span", attrs={"class": "author"})
+            author_tag.string = author_text
+            new_footer.append(author_tag)
+
+            if rest_text:  # case: "Naval Ravikant, quoted in …"
+                new_footer.append(", " + rest_text)
+            elif had_comma:  # case: "Austin Kleon," (just a trailing comma)
+                new_footer.append(",")
+
+            new_footer.append(" ")
+            new_footer.append(book_tag)
+
+            if after_em:
+                new_footer.append(" " + "".join(str(c) for c in after_em).strip())
+
+            last_p.replace_with(new_footer)
+
+    html = str(soup)
     logger.debug("convert_markdown_to_html: Conversion complete. Output length=%d", len(html or ""))
+
     return html
 
 
