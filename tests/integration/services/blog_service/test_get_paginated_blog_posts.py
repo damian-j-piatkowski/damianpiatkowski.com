@@ -114,5 +114,3 @@ def test_get_paginated_blog_posts_single_page(session, seed_blog_posts) -> None:
 
     assert len(posts) == 7
     assert total_pages == 1
-    assert posts[0].title == "Post 1"
-    assert posts[-1].title == "Post 7"

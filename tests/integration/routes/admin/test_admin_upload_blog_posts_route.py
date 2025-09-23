@@ -92,8 +92,9 @@ def test_upload_blog_posts_route_with_actual_api(
         # Verify preview HTML content format
         html_content = uploaded_post["html_content"]
 
-        # Check typographic elements
-        assert "&rsquo;" in html_content or "'" in html_content, "Smart quotes or apostrophes should be present"
+        # Check typographic elements (allow Unicode curly quotes too)
+        assert any(q in html_content for q in ["&rsquo;", "'", "’"]), \
+            "Smart quotes or apostrophes should be present"
 
         # Check preview content
         assert html_content.endswith("..."), "Preview should end with ellipsis"
