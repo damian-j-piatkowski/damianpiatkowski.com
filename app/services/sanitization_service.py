@@ -127,17 +127,21 @@ def sanitize_html(content: str) -> str:
         'table', 'thead', 'tbody', 'tr',  # Tables
         'th', 'td',
         'a', 'img',  # Links and images
-        'sup', 'sub'  # Superscript/subscript
+        'sup', 'sub',  # Superscript/subscript
+        'footer', 'span'
     ]
 
     sanitized_content = clean(
         content,
         tags=allowed_tags,
         attributes={
-            'a': ['href', 'title'],
+            'a': ['href', 'title', 'class'],
             'img': ['src', 'alt', 'title'],
             'code': ['class'],  # allow syntax highlighting classes
             'pre': ['class'],  # optional styling on <pre>
+            'em': ['class'],
+            'footer': ['class'],
+            'span': ['class'],  # preserve <span class="site-ref">
         },
         strip=True
     )
