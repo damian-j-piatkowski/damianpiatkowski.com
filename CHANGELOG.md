@@ -12,6 +12,20 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.3] - 2025-09-25
+### Added
+- **Blog content styling**
+  - Introduced dedicated styling for SQL code blocks in `post_body.css`:
+    - Pale yellow background and border for `language-sql` blocks.
+    - Labeled SQL tag for clear language identification.
+
+### Changed
+- **Related posts layout**
+  - Increased `.related-post-thumbnail` height from 180px → 220px in
+    `single_post_layout.css` to improve image fit and visual balance.
+
+---
+
 ## [1.2.2] - 2025-09-23
 ### Changed
 - **Blog post ordering**
