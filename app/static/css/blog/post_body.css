@@ -238,6 +238,18 @@
 .single-blog-post .blog-content pre > code.language-html::before { content: 'HTML'; }
 .single-blog-post .blog-content pre > code.language-css::before { content: 'CSS'; }
 .single-blog-post .blog-content pre > code.language-bash::before { content: 'Bash'; }
+.single-blog-post .blog-content pre > code.language-sql::before { content: 'SQL'; }
+
+/* --- SQL Code Blocks --- */
+.single-blog-post .blog-content pre:has(> code.language-sql) {
+    background-color: #fff9db; /* pale yellow */
+    border: 1px solid #e6d86b;
+}
+
+.single-blog-post .blog-content pre > code.language-sql::before {
+    background-color: #e6d86b; /* stronger yellow for label */
+    color: #333;
+}
 
 /* --- Terminal Blocks (Bash) --- */
 .single-blog-post .blog-content pre > code.language-bash {
