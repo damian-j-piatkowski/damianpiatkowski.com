@@ -12,6 +12,17 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.2.4] - 2025-10-28
+
+### Added
+- **Blog content styling**
+  - Introduced dedicated styling for folder structure (`language-plaintext`) blocks in `post_body.css`:
+    - Added soft blue-tinted background and border for improved visual distinction.
+    - Implemented `"Folder Structure"` label consistent with existing language tags (Python, SQL, Bash, etc.).
+    - Preserved existing font stack (`Consolas`, `Monaco`, `Courier New`) and spacing for consistency across code blocks.
+
+---
+
 ## [1.2.3] - 2025-09-25
 ### Added
 - **Blog content styling**
