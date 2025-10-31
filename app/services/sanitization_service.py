@@ -128,7 +128,8 @@ def sanitize_html(content: str) -> str:
         'th', 'td',
         'a', 'img',  # Links and images
         'sup', 'sub',  # Superscript/subscript
-        'footer', 'span'
+        'footer', 'span',
+        'div'
     ]
 
     sanitized_content = clean(
@@ -142,6 +143,10 @@ def sanitize_html(content: str) -> str:
             'em': ['class'],
             'footer': ['class'],
             'span': ['class'],  # preserve <span class="site-ref">
+            'div': ['class'],  # preserve div class="toc"
+            # Allow IDs on headings for TOC scrolling
+            **{tag: ['id'] for tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']},
+            'p': ['class'],
         },
         strip=True
     )

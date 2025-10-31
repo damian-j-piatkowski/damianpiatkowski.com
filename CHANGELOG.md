@@ -12,14 +12,35 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
-## [1.2.4] - 2025-10-28
+## [1.3.0] - 2025-10-31
 
 ### Added
-- **Blog content styling**
-  - Introduced dedicated styling for folder structure (`language-plaintext`) blocks in `post_body.css`:
-    - Added soft blue-tinted background and border for improved visual distinction.
-    - Implemented `"Folder Structure"` label consistent with existing language tags (Python, SQL, Bash, etc.).
-    - Preserved existing font stack (`Consolas`, `Monaco`, `Courier New`) and spacing for consistency across code blocks.
+
+- **Table of Contents (TOC) feature**  
+  - Automatically injects `[TOC]` before the first header in Markdown to generate a navigable table of contents.  
+  - Adds a “Table of Contents” heading (`<p class="toc-title">`) above the generated list.  
+  - Ensures all headings (`<h1>`–`<h6>`) have stable `id` attributes for in-page anchor scrolling.  
+  - Introduced new `.toc` and `.toc-title` styling in `app/static/css/blog/single_post_layout.css`:  
+    - Decorative accent border and background container for the TOC block.  
+    - Accent bullets and nested list styling for hierarchical headings.  
+    - Smooth hover transitions for in-page TOC links.
+
+- **Blog content styling**  
+  - Introduced dedicated styling for folder structure (`language-plaintext`) blocks in `post_body.css`:  
+    - Added soft blue-tinted background and border for improved visual distinction.  
+    - Implemented `"Folder Structure"` label consistent with existing language tags (Python, SQL, Bash, etc.).  
+    - Preserved existing font stack (`Consolas`, `Monaco`, `Courier New`) and spacing for consistency across code blocks.  
+
+### Changed
+
+- **Markdown → HTML conversion** (`app/services/formatting_service.py`)  
+  - Updated `convert_markdown_to_html()` to support TOC insertion and heading ID enforcement.  
+  - Injects TOC title markup and preserves link styling, domain wrapping, and blockquote attribution logic.  
+
+- **HTML sanitization** (`app/services/sanitization_service.py`)  
+  - Extended allowed tags and attributes to include `<div class="toc">` for safe TOC rendering.  
+  - Added support for `id` attributes on headings (`<h1>`–`<h6>`) for smooth anchor scrolling.  
+  - Preserved class attributes on `<p>` and `<div>` tags for consistent blog content styling.
 
 ---
 
