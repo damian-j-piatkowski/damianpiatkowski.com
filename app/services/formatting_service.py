@@ -36,20 +36,26 @@ logger = logging.getLogger(__name__)
 
 
 def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]] = None) -> str:
-    """Converts markdown-formatted text to HTML with enhanced features.
+    """Converts Markdown-formatted text to HTML with enhanced features.
 
     Customizations:
-    - Wraps '#damianpiatkowski.com#' in <span class="site-ref"> for styling
-    - Adds 'link' class to all <a> tags, except auto-generated heading permalinks (class="headerlink")
-    - Formats blockquote attribution into:
-        <footer class="attribution"><span class="author">Author</span>, <em class="book">Book Title</em></footer>
+    - Automatically inserts [TOC] before the first header to generate a table of contents.
+    - Adds a "Table of Contents" title (<p class="toc-title">) at the top of the TOC block.
+    - Wraps '#damianpiatkowski.com#' in <span class="site-ref"> for styling.
+    - Adds 'link' class to all <a> tags, except auto-generated heading permalinks (class="headerlink").
+    - Ensures all headings (<h1>–<h6>) have IDs to support TOC anchor scrolling.
+    - Formats blockquote attributions into:
+        <footer class="attribution">
+            <span class="author">Author</span>, <em class="book">Book Title</em>
+        </footer>
+
       Rules:
         * If there is additional attribution text after the author (e.g., "quoted in …"), it is preserved after the comma.
         * If there is only a trailing comma before the book title, the comma is preserved.
     """
     logger.debug("convert_markdown_to_html: Starting conversion. Input length=%d", len(markdown_text or ""))
 
-    markdown_text = markdown_text.lstrip('\ufeff')
+    markdown_text = markdown_text.lstrip("\ufeff")
 
     default_extensions = [
         "fenced_code",
@@ -66,7 +72,22 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     all_extensions = default_extensions + (extensions or [])
     extension_configs = {"toc": {"permalink": True, "baselevel": 1}}
 
-    # Convert Markdown
+    # --- Insert [TOC] before the first header ---
+    lines = markdown_text.splitlines()
+    header_index = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("#"):  # detect first Markdown heading
+            header_index = i
+            break
+
+    if header_index is not None:
+        lines.insert(header_index, "\n[TOC]\n")
+        markdown_text = "\n".join(lines)
+        logger.debug("convert_markdown_to_html: Injected [TOC] before first header at line %d", header_index)
+    else:
+        logger.debug("convert_markdown_to_html: No header found, skipping TOC injection.")
+
+    # --- Convert Markdown ---
     html = markdown.markdown(
         markdown_text,
         extensions=all_extensions,
@@ -75,6 +96,21 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     )
 
     soup = BeautifulSoup(html, "html.parser")
+
+    # --- Ensure headings have IDs for TOC scrolling ---
+    for heading in soup.find_all(re.compile("^h[1-6]$")):
+        link = heading.find("a", class_="headerlink")
+        if link and "href" in link.attrs:
+            anchor = link["href"].lstrip("#")
+            if not heading.get("id"):
+                heading["id"] = anchor
+
+    # --- Insert "Table of Contents" title if applicable ---
+    toc_div = soup.find("div", class_="toc")
+    if toc_div and not toc_div.find("p", class_="toc-title"):
+        toc_title = soup.new_tag("p", **{"class": "toc-title"})
+        toc_title.string = "Table of Contents"
+        toc_div.insert(0, toc_title)
 
     # --- Style links ---
     for a in soup.find_all("a", href=True):
@@ -86,9 +122,7 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     domain_pattern = re.compile(r"#(damianpiatkowski\.com)#", re.IGNORECASE)
     for node in soup.find_all(string=True):
         if domain_pattern.search(node):
-            new_html = domain_pattern.sub(
-                r'<span class="site-ref">\1</span>', node
-            )
+            new_html = domain_pattern.sub(r'<span class="site-ref">\1</span>', node)
             new_nodes = BeautifulSoup(new_html, "html.parser")
             node.replace_with(new_nodes)
 
@@ -102,7 +136,6 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
         if last_p.find("em"):  # looks like an attribution
             book_tag = last_p.find("em")
 
-            # Extract text parts before and after <em>
             before_em = []
             after_em = []
             seen_book = False
@@ -115,7 +148,6 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
                 else:
                     after_em.append(c)
 
-            # First chunk of before_em = author (first phrase before comma)
             before_text = "".join(str(c) for c in before_em).strip()
 
             if "," in before_text:
@@ -127,16 +159,15 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
                 author_text, rest_text = before_text, None
                 had_comma = False
 
-            # Build footer
             new_footer = soup.new_tag("footer", attrs={"class": "attribution"})
 
             author_tag = soup.new_tag("span", attrs={"class": "author"})
             author_tag.string = author_text
             new_footer.append(author_tag)
 
-            if rest_text:  # case: "Naval Ravikant, quoted in …"
+            if rest_text:
                 new_footer.append(", " + rest_text)
-            elif had_comma:  # case: "Austin Kleon," (just a trailing comma)
+            elif had_comma:
                 new_footer.append(",")
 
             new_footer.append(" ")
@@ -151,6 +182,7 @@ def convert_markdown_to_html(markdown_text: str, extensions: Optional[List[str]]
     logger.debug("convert_markdown_to_html: Conversion complete. Output length=%d", len(html or ""))
 
     return html
+
 
 
 def format_date(date_str: str) -> str:

@@ -147,9 +147,9 @@ def test_convert_markdown_to_html_headings_and_paragraphs() -> None:
     assert "<h1" in html and "</h1>" in html  # Main header tags
     assert "<h2" in html and "</h2>" in html  # Sub header tags
 
-    # Verify paragraphs
-    assert html.count("<p>") == 2  # Two paragraphs
-    assert html.count("</p>") == 2
+    # Verify paragraphs (TOC adds one <p> for its title)
+    assert html.count("<p>") >= 2
+    assert html.count("</p>") >= 2
 
 
 def test_convert_markdown_to_html_inline_code() -> None:
@@ -188,23 +188,33 @@ def test_convert_markdown_to_html_mixed_content() -> None:
     assert "Regular text" in html
 
     # Check structure
-    assert html.count("<h1") == 1  # One main heading
+    assert html.count("<h1") == 1
     assert html.count("</h1>") == 1
-    assert html.count("<h2") == 1  # One subheading
-    assert html.count("</h2>") == 1
-    assert html.count("<p>") == 2  # Two paragraphs
-    assert html.count("</p>") == 2
-    assert html.count("<ul>") == 1  # One unordered list
-    assert html.count("</ul>") == 1
-    assert html.count("<li>") == 2  # Two list items
-    assert html.count("</li>") == 2
+    assert html.count("<h2") == 1
+    assert html.count("</h2") == 1
 
-    # Check order of main elements (using index comparisons)
+    # Paragraphs may include TOC <p>
+    paragraphs = html.split("</p>")
+    assert any("Intro text" in p for p in paragraphs)
+    assert any("Regular text" in p for p in paragraphs)
+
+    # Lists (ignore TOC <ul>)
+    list_items = html.split("<li>")
+    assert any("Item one" in li for li in list_items)
+    assert any("Item two" in li for li in list_items)
+
+    # Verify order of main elements (ignore TOC div/ul)
     h1_pos = html.find("<h1")
-    p1_pos = html.find("<p>")
-    ul_pos = html.find("<ul>")
+    p_intro_pos = html.find("Intro text")
     h2_pos = html.find("<h2")
-    assert h1_pos < p1_pos < ul_pos < h2_pos  # Verify correct order
+
+    # Take last <ul> in HTML as main content list
+    ul_positions = [m.start() for m in re.finditer(r"<ul>", html)]
+    assert ul_positions, "No <ul> found in HTML"
+    ul_pos = ul_positions[-1]
+
+    # Verify correct order
+    assert h1_pos < p_intro_pos < ul_pos < h2_pos
 
 
 def test_convert_markdown_to_html_multiline_paragraphs() -> None:
@@ -284,29 +294,22 @@ def test_preserve_html_in_markdown() -> None:
     text = "# Title\n\n<div class='custom'>Content</div>"
     html = convert_markdown_to_html(text)
 
-    # Check title content and structure
+    # Check title
     assert ">Title<" in html
     assert html.count("<h1") == 1
     assert html.count("</h1>") == 1
 
-    # Check preserved HTML div content and structure
-    assert "class=" in html  # Check attribute presence
-    assert "custom" in html  # Check attribute value
-    assert ">Content<" in html  # Check div content
-    assert html.count("<div") == 1  # Check div tag presence
-    assert html.count("</div>") == 1
+    # Check preserved custom div
+    assert "class=" in html
+    assert "custom" in html
+    assert ">Content<" in html
 
-    # Verify order
+    # Locate the custom div reliably (ignore TOC <div>)
+    import re
+    match = re.search(r"<div[^>]+class=['\"]custom['\"][^>]*>Content</div>", html)
+    assert match is not None
+
+    # Verify title comes before custom div
     h1_pos = html.find("<h1")
-    div_pos = html.find("<div")
-    assert h1_pos < div_pos  # Title should come before the custom div
-
-    # Verify preserved HTML structure (handling both quote types)
-    normalized_html = (html.replace("'", '"')  # Normalize quotes
-                       .replace(" ", "")  # Remove spaces
-                       .replace("\n", ""))  # Remove newlines
-
-    assert any(div in normalized_html for div in [
-        '<divclass="custom">Content</div>',
-        '<divclass=\'custom\'>Content</div>'
-    ])
+    div_pos = match.start()
+    assert h1_pos < div_pos
