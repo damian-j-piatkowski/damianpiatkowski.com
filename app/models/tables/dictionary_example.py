@@ -1,7 +1,8 @@
 """SQLAlchemy Core schema definition for the dictionary_examples table.
 
 This module models the relational layer for contextual vocabulary usage exposures,
-binding real-world language citations directly to their target dictionary keys.
+binding real-world language citations directly to their target dictionary keys 
+alongside modification audit trails.
 
 Columns:
     id (Integer): Primary key with automatic incrementation.
@@ -11,7 +12,8 @@ Columns:
         (dictionary_sources.id) with cascading deletion.
     sentence (Text): The raw Vietnamese contextual text block supporting 'utf8mb4_unicode_ci'.
     english_translation (Text): The translated English meaning for parallel context matching.
-    created_at (TIMESTAMP): The timezone-aware creation record, defaulting to database time.
+    created_at (TIMESTAMP): The timezone-aware creation record (via Mixin).
+    updated_at (TIMESTAMP): The timezone-aware active update tracking record (via Mixin).
 
 Indices:
     idx_word_examples_lookup: A composite index built over (word_id, created_at) to accelerate
@@ -34,7 +36,8 @@ Data Lifecycle Schema Examples:
            "source_id": 14,
            "sentence": "Doraemon và nhóm bạn càng lúc càng gay cấn, các em đừng bỏ lỡ nhé!",
            "english_translation": "The adventures of Doraemon and his friends are getting more thrilling by the minute; don't miss out, kids!",
-           "created_at": datetime.datetime(2026, 7, 6, 15, 2, 49, tzinfo=datetime.timezone.utc)
+           "created_at": "2026-07-06T15:02:49Z",
+           "updated_at": "2026-07-06T15:02:49Z"
        }
 """
 
@@ -43,13 +46,11 @@ from sqlalchemy import (
     Integer,
     Table,
     Text,
-    TIMESTAMP,
     ForeignKey,
-    Index,
-    text
+    Index
 )
 
-from app.models.base import metadata
+from app.models.base import metadata, TimestampMixin
 
 dictionary_examples = Table(
     'dictionary_examples', metadata,
@@ -76,12 +77,9 @@ dictionary_examples = Table(
         Text(collation='utf8mb4_unicode_ci'),
         nullable=False
     ),
-    Column(
-        'created_at',
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        server_default=text('CURRENT_TIMESTAMP')
-    ),
+
+    # Injects both 'created_at' and 'updated_at' via centralized TimestampMixin
+    *TimestampMixin.modification_timestamps(),
 
     Index('idx_word_examples_lookup', 'word_id', 'created_at')
 )

@@ -4,32 +4,23 @@ This module creates a `blog_posts` table using SQLAlchemy's Table API, which rep
 the schema for storing blog post records. Each blog post includes metadata and SEO fields,
 along with content, timing, and categorization.
 
-Fields include:
-- A unique title and slug for URL generation and identification.
-- HTML content parsed from markdown.
-- A Google Drive file ID used as the source of the original content.
-- SEO metadata such as meta description and keywords.
-- Read time estimate (in minutes) for user experience enhancements.
-- Created and updated timestamps for versioning and sitemap accuracy.
-- Optional list of categories as JSON for topic grouping.
-
 Columns:
-    - id: Primary key, auto-incremented integer.
-    - title: Unique title of the blog post (max length 255).
-    - slug: URL-friendly string identifier (max length 255).
-    - html_content: HTML content of the blog post (text).
-    - drive_file_id: Unique Google Drive file ID (max length 255).
-    - meta_description: Short SEO-friendly summary (max length 255).
-    - keywords: JSON array of SEO keywords.
-    - read_time_minutes: Estimated reading time in minutes (integer).
-    - categories: JSON array of strings representing categories.
-    - created_at: Timestamp of when the post was created (auto-generated).
-    - updated_at: Timestamp of the most recent update (auto-updated).
+    id (Integer): Primary key, auto-incremented integer.
+    title (String): Unique title of the blog post (max length 255).
+    slug (String): URL-friendly string identifier (max length 255).
+    html_content (Text): HTML content of the blog post.
+    drive_file_id (String): Unique Google Drive file ID (max length 255).
+    meta_description (String): Short SEO-friendly summary (max length 255).
+    keywords (JSON): JSON array of SEO keywords.
+    read_time_minutes (Integer): Estimated reading time in minutes.
+    categories (JSON): JSON array of strings representing categories.
+    created_at (TIMESTAMP): Timestamp of when the post was created (via Mixin).
+    updated_at (TIMESTAMP): Timestamp of the most recent update (via Mixin).
 """
 
-from sqlalchemy import Column, Integer, JSON, MetaData, String, Table, Text, TIMESTAMP, text, FetchedValue
+from sqlalchemy import Column, Integer, JSON, String, Table, Text
 
-metadata = MetaData()
+from app.models.base import metadata, TimestampMixin
 
 blog_posts = Table(
     'blog_posts', metadata,
@@ -42,17 +33,7 @@ blog_posts = Table(
     Column('keywords', JSON, nullable=False, default=[]),  # SEO keywords
     Column('read_time_minutes', Integer, nullable=False),  # Estimated reading time
     Column('categories', JSON, nullable=False, default=[]),  # Optional category tags
-    Column(
-        'created_at',
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        server_default=text('CURRENT_TIMESTAMP')
-    ),
-    Column(
-        'updated_at',
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        server_default=text('CURRENT_TIMESTAMP'),
-        server_onupdate=FetchedValue()
-    ),
+
+    # Injected via centralized TimestampMixin
+    *TimestampMixin.modification_timestamps()
 )
