@@ -1,3 +1,5 @@
+# tests/fixtures/db_fixtures.py
+
 """Database-related pytest fixtures.
 
 This module includes fixtures for initializing the database and managing
@@ -18,11 +20,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import db
-from app.models.tables.blog_post import metadata as blog_post_metadata
-from app.models.tables.log import metadata as log_metadata
-
-# List of metadata objects to manage database tables
-all_metadata = [blog_post_metadata, log_metadata]
+from app.models.base import metadata
 
 
 @pytest.fixture(scope='function')
@@ -31,18 +29,16 @@ def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
 
     This fixture:
     - Runs within the Flask application context to ensure proper access to `db`.
-    - Creates all necessary tables at the start of each test.
+    - Creates all registered tables via the unified metadata registry.
     - Yields the database instance for use in tests.
     - Drops all tables after the test completes to clean up.
 
     This guarantees a clean slate for every test, preventing data contamination.
     """
     with app.app_context():
-        for metadata in all_metadata:
-            metadata.create_all(bind=db.engine)
+        metadata.create_all(bind=db.engine)
         yield db
-        for metadata in all_metadata:
-            metadata.drop_all(bind=db.engine)
+        metadata.drop_all(bind=db.engine)
 
 
 @pytest.fixture(scope='function')
