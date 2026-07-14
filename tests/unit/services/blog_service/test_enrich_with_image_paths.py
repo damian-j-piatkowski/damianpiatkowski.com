@@ -25,8 +25,20 @@ Fixtures:
 
 import os
 from unittest.mock import patch
+import pytest
 
 from app.services.blog_service import enrich_with_image_paths
+
+
+@pytest.fixture(autouse=True)
+def reset_blog_image_config(app):
+    """Ensures changes to BLOG_IMAGE_BASE_PATH are cleanly rolled back after each test."""
+    original_base = app.config.get("BLOG_IMAGE_BASE_PATH")
+    yield
+    if original_base is None:
+        app.config.pop("BLOG_IMAGE_BASE_PATH", None)
+    else:
+        app.config["BLOG_IMAGE_BASE_PATH"] = original_base
 
 
 def test_enrich_with_image_paths_empty_list(app):
@@ -118,19 +130,15 @@ def test_enrich_with_image_paths_mixed_hybrid(mock_url_for, mock_exists, app):
 
     posts = [{"slug": f"post-{i + 1}"} for i in range(7)]
 
-    # Manually override the base for last 3 to simulate fallback behavior
-    remote = posts[:4]
-    local = posts[4:]
-
     # Remote config is applied first
-    enriched_remote = enrich_with_image_paths(remote)
+    enriched_remote = enrich_with_image_paths(remote := posts[:4])
 
     # Now simulate local config fallback
     app.config["BLOG_IMAGE_BASE_PATH"] = "blog-images"
     mock_exists.side_effect = [False, False, False]
     mock_url_for.side_effect = lambda *args, **kwargs: f"/static/{kwargs['filename']}"
 
-    enriched_local = enrich_with_image_paths(local)
+    enriched_local = enrich_with_image_paths(local := posts[4:])
 
     combined = enriched_remote + enriched_local
 
@@ -145,6 +153,9 @@ def test_enrich_with_image_paths_mixed_hybrid(mock_url_for, mock_exists, app):
 @patch("app.services.blog_service.url_for")
 def test_enrich_with_image_paths_mixed_local(mock_url_for, mock_exists, app):
     """Verifies behavior when some posts have thumbnail files and others fallback (local base)."""
+    # Ensure a local config baseline is active for this test
+    app.config["BLOG_IMAGE_BASE_PATH"] = "blog-images"
+
     # First 3 exist, next 4 do not
     mock_exists.side_effect = [True, True, True, False, False, False, False]
     mock_url_for.side_effect = lambda *args, **kwargs: f"/static/{kwargs['filename']}"
