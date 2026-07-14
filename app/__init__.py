@@ -7,7 +7,6 @@ from flask_wtf.csrf import CSRFProtect
 
 from app.config import BaseConfig
 from app.domain.blog_post import BlogPost
-from app.domain.log import Log
 from app.extensions import db, mail
 from app.logging_config import configure_logging
 from app.orm import start_mappers

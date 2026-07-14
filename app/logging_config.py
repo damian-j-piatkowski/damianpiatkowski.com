@@ -1,18 +1,11 @@
 import logging
-import re
 from logging.handlers import RotatingFileHandler
-
-from sqlalchemy.exc import SQLAlchemyError
-
-from app.domain.log import Log
-from app.extensions import db
 
 
 def configure_logging(app):
     log_file = app.config.get('LOG_FILE', '')
     fallback_log_path = app.config.get('FALLBACK_LOG_PATH', '')
     log_level = app.config.get('LOG_LEVEL', logging.DEBUG)
-    log_to_db = app.config.get('LOG_TO_DB', False)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
@@ -44,36 +37,5 @@ def configure_logging(app):
         fallback_logger.handlers.clear()  # Clear existing handlers
         fallback_logger.addHandler(fallback_file_handler)
         root_logger.info("Fallback logger set up.")
-
-    if log_to_db:
-        class SQLAlchemyHandler(logging.Handler):
-            ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-
-            def emit(self, record):
-                try:
-                    message = record.getMessage()
-                    if ("Running on" in message or
-                            "Press CTRL+C to quit" in message):
-                        return  # Skip these messages
-
-                    message = self.ansi_escape.sub('', message)
-
-                    log_entry = Log(level=record.levelname, message=message)
-                    with app.app_context():
-                        db.session.add(log_entry)
-                        db.session.commit()
-                except SQLAlchemyError as sqle:
-                    with app.app_context():
-                        db.session.rollback()
-                    fallback_logger.error(f"SQLAlchemyError occurred: {sqle}")
-                except Exception as e:
-                    fallback_logger.error(
-                        f"Unexpected error occurred during logging: {e}")
-
-        db_handler = SQLAlchemyHandler()
-        db_handler.setLevel(logging.DEBUG)
-        db_handler.setFormatter(formatter)
-        root_logger.addHandler(db_handler)
-        root_logger.info("SQLAlchemyHandler added to root logger.")
 
     root_logger.propagate = True
