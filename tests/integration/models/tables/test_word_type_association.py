@@ -52,7 +52,6 @@ def test_duplicate_composite_primary_key_fails(session, make_word):
     duplicate_stmt = word_type_association.insert().values(word_id=word.id, word_type="verb")
     with pytest.raises(IntegrityError):
         session.execute(duplicate_stmt)
-    session.rollback()
 
 
 def test_insert_non_existent_word_id_violates_foreign_key(session):
@@ -60,7 +59,6 @@ def test_insert_non_existent_word_id_violates_foreign_key(session):
     stmt = word_type_association.insert().values(word_id=99999, word_type="noun")
     with pytest.raises(IntegrityError):
         session.execute(stmt)
-    session.rollback()
 
 
 def test_deleting_dictionary_word_cascades_to_type_associations(session, make_word):

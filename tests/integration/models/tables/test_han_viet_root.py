@@ -56,7 +56,6 @@ def test_duplicate_root_violates_unique_constraint(session):
     )
     with pytest.raises(IntegrityError):
         session.execute(duplicate_stmt)
-    session.rollback()
 
 
 def test_insert_han_viet_root_missing_required_fields(session):
@@ -68,7 +67,6 @@ def test_insert_han_viet_root_missing_required_fields(session):
     )
     with pytest.raises(IntegrityError):
         session.execute(invalid_stmt)
-    session.rollback()
 
 
 def test_chinese_character_collation_and_length(session):

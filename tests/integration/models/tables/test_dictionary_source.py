@@ -69,7 +69,6 @@ def test_insert_source_missing_required_title_fails(session):
     )
     with pytest.raises(SQLAlchemyError):
         session.execute(stmt)
-    session.rollback()
 
 
 def test_insert_source_missing_required_source_type_fails(session):
@@ -79,7 +78,6 @@ def test_insert_source_missing_required_source_type_fails(session):
     )
     with pytest.raises(SQLAlchemyError):
         session.execute(stmt)
-    session.rollback()
 
 
 def test_source_type_field_length_overflow(session):
@@ -91,7 +89,6 @@ def test_source_type_field_length_overflow(session):
     )
     with pytest.raises((DataError, IntegrityError)):  # type: ignore[arg-type]
         session.execute(stmt)
-    session.rollback()
 
 
 def test_source_type_lookup_index_query_execution(session):
