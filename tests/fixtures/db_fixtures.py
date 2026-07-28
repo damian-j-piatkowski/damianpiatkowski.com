@@ -5,57 +5,53 @@
 This module includes fixtures for initializing the database and managing
 database sessions during tests. These fixtures ensure that each test runs in
 a clean database environment, preventing data persistence across tests.
-
-Fixtures:
-    - _db: Sets up a fresh test database with tables created before each test
-           and dropped afterward to maintain test isolation.
-    - session: Provides a new database session for each test function, using
-               transactions to ensure that database state resets automatically.
 """
+
+import os
 from typing import Generator
 
 import pytest
 from flask import Flask
+from flask_migrate import upgrade
 from flask_sqlalchemy import SQLAlchemy
+# 👇 Import reflect to grab whatever happens to live in the test DB
+from sqlalchemy import MetaData
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import db
-from app.models.base import metadata
 
 
-@pytest.fixture(scope='function')
-def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
-    """Sets up a fresh test database before each test and tears it down afterward.
+def prepare_integration_db(app: Flask) -> None:
+    """Programmatically cleans and updates the test database schema using migrations.
 
-    This fixture:
-    - Runs within the Flask application context to ensure proper access to `db`.
-    - Creates all registered tables via the unified metadata registry.
-    - Yields the database instance for use in tests.
-    - Drops all tables after the test completes to clean up.
-
-    This guarantees a clean slate for every test, preventing data contamination.
+    Bypasses step-by-step downgrades to avoid FileNotFoundError and Missing Table errors.
     """
     with app.app_context():
-        metadata.create_all(bind=db.engine)
+        os.environ['FLASK_ENV'] = 'testing'
+        migrations_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'migrations')
+
+        print("\n[Test DB Setup] Purging any lingering tables...")
+        # Reflect whatever is physically in the DB right now and drop it clean
+        raw_metadata = MetaData()
+        raw_metadata.reflect(bind=db.engine)
+        raw_metadata.drop_all(bind=db.engine)
+
+        print("[Alembic via Flask-Migrate] Applying fresh migration changes to head...")
+        upgrade(directory=migrations_dir, revision='head')
+
+
+@pytest.fixture(scope='session')
+def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
+    """Sets up the schema via migrations ONCE per test session."""
+    prepare_integration_db(app)
+
+    with app.app_context():
         yield db
-        metadata.drop_all(bind=db.engine)
 
 
 @pytest.fixture(scope='function')
 def session(_db: SQLAlchemy) -> Generator[Session, None, None]:
-    """Provides a fresh database session for each test function.
-
-    This fixture:
-    - Establishes a **new connection** to the test database.
-    - Begins a **transaction**, ensuring all changes are rolled back after the test.
-    - Uses a **session factory** to create an independent session for each test.
-    - Yields the session to the test function.
-    - Rolls back any changes made during the test to keep the database clean.
-    - Closes the session and connection afterward.
-
-    Since the transaction is rolled back at the end of each test, no data persists,
-    ensuring each test starts with a **pristine database state**.
-    """
+    """Provides a fresh database session for each test function."""
     connection = _db.engine.connect()
     transaction = connection.begin()
 
@@ -68,7 +64,7 @@ def session(_db: SQLAlchemy) -> Generator[Session, None, None]:
         print(f"Error during test session: {e}")
         raise
     finally:
+        test_session.close()
         if transaction.is_active:
             transaction.rollback()
         connection.close()
-        test_session.close()
