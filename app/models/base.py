@@ -2,9 +2,14 @@
 
 This module provides a single shared MetaData instance used to collect, bind,
 and cross-reference all database table architectures across the application,
-ensuring clean foreign key resolution and unified migration tracking. Additionally, 
-it houses reusable structural utilities to enforce auditing consistency across 
-individual schema definitions.
+ensuring clean foreign key resolution and unified migration tracking.
+
+Importing this module automatically triggers the registration of all table schemas
+by importing the `app.models.tables` package, guaranteeing complete target metadata
+visibility for Alembic migration autogeneration.
+
+Additionally, it houses reusable structural utilities to enforce auditing consistency
+across individual schema definitions.
 
 Classes:
     TimestampMixin: Injects explicit MySQL-compatible temporal tracking columns.
@@ -59,3 +64,6 @@ class TimestampMixin:
             server_onupdate=FetchedValue()
         )
         return created, updated
+
+# Import the tables package to register all schema modules into `metadata`
+import app.models.tables  # noqa: F401
