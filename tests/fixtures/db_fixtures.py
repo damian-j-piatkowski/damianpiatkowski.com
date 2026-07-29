@@ -14,9 +14,7 @@ import pytest
 from flask import Flask
 from flask_migrate import upgrade
 from flask_sqlalchemy import SQLAlchemy
-# 👇 Import reflect to grab whatever happens to live in the test DB
 from sqlalchemy import MetaData
-from sqlalchemy.orm import Session, sessionmaker
 
 from app import db
 
@@ -49,22 +47,35 @@ def _db(app: Flask) -> Generator[SQLAlchemy, None, None]:
         yield db
 
 
+from sqlalchemy.orm import scoped_session, sessionmaker
+import pytest
+from typing import Generator
+from sqlalchemy.orm import Session
+from flask_sqlalchemy import SQLAlchemy
+
+
 @pytest.fixture(scope='function')
 def session(_db: SQLAlchemy) -> Generator[Session, None, None]:
-    """Provides a fresh database session for each test function."""
+    """Provides a fresh database session, binding Flask-SQLAlchemy to the test transaction."""
     connection = _db.engine.connect()
     transaction = connection.begin()
 
     session_factory = sessionmaker(bind=connection)
-    test_session = session_factory()
+    # Wrap in scoped_session so .remove() exists for Flask-SQLAlchemy's teardown hook
+    test_session = scoped_session(session_factory)
+
+    # Save original db.session reference to restore later
+    original_session = _db.session
+    _db.session = test_session
 
     try:
-        yield test_session
+        yield test_session()
     except Exception as e:
         print(f"Error during test session: {e}")
         raise
     finally:
-        test_session.close()
+        test_session.remove()  # Safely cleans up the scoped session
         if transaction.is_active:
             transaction.rollback()
         connection.close()
+        _db.session = original_session  # Restore original db.session proxy

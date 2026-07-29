@@ -21,7 +21,7 @@ from app.domain.dictionary_word import DictionaryWord
 from app.domain.han_viet_root import HanVietRoot
 from app.models.tables.dictionary_example import dictionary_examples
 from app.models.tables.dictionary_source import dictionary_sources
-# Import the core table schemas directly to execute clean database-level inserts
+# Core table schemas for direct database-level operations
 from app.models.tables.dictionary_word import dictionary_words
 from app.models.tables.han_viet_root import han_viet_roots
 from app.models.tables.word_han_viet_association import word_han_viet_association
@@ -51,7 +51,7 @@ CANONICAL_SOURCES = [
 
 
 # ==============================================================================
-# 2. MODULAR FACTORY FIXTURES (WITH FLUSH AND CORRECTED INITIALIZERS)
+# 2. MODULAR FACTORY FIXTURES (WITH FLUSH AND ISOLATED TRANSACTIONS)
 # ==============================================================================
 
 @pytest.fixture(scope='function')
@@ -62,22 +62,19 @@ def make_word(session: Session) -> Callable[..., DictionaryWord]:
             viet_word: str = "tự do",
             english_translation: str = "freedom / liberty"
     ) -> DictionaryWord:
-        # DB-level write to verify unique constraints and timestamp mixins
         stmt = dictionary_words.insert().values(
             viet_word=viet_word,
             english_translation=english_translation
         )
         result = session.execute(stmt)
-        session.flush()  # Flushes SQL to get generated IDs without committing the transaction
+        session.flush()
 
         inserted_id = result.inserted_primary_key[0]
 
-        # Read back generated timestamps and construct clean Domain Entity
         row = session.execute(
             dictionary_words.select().where(dictionary_words.c.id == inserted_id)
         ).fetchone()
 
-        # Wire database ID directly as word_id
         word = DictionaryWord(
             word_id=row.id,
             viet_word=row.viet_word,
@@ -114,7 +111,6 @@ def make_source(session: Session) -> Callable[..., DictionarySource]:
             dictionary_sources.select().where(dictionary_sources.c.id == inserted_id)
         ).fetchone()
 
-        # Wire database ID directly as source_id
         source = DictionarySource(
             source_id=row.id,
             source_type=row.source_type,
@@ -151,7 +147,6 @@ def make_root(session: Session) -> Callable[..., HanVietRoot]:
             han_viet_roots.select().where(han_viet_roots.c.id == inserted_id)
         ).fetchone()
 
-        # Wire database ID directly as root_id
         entity = HanVietRoot(
             root_id=row.id,
             root=row.root,
@@ -189,7 +184,6 @@ def make_example(session: Session) -> Callable[..., DictionaryExample]:
             dictionary_examples.select().where(dictionary_examples.c.id == inserted_id)
         ).fetchone()
 
-        # Wire database ID directly as example_id (excluding updated_at)
         example = DictionaryExample(
             example_id=row.id,
             word_id=row.word_id,

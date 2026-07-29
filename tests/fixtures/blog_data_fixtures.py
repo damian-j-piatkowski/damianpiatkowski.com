@@ -22,17 +22,12 @@ from app.models.tables.blog_post import blog_posts
 
 @pytest.fixture(scope='function')
 def create_blog_post(session: Session) -> Callable[..., BlogPost]:
-    """Creates and persists a BlogPost instance with customizable attributes.
+    """Creates and persists a BlogPost instance for integration tests.
 
-    This fixture inserts a BlogPost record into the database with required fields,
-    satisfying all NOT NULL and UNIQUE constraints. Returns a domain-level BlogPost
-    object representing the inserted post (without the database ID).
-
-    Args:
-        session (Session): The SQLAlchemy session for database interactions.
-
-    Returns:
-        Callable[..., BlogPost]: A function that inserts and returns a BlogPost object.
+    Uses SQLAlchemy Core inserts paired with a transaction-safe local flush.
+    This guarantees generated database attributes (like IDs and timestamps)
+    are fetched instantly without committing the transaction, leaving teardown
+    isolation completely intact.
     """
 
     def _create_blog_post(
@@ -53,7 +48,8 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
         if categories is None:
             categories = ['testing', 'demo']
 
-        query = blog_posts.insert().values(
+        # 1. Insert row using Core expression
+        stmt = blog_posts.insert().values(
             title=title,
             slug=slug,
             html_content=html_content,
@@ -63,43 +59,41 @@ def create_blog_post(session: Session) -> Callable[..., BlogPost]:
             read_time_minutes=read_time_minutes,
             categories=categories,
             created_at=created_at
-        ).returning(blog_posts.c.id)
-        session.execute(query)
-        session.commit()
+        )
+        result = session.execute(stmt)
+
+        # 2. Flush pending SQL to database without committing
+        session.flush()
+
+        # 3. Retrieve primary key and read back database-generated defaults
+        inserted_id = result.inserted_primary_key[0]
 
         row = session.execute(
-            blog_posts.select().where(blog_posts.c.title == title)
+            blog_posts.select().where(blog_posts.c.id == inserted_id)
         ).fetchone()
 
-        return BlogPost(
-            title=title,
-            slug=slug,
-            html_content=html_content,
-            drive_file_id=drive_file_id,
-            meta_description=meta_description,
-            keywords=keywords,
-            read_time_minutes=read_time_minutes,
-            categories=categories,
-            created_at=created_at,
-            updated_at=row.updated_at,
+        # 4. Construct domain object with fully populated database properties
+        post = BlogPost(
+            title=row.title,
+            slug=row.slug,
+            html_content=row.html_content,
+            drive_file_id=row.drive_file_id,
+            meta_description=row.meta_description,
+            keywords=row.keywords,
+            read_time_minutes=row.read_time_minutes,
+            categories=row.categories,
+            created_at=row.created_at,
+            updated_at=row.updated_at
         )
+        post.id = row.id
+        return post
 
     return _create_blog_post
 
 
 @pytest.fixture(scope='function')
 def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
-    """Seeds a configurable number of blog posts using the create_blog_post fixture.
-
-    This fixture generates a list of blog posts in the database to facilitate
-    pagination and retrieval tests. The number of posts can be configured by the test.
-
-    Args:
-        create_blog_post (Callable[..., BlogPost]): Fixture for creating individual blog posts.
-
-    Returns:
-        Callable[[int], List[BlogPost]]: A function that accepts the desired number of blog posts to create.
-    """
+    """Seeds a configurable number of blog posts using the create_blog_post fixture."""
 
     def _seed_blog_posts(count: int = 25) -> List[BlogPost]:
         return [
@@ -108,7 +102,7 @@ def seed_blog_posts(create_blog_post) -> Callable[[int], List[BlogPost]]:
                 slug=f"post-{i + 1}",
                 html_content=f"<p>Content {i + 1}</p>",
                 drive_file_id=f"drive_id_{i + 1}",
-                created_at=datetime.now(UTC)  # Always create timezone-aware timestamps
+                created_at=datetime.now(UTC)
             ) for i in range(count)
         ]
 
