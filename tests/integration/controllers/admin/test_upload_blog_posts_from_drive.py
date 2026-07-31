@@ -29,7 +29,7 @@ Fixtures:
 """
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Dict, Any
 from unittest.mock import Mock
 
@@ -113,19 +113,19 @@ class TestUploadBlogPostsMockedAPI:
 
             # Validate created_at and updated_at fields and remove them before comparison
             for success_item in response_json.get("success", []):
-                now = datetime.now(timezone.utc)
+                now = datetime.now()
                 delta = timedelta(minutes=1)
 
                 # created_at
                 created_at = success_item.pop("created_at", None)
                 assert created_at is not None, "created_at is missing from success item"
-                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S")
                 assert now - delta <= parsed_created <= now + delta, f"created_at too far from current time: {created_at}"
 
                 # updated_at
                 updated_at = success_item.pop("updated_at", None)
                 assert updated_at is not None, "updated_at is missing from success item"
-                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S")
                 assert now - delta <= parsed_updated <= now + delta, f"updated_at too far from current time: {updated_at}"
 
             # Final comparison without created_at/updated_at fields
@@ -160,10 +160,10 @@ class TestUploadBlogPostsMockedAPI:
                 created_at = success_item.pop("created_at", None)
                 assert created_at is not None, "created_at is missing from success item"
 
-                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                parsed_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S")
                 assert isinstance(parsed_created, datetime)
 
-                now = datetime.now(timezone.utc)
+                now = datetime.now()
                 delta = timedelta(minutes=1)
                 assert now - delta <= parsed_created <= now + delta, f"created_at too far from current time: {created_at}"
 
@@ -171,7 +171,7 @@ class TestUploadBlogPostsMockedAPI:
                 updated_at = success_item.pop("updated_at", None)
                 assert updated_at is not None, "updated_at is missing from success item"
 
-                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                parsed_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S")
                 assert isinstance(parsed_updated, datetime)
                 assert now - delta <= parsed_updated <= now + delta, f"updated_at too far from current time: {updated_at}"
 
@@ -233,7 +233,8 @@ class TestUploadBlogPostsRealDriveAPI:
             assert len(response_data["success"]) == len(files)
 
             uploaded_post = response_data["success"][0]
-            assert uploaded_post["title"] == 'Six Essential Object-Oriented Design Principles from Matthias Noback\'s "Object Design Style Guide"'
+            assert uploaded_post[
+                       "title"] == 'Six Essential Object-Oriented Design Principles from Matthias Noback\'s "Object Design Style Guide"'
             assert uploaded_post["read_time_minutes"] >= 10
             assert uploaded_post["drive_file_id"] == file_id
             assert uploaded_post["slug"] == slug
@@ -280,7 +281,7 @@ class TestUploadBlogPostsRealDriveAPI:
                     assert len(html_content) <= max_trimmed_length
 
             assert uploaded_post["html_content"].endswith("...") or len(
-                    uploaded_post["html_content"]) <= max_trimmed_length
+                uploaded_post["html_content"]) <= max_trimmed_length
 
             uploaded_slugs = {post["slug"] for post in response_data["success"]}
             assert metadata_1["slug"] in uploaded_slugs
