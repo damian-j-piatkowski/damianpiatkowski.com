@@ -7,6 +7,7 @@ database sessions during tests. These fixtures ensure that each test runs in
 a clean database environment, preventing data persistence across tests.
 """
 
+import logging
 import os
 from typing import Generator
 
@@ -26,7 +27,10 @@ def prepare_integration_db(app: Flask) -> None:
     """
     with app.app_context():
         os.environ['FLASK_ENV'] = 'testing'
-        migrations_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'migrations')
+        migrations_dir = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'migrations'
+        )
 
         print("\n[Test DB Setup] Purging any lingering tables...")
         # Reflect whatever is physically in the DB right now and drop it clean
@@ -36,6 +40,11 @@ def prepare_integration_db(app: Flask) -> None:
 
         print("[Alembic via Flask-Migrate] Applying fresh migration changes to head...")
         upgrade(directory=migrations_dir, revision='head')
+
+        # Re-enable any loggers disabled by Alembic's migration execution
+        for logger in logging.Logger.manager.loggerDict.values():
+            if isinstance(logger, logging.Logger):
+                logger.disabled = False
 
 
 @pytest.fixture(scope='session')

@@ -15,6 +15,8 @@ Fixtures:
     - seed_blog_posts: Seeds multiple blog posts for test scenarios.
 """
 
+import logging
+
 import pytest
 
 from app.services.blog_service import get_all_blog_post_identifiers
@@ -36,16 +38,16 @@ def test_returns_all_blog_post_identifiers(session, create_blog_post, caplog) ->
     )
     session.commit()
 
-    with caplog.at_level("INFO"):
+    with caplog.at_level(logging.INFO):
         result = get_all_blog_post_identifiers()
 
-    assert len(result) == 2
-    assert {"slug", "title", "drive_file_id"} <= result[0].keys()
-    assert result[0]["title"] == "First Post"
-    assert result[1]["drive_file_id"] == "id_two"
+        assert len(result) == 2
+        assert {"slug", "title", "drive_file_id"} <= result[0].keys()
+        assert result[0]["title"] == "First Post"
+        assert result[1]["drive_file_id"] == "id_two"
 
-    assert "Fetching blog post identifiers from the repository." in caplog.text
-    assert "Successfully fetched 2 blog post identifiers." in caplog.text
+        assert "Fetching blog post identifiers from the repository." in caplog.text
+        assert "Successfully fetched 2 blog post identifiers." in caplog.text
 
 
 @pytest.mark.admin_published_posts
@@ -57,7 +59,9 @@ def test_raises_exception_on_database_error(mocker, caplog) -> None:
         side_effect=RuntimeError("DB error")
     )
 
-    with caplog.at_level("INFO"), pytest.raises(RuntimeError, match="Failed to retrieve blog post identifiers"):
+    with caplog.at_level(logging.INFO), pytest.raises(
+            RuntimeError, match="Failed to retrieve blog post identifiers"
+    ):
         get_all_blog_post_identifiers()
 
     assert "Fetching blog post identifiers from the repository." in caplog.text
@@ -68,12 +72,12 @@ def test_raises_exception_on_database_error(mocker, caplog) -> None:
 @pytest.mark.admin_unpublished_posts
 def test_returns_empty_list_when_no_posts_exist(session, caplog) -> None:
     """Should return an empty list when no blog posts are in the database."""
-    with caplog.at_level("INFO"):
+    with caplog.at_level(logging.INFO):
         result = get_all_blog_post_identifiers()
 
-    assert result == []
-    assert "Fetching blog post identifiers from the repository." in caplog.text
-    assert "Successfully fetched 0 blog post identifiers." in caplog.text
+        assert result == []
+        assert "Fetching blog post identifiers from the repository." in caplog.text
+        assert "Successfully fetched 0 blog post identifiers." in caplog.text
 
 
 @pytest.mark.admin_published_posts
@@ -82,12 +86,12 @@ def test_handles_large_number_of_posts(session, seed_blog_posts, caplog) -> None
     """Should return all identifiers correctly when many blog posts are present."""
     seed_blog_posts(30)
 
-    with caplog.at_level("INFO"):
+    with caplog.at_level(logging.INFO):
         result = get_all_blog_post_identifiers()
 
-    assert len(result) == 30
-    assert result[0]["slug"] == "post-1"
-    assert result[-1]["title"] == "Post 30"
+        assert len(result) == 30
+        assert result[0]["slug"] == "post-1"
+        assert result[-1]["title"] == "Post 30"
 
-    assert "Fetching blog post identifiers from the repository." in caplog.text
-    assert "Successfully fetched 30 blog post identifiers." in caplog.text
+        assert "Fetching blog post identifiers from the repository." in caplog.text
+        assert "Successfully fetched 30 blog post identifiers." in caplog.text
