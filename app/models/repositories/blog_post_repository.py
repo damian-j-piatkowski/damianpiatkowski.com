@@ -262,6 +262,9 @@ class BlogPostRepository:
             - Blog posts are ordered by their natural database order.
         """
         try:
+            # Standardize page to a 1-based index minimum
+            page = max(1, page)
+
             total_posts = self.count_total_blog_posts()
             total_pages = (total_posts + per_page - 1) // per_page
             offset = (page - 1) * per_page
