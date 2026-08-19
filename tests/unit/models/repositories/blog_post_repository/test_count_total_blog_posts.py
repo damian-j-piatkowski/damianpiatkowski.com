@@ -55,16 +55,18 @@ def test_count_total_blog_posts_large_dataset(session, seed_blog_posts):
 @pytest.mark.render_blog_posts
 def test_count_total_blog_posts_after_deletion(session, seed_blog_posts):
     """Ensures deleted posts do not affect the count."""
-    seed_blog_posts(25)
+    posts = seed_blog_posts(25)
     session.commit()
     repository = BlogPostRepository(session)
 
-    # Delete 5 posts manually
-    session.execute(delete(blog_posts).where(blog_posts.c.id <= 5))
+    # Capture actual primary keys from the seeded instances
+    target_ids = [post.id for post in posts[:5]]
+
+    session.execute(delete(blog_posts).where(blog_posts.c.id.in_(target_ids)))
     session.commit()
 
     total_posts = repository.count_total_blog_posts()
-    assert total_posts == 20  # 25 - 5 = 20
+    assert total_posts == 20
 
 
 @pytest.mark.render_blog_posts
