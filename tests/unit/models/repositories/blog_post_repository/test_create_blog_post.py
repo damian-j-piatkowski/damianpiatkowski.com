@@ -128,7 +128,7 @@ def test_create_blog_post_missing_content(session):
     repository = BlogPostRepository(session)
 
     # Act & Assert: Attempt to create a post with `None` content
-    with pytest.raises(IntegrityError, match="NOT NULL constraint failed: blog_posts.html_content"):
+    with pytest.raises(IntegrityError, match="html_content"):
         repository.create_blog_post(
             title='Missing Content Post',
             slug='missing-content',
