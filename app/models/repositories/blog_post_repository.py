@@ -217,7 +217,7 @@ class BlogPostRepository:
             raise RuntimeError("Failed to fetch blog post identifiers from the database.") from e
 
     def fetch_blog_post_by_slug(self, slug: str) -> BlogPost:
-        """Retrieves a single blog post by its slug.
+        """Retrieves a single blog post by its slug (case-sensitive).
 
         Args:
             slug (str): The unique slug of the blog post to retrieve.
@@ -226,14 +226,15 @@ class BlogPostRepository:
             BlogPost: The retrieved blog post instance.
 
         Raises:
-            BlogPostNotFoundError: If no blog post with the given slug exists.
+            BlogPostNotFoundError: If no blog post with the given slug exists or if slug casing differs.
             RuntimeError: If a database error occurs during retrieval.
         """
         try:
             query = select(blog_posts).where(column("slug") == slug)
             result = self.session.execute(query).mappings().first()
 
-            if not result:
+            # Treat mismatched casing as a non-existent record
+            if not result or result["slug"] != slug:
                 raise BlogPostNotFoundError(f"No blog post found with slug {slug}")
 
             return self._hydrate_blog_post(dict(result))
