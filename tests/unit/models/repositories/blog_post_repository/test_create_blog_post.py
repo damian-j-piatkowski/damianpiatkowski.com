@@ -31,6 +31,10 @@ from app.models.repositories.blog_post_repository import BlogPostRepository
 def test_create_blog_post_created_at(session):
     """Ensures the created_at timestamp is correctly assigned."""
     repository = BlogPostRepository(session)
+
+    # Record bounds around insertion time
+    start_time = datetime.now(timezone.utc)
+
     post = repository.create_blog_post(
         title="Timestamp Test",
         slug="timestamp-test",
@@ -41,10 +45,17 @@ def test_create_blog_post_created_at(session):
     assert post.created_at is not None
     assert isinstance(post.created_at, datetime)
 
-    # Make post.created_at timezone-aware
-    post_created_at = post.created_at.replace(tzinfo=timezone.utc)
+    # Handle naive datetime objects returned from MySQL/SQLite drivers
+    post_created_at = post.created_at
+    if post_created_at.tzinfo is None:
+        # If naive, assume system local time and convert to UTC
+        post_created_at = post_created_at.astimezone(timezone.utc)
 
-    assert post_created_at <= datetime.now(timezone.utc) + timedelta(seconds=1)
+    # Verify timestamp falls within a reasonable window relative to execution time
+    end_time = datetime.now(timezone.utc) + timedelta(seconds=5)
+    start_time_threshold = start_time - timedelta(seconds=5)
+
+    assert start_time_threshold <= post_created_at <= end_time
 
 
 @pytest.mark.admin_upload_blog_posts
