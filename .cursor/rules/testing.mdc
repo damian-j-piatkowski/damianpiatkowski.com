@@ -1,0 +1,14 @@
+---
+description: Testing conventions for the Flask application
+alwaysApply: true
+---
+
+# Testing Conventions
+
+- Follow the existing pytest structure, naming and fixture conventions.
+- Use real implementations and integration-style tests where the existing project testing infrastructure supports them; use mocks/test doubles where isolated unit testing is more appropriate.
+- Repository tests should exercise the real repository implementation.
+- Controller tests should call controllers directly rather than unnecessarily using the Flask test client.
+- Reuse existing fixtures rather than creating parallel fixture infrastructure.
+- Add tests for new behaviour and regression cases introduced by a change.
+- Run the relevant test suite after implementation.

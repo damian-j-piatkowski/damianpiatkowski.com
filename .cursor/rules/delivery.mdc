@@ -1,0 +1,18 @@
+---
+description: Delivery and project workflow conventions
+alwaysApply: true
+---
+
+Delivery Conventions
+
+- Treat these conventions as the default workflow for completing development tasks unless the task explicitly specifies otherwise.
+- Every completed development task should produce a draft commit message in "temporary/commit-drafts/".
+- The commit-message draft should accurately summarize the completed change and follow the project's existing commit-message conventions.
+- Do not commit changes to Git unless explicitly requested.
+- When a task introduces a new database migration, apply the migration with "flask db upgrade" before the verification stage so that the test suite runs against the current schema.
+- When modifying an existing migration rather than creating a new one, do not automatically apply destructive or irreversible database changes; inspect the migration history and existing database state first.
+- When introducing a new application version, add the corresponding entry to the changelog.
+- When modifying or extending functionality that belongs to the current unreleased version, update the existing changelog entry for that version rather than creating a separate version entry.
+- Keep changelog entries concise and focused on user-visible or materially relevant changes.
+- Do not modify unrelated changelog entries.
+- Generated or temporary workflow artifacts should remain in their designated temporary locations and should not be added to production application directories unless explicitly required.

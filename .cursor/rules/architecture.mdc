@@ -1,0 +1,20 @@
+---
+description: Core architectural conventions for the Flask application
+alwaysApply: true
+---
+
+# Architecture Conventions
+
+- Treat the existing codebase as the source of truth.
+- Follow the established Flask routes → controllers/orchestrators → services → repositories architecture.
+- Routes must remain thin and pass explicit parameters to controllers.
+- Controllers must not access Flask `request` directly.
+- Business/domain logic belongs in services, not routes or repositories.
+- Repositories own persistence and database queries; they must not contain business logic or authentication rules.
+- Keep domain objects separate from persistence/ORM concerns.
+- Use `app/models/data_schemas` for data schemas. Do not introduce `api_schemas`.
+- The application is a server-rendered Flask web application. AJAX/fetch requests and JSON responses may be used for interactive web UI behaviour, but do not introduce a separate public API architecture, API versioning scheme, SPA framework, or frontend/backend separation unless explicitly required.
+- Prefer the project's existing abstractions and patterns over introducing new ones.
+- Do not perform unrelated refactoring while implementing a feature.
+- Do not introduce a new dependency, framework, architectural pattern, or abstraction unless the task genuinely requires it.
+- Inspect existing implementations and tests before creating a new pattern.
