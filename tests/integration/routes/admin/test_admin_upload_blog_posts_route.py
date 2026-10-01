@@ -14,7 +14,7 @@ Test Functions:
 
 Fixtures:
     - app: Provides the Flask application context for testing.
-    - client: A Flask test client to simulate HTTP requests.
+    - auth_client: A Flask test auth_client to simulate HTTP requests.
     - google_drive_service_fixture: Provides real access to Google Drive.
     - file_metadata: Metadata for a real file used in the upload process.
     - session: SQLAlchemy database session for verifying persistence.
@@ -26,11 +26,11 @@ import pytest
 
 
 @pytest.mark.admin_upload_blog_posts
-def test_upload_blog_posts_missing_files_key(client):
+def test_upload_blog_posts_missing_files_key(auth_client):
     payload = json.dumps({"wrong_key": "oops"})
     content_type = "application/json"
 
-    response = client.post("/admin/upload-blog-posts", data=payload, content_type=content_type)
+    response = auth_client.post("/admin/upload-blog-posts", data=payload, content_type=content_type)
 
     assert response.status_code == 400
     assert response.get_json() == {
@@ -40,9 +40,9 @@ def test_upload_blog_posts_missing_files_key(client):
 
 
 @pytest.mark.admin_upload_blog_posts
-def test_upload_blog_posts_malformed_json(client):
+def test_upload_blog_posts_malformed_json(auth_client):
     """Should return 400 for malformed JSON with correct content-type."""
-    response = client.post(
+    response = auth_client.post(
         "/admin/upload-blog-posts",
         data="{not: 'valid', json}",
         content_type="application/json"
@@ -53,7 +53,7 @@ def test_upload_blog_posts_malformed_json(client):
 @pytest.mark.api
 @pytest.mark.admin_upload_blog_posts
 def test_upload_blog_posts_route_with_actual_api(
-        app, client, google_drive_service_fixture, session, test_drive_file_metadata_map
+        app, auth_client, google_drive_service_fixture, session, test_drive_file_metadata_map
 ):
     """Tests the /admin/upload-blog-posts route with real Google Drive API and database integration.
 
@@ -73,7 +73,7 @@ def test_upload_blog_posts_route_with_actual_api(
             "files": [{"id": file_id, "slug": slug}]
         }
 
-        response = client.post(
+        response = auth_client.post(
             "/admin/upload-blog-posts",
             data=json.dumps(payload),
             content_type="application/json"
@@ -144,9 +144,9 @@ def test_upload_blog_posts_route_with_actual_api(
 
 
 @pytest.mark.admin_upload_blog_posts
-def test_upload_blog_posts_unsupported_media_type(client):
+def test_upload_blog_posts_unsupported_media_type(auth_client):
     """Should return 415 for unsupported content-type like text/plain."""
-    response = client.post(
+    response = auth_client.post(
         "/admin/upload-blog-posts",
         data="not-json",
         content_type="text/plain"

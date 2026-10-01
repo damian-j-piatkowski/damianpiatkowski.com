@@ -15,7 +15,7 @@ Test Functions:
 
 Fixtures:
     - app: Provides the Flask app context.
-    - client: A test client for making HTTP requests.
+    - auth_client: A test auth_client for making HTTP requests.
     - session: SQLAlchemy session for database verification.
     - create_blog_post: Creates a blog post entry in the DB.
     - test_drive_file_metadata_map: Provides file metadata for integration.
@@ -30,7 +30,7 @@ from app import exceptions
 
 @pytest.mark.admin_unpublished_posts
 @pytest.mark.api
-def test_unpublished_posts_all_articles_published(client, session, create_blog_post, test_drive_file_metadata_map):
+def test_unpublished_posts_all_articles_published(auth_client, session, create_blog_post, test_drive_file_metadata_map):
     """Verifies that the route returns an empty list when all Drive files are already published in the database."""
     for metadata in test_drive_file_metadata_map.values():
         create_blog_post(
@@ -41,7 +41,7 @@ def test_unpublished_posts_all_articles_published(client, session, create_blog_p
         )
     session.commit()
 
-    response = client.get("/admin/unpublished-posts")
+    response = auth_client.get("/admin/unpublished-posts")
     assert response.status_code == 200
     assert response.get_json() == []
 
@@ -50,9 +50,9 @@ def test_unpublished_posts_all_articles_published(client, session, create_blog_p
 @pytest.mark.parametrize("mock_google_drive_service",
                          [{"patch_target": "app.services.google_drive_service.GoogleDriveService",
                            "list_folder_contents_return": []}], indirect=True)
-def test_unpublished_posts_empty_database_and_folder(client, mock_google_drive_service, session):
+def test_unpublished_posts_empty_database_and_folder(auth_client, mock_google_drive_service, session):
     """Verifies that the route returns an empty list when both the DB and Google Drive folder are empty."""
-    response = client.get("/admin/unpublished-posts")
+    response = auth_client.get("/admin/unpublished-posts")
     assert response.status_code == 200
     assert response.get_json() == []
 
@@ -64,10 +64,10 @@ def test_unpublished_posts_empty_database_and_folder(client, mock_google_drive_s
                              "list_folder_contents_side_effect": exceptions.GoogleDriveAPIError("Google Drive API error")
                          }],
                          indirect=True)
-def test_unpublished_posts_google_drive_api_error(client, mock_google_drive_service, session):
+def test_unpublished_posts_google_drive_api_error(auth_client, mock_google_drive_service, session):
     """Verifies that the route returns a 500 error with a message when a Google Drive API error occurs."""
 
-    response = client.get("/admin/unpublished-posts")
+    response = auth_client.get("/admin/unpublished-posts")
 
     # Sanity check: ensure the side effect got used
     mock_google_drive_service.list_folder_contents.assert_called_once()
@@ -77,12 +77,12 @@ def test_unpublished_posts_google_drive_api_error(client, mock_google_drive_serv
 
 
 @pytest.mark.admin_unpublished_posts
-def test_unpublished_posts_no_folder_id(app, client, monkeypatch, session):
+def test_unpublished_posts_no_folder_id(app, auth_client, monkeypatch, session):
     """Verifies that the route returns a 500 error when the DRIVE_BLOG_POSTS_FOLDER_ID config is missing."""
     with app.app_context():
         monkeypatch.setitem(current_app.config, "DRIVE_BLOG_POSTS_FOLDER_ID", None)
 
-        response = client.get("/admin/unpublished-posts")
+        response = auth_client.get("/admin/unpublished-posts")
         assert response.status_code == 500
         assert response.get_json() == {
             "error": "Google Drive folder ID is missing in the configuration"
@@ -96,13 +96,13 @@ def test_unpublished_posts_no_folder_id(app, client, monkeypatch, session):
                              "patch_target": "app.controllers.admin_controller.GoogleDriveService"
                          }],
                          indirect=True)
-def test_unpublished_posts_permission_error(client, mock_google_drive_service, session):
+def test_unpublished_posts_permission_error(auth_client, mock_google_drive_service, session):
     """Verifies that the route returns a 403 error when a Google Drive permission error occurs."""
     mock_google_drive_service.list_folder_contents.side_effect = exceptions.GoogleDrivePermissionError(
         "Insufficient permissions for Google Drive access"
     )
 
-    response = client.get("/admin/unpublished-posts")
+    response = auth_client.get("/admin/unpublished-posts")
     assert response.status_code == 403
     assert response.get_json() == {
         "error": "Insufficient permissions for Google Drive access"
@@ -111,7 +111,7 @@ def test_unpublished_posts_permission_error(client, mock_google_drive_service, s
 
 @pytest.mark.admin_unpublished_posts
 @pytest.mark.api
-def test_unpublished_posts_some_articles_unpublished(client, session, create_blog_post, test_drive_file_metadata_map):
+def test_unpublished_posts_some_articles_unpublished(auth_client, session, create_blog_post, test_drive_file_metadata_map):
     """Verifies that the route returns only Drive articles that are not yet published in the database."""
     design_metadata = test_drive_file_metadata_map["design_principles"]
     value_metadata = test_drive_file_metadata_map["value_objects"]
@@ -123,7 +123,7 @@ def test_unpublished_posts_some_articles_unpublished(client, session, create_blo
     )
     session.commit()
 
-    response = client.get("/admin/unpublished-posts")
+    response = auth_client.get("/admin/unpublished-posts")
     assert response.status_code == 200
 
     slugs = [item["slug"] for item in response.get_json()]

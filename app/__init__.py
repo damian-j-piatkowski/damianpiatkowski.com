@@ -13,6 +13,7 @@ from app.orm import start_mappers
 from app.routes.about_me import about_me_bp
 from app.routes.admin import admin_bp
 from app.routes.blog import blog_bp
+from app.routes.dictionary import dictionary_bp
 from app.routes.home import home_bp
 from app.routes.resume import resume_bp
 from app.__version__ import __version__
@@ -57,6 +58,7 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
     flask_app.register_blueprint(about_me_bp)
     flask_app.register_blueprint(admin_bp)
     flask_app.register_blueprint(blog_bp)
+    flask_app.register_blueprint(dictionary_bp)
     flask_app.register_blueprint(home_bp)
     flask_app.register_blueprint(resume_bp)
 
@@ -68,12 +70,31 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
             f"Logs: {flask_app.config['LOG_FILE']})"
         )
 
-    # Make FLASK_ENV and VERSION available in all templates
+    # Make FLASK_ENV, VERSION, and admin auth state available in all templates
     @flask_app.context_processor
     def inject_globals():
+        from app.services.auth_service import is_admin_authenticated
         return {
             "ENV": flask_app.config["FLASK_ENV"],
             "VERSION": __version__,
+            "is_admin": is_admin_authenticated(),
         }
+
+    @flask_app.cli.command("create-admin")
+    def create_admin_command():
+        """Create an administrator account for the dictionary admin panel."""
+        import click
+        from app.models.repositories.user_repository import UserRepository
+        from app.services.auth_service import hash_password
+
+        username = click.prompt("Username")
+        password = click.prompt("Password", hide_input=True, confirmation_prompt=True)
+        repository = UserRepository(db.session)
+        if repository.find_by_username(username):
+            click.echo(f"User '{username}' already exists.")
+            return
+        repository.create_user(username=username, password_hash=hash_password(password))
+        db.session.commit()
+        click.echo(f"Admin user '{username}' created.")
 
     return flask_app

@@ -26,10 +26,11 @@ Domain Lifecycle Object Examples:
 """
 
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 # Forward references for type hinting complex aggregate relations
 from app.domain.dictionary_example import DictionaryExample
+from app.domain.domain_enums import WordType
 from app.domain.han_viet_root import HanVietRoot
 
 
@@ -42,6 +43,7 @@ class DictionaryWord:
         english_translation (str): Core summary definition string.
         examples (List[DictionaryExample]): Associated contextual sentence exposures.
         han_viet_roots (List[HanVietRoot]): Underlying Sino-Vietnamese components.
+        word_types (List[str]): Grammatical classifications associated with the entry.
         created_at (Optional[datetime.datetime]): Timezone-aware initial record creation timestamp.
         updated_at (Optional[datetime.datetime]): Timezone-aware active record mutation timestamp.
     """
@@ -53,6 +55,7 @@ class DictionaryWord:
             english_translation: str,
             examples: Optional[List[DictionaryExample]] = None,
             han_viet_roots: Optional[List[HanVietRoot]] = None,
+            word_types: Optional[List[Union[WordType, str]]] = None,
             created_at: Optional[datetime.datetime] = None,
             updated_at: Optional[datetime.datetime] = None
     ) -> None:
@@ -62,6 +65,10 @@ class DictionaryWord:
         self.english_translation = english_translation
         self.examples = examples or []
         self.han_viet_roots = han_viet_roots or []
+        self.word_types = [
+            wt.value if isinstance(wt, WordType) else str(wt)
+            for wt in (word_types or [])
+        ]
         self.created_at = created_at
         self.updated_at = updated_at
 

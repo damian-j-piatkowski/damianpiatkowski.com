@@ -44,6 +44,7 @@ from app.models.tables.dictionary_word import dictionary_words
 from app.models.tables.han_viet_root import han_viet_roots
 from app.models.tables.user import users
 from app.models.tables.word_han_viet_association import word_han_viet_association
+from app.models.tables.word_type_association import word_type_association
 
 # Initialize the registry to track classical model mappings
 mapper_registry = registry()
@@ -84,6 +85,9 @@ def start_mappers(app):
         )
 
         # Map DictionaryWord (One-to-Many to Examples, Many-to-Many to Roots)
+        # word_types are managed via Core SQL on word_type_association in repositories;
+        # the association table is imported so metadata stays complete for migrations.
+        _ = word_type_association
         mapper_registry.map_imperatively(
             DictionaryWord,
             dictionary_words,

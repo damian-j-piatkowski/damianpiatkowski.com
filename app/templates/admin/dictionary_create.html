@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Create Dictionary Entry | Damian Piatkowski{% endblock %}
+{% block meta_description %}Create a new Vietnamese-English dictionary entry.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-page" id="dictionary-create-workspace"
+         data-word-types='{{ word_types|tojson }}'
+         data-source-types='{{ source_types|tojson }}'
+         data-recent-sources='{{ recent_sources|tojson }}'>
+    <h1>Create dictionary entry</h1>
+    <p class="muted">Define the word, types, examples, sources, and Hán Việt roots in one workspace.</p>
+
+    <div id="duplicate-banner" class="admin-alert admin-alert-warning" hidden>
+        <p id="duplicate-message"></p>
+        <a id="duplicate-edit-link" class="admin-btn" href="#">Open existing entry</a>
+    </div>
+    <div id="form-error" class="admin-alert admin-alert-error" hidden></div>
+
+    <div class="admin-form-group">
+        <label for="viet-word">Vietnamese word</label>
+        <input id="viet-word" type="text" autocomplete="off" required>
+    </div>
+    <div class="admin-form-group">
+        <label for="english-translation">English translation</label>
+        <input id="english-translation" type="text" required>
+    </div>
+
+    <div class="admin-form-group">
+        <label for="word-type-select">Word types</label>
+        <div class="admin-chip-row">
+            <select id="word-type-select"></select>
+            <button type="button" class="admin-btn" id="add-word-type">Add type</button>
+        </div>
+        <div id="selected-word-types" class="admin-chip-row"></div>
+    </div>
+
+    <div class="admin-section">
+        <h2>Examples</h2>
+        <div id="examples-list"></div>
+        <div class="admin-form-group">
+            <label for="example-sentence">Vietnamese sentence</label>
+            <textarea id="example-sentence" rows="2"></textarea>
+        </div>
+        <div class="admin-form-group">
+            <label for="example-translation">English translation</label>
+            <textarea id="example-translation" rows="2"></textarea>
+        </div>
+        <div class="admin-form-group">
+            <label for="example-source">Source</label>
+            <select id="example-source"></select>
+        </div>
+        <button type="button" class="admin-btn" id="add-example">Add example</button>
+    </div>
+
+    <div class="admin-section">
+        <h2>New source</h2>
+        <div class="admin-form-group">
+            <label for="new-source-type">Source type</label>
+            <select id="new-source-type"></select>
+        </div>
+        <div class="admin-form-group">
+            <label for="new-source-title">Title</label>
+            <input id="new-source-title" type="text">
+        </div>
+        <div class="admin-form-group">
+            <label for="new-source-url">URL (optional)</label>
+            <input id="new-source-url" type="url">
+        </div>
+        <button type="button" class="admin-btn" id="create-source">Create source</button>
+    </div>
+
+    <div class="admin-section">
+        <h2>Hán Việt roots</h2>
+        <p class="muted">Optional. Check compound words for existing roots after saving, or associate during edit.</p>
+        <button type="button" class="admin-btn" id="check-roots" disabled>Check for existing roots</button>
+        <div id="han-viet-results"></div>
+    </div>
+
+    <div class="admin-section">
+        <button type="button" class="admin-btn" id="save-entry">Save entry</button>
+        <a class="admin-btn" href="{{ url_for('dictionary.render_dictionary_page') }}">Back to dictionary</a>
+    </div>
+</section>
+<script src="{{ url_for('static', filename='js/dictionaryAdmin.js') }}"></script>
+{% endblock %}

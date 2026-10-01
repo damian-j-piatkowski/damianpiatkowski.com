@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login | Damian Piatkowski{% endblock %}
+{% block meta_description %}Administrator login for dictionary and site management.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-login-page admin-page">
+    <h1>Admin Login</h1>
+    <p class="muted">Sign in to manage dictionary entries.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('admin.admin_login') }}" id="admin-login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+        {% endif %}
+        <div class="admin-form-group">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" required value="{{ username|default('') }}">
+        </div>
+        <div class="admin-form-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="admin-btn" id="admin-login-submit">Sign in</button>
+    </form>
+</section>
+{% endblock %}

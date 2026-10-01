@@ -1,5 +1,6 @@
 pytest_plugins = [
     "tests.fixtures.app_fixtures",
+    "tests.fixtures.auth_fixtures",
     "tests.fixtures.blog_data_fixtures",
     "tests.fixtures.db_fixtures",
     "tests.fixtures.dictionary_data_fixtures",

@@ -13,7 +13,7 @@ Tests included:
     - test_admin_delete_blog_posts_runtime_error
 
 Fixtures:
-    - client: Provides a Flask test client.
+    - auth_client: Provides a Flask test auth_client.
     - create_blog_post: Creates an individual blog post.
     - session: Provides a database session.
 """
@@ -26,7 +26,7 @@ from app.models.repositories.blog_post_repository import BlogPostRepository
 
 @pytest.mark.admin_delete_blog_posts
 @pytest.mark.parametrize("count", [1, 2, 3, 4, 5])
-def test_admin_delete_blog_posts_all_success(client, session, create_blog_post, count):
+def test_admin_delete_blog_posts_all_success(auth_client, session, create_blog_post, count):
     """Successfully deletes 1 to 5 blog posts via the route."""
     slugs = []
     for i in range(count):
@@ -35,7 +35,7 @@ def test_admin_delete_blog_posts_all_success(client, session, create_blog_post, 
         slugs.append(slug)
     session.commit()
 
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": slugs})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": slugs})
 
     assert response.status_code == 200
     json_data = response.get_json()
@@ -51,7 +51,7 @@ def test_admin_delete_blog_posts_all_success(client, session, create_blog_post, 
 
 @pytest.mark.admin_delete_blog_posts
 @pytest.mark.parametrize("delete_count", [1, 2, 3, 4])
-def test_admin_delete_blog_posts_partial_deletion(client, session, create_blog_post, delete_count):
+def test_admin_delete_blog_posts_partial_deletion(auth_client, session, create_blog_post, delete_count):
     """Deletes a subset of posts and verifies remaining posts via the route."""
     total_slugs = []
     for i in range(5):
@@ -62,7 +62,7 @@ def test_admin_delete_blog_posts_partial_deletion(client, session, create_blog_p
 
     slugs_to_delete = total_slugs[:delete_count]
 
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": slugs_to_delete})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": slugs_to_delete})
 
     assert response.status_code == 200
     json_data = response.get_json()
@@ -79,14 +79,14 @@ def test_admin_delete_blog_posts_partial_deletion(client, session, create_blog_p
 
 
 @pytest.mark.admin_delete_blog_posts
-def test_admin_delete_blog_posts_mixed_success_and_failure(client, session, create_blog_post):
+def test_admin_delete_blog_posts_mixed_success_and_failure(auth_client, session, create_blog_post):
     """Partial success with one valid and one non-existent slug via the route."""
     create_blog_post("Existing Post", "existing-post", "Content", "drive_id_exist")
     session.commit()
 
     slugs = ["existing-post", "missing-post"]
 
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": slugs})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": slugs})
 
     assert response.status_code == 207
     json_data = response.get_json()
@@ -103,9 +103,9 @@ def test_admin_delete_blog_posts_mixed_success_and_failure(client, session, crea
 
 
 @pytest.mark.admin_delete_blog_posts
-def test_admin_delete_blog_posts_missing_slug(client, session):
+def test_admin_delete_blog_posts_missing_slug(auth_client, session):
     """Deletion fails for a non-existent slug via the route."""
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": ["nonexistent-post"]})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": ["nonexistent-post"]})
 
     assert response.status_code == 400
     json_data = response.get_json()
@@ -114,9 +114,9 @@ def test_admin_delete_blog_posts_missing_slug(client, session):
 
 
 @pytest.mark.admin_delete_blog_posts
-def test_admin_delete_blog_posts_no_slugs_provided(client):
+def test_admin_delete_blog_posts_no_slugs_provided(auth_client):
     """Returns 400 when no slugs are provided in the request body."""
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": []})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": []})
 
     assert response.status_code == 400
     json_data = response.get_json()
@@ -124,7 +124,7 @@ def test_admin_delete_blog_posts_no_slugs_provided(client):
 
 
 @pytest.mark.admin_delete_blog_posts
-def test_admin_delete_blog_posts_runtime_error(monkeypatch, client, session, create_blog_post):
+def test_admin_delete_blog_posts_runtime_error(monkeypatch, auth_client, session, create_blog_post):
     """Simulates a critical runtime error during deletion via the route."""
     create_blog_post("Error Post", "error-post", "Content", "drive_id_error")
     session.commit()
@@ -135,7 +135,7 @@ def test_admin_delete_blog_posts_runtime_error(monkeypatch, client, session, cre
 
     monkeypatch.setattr("app.controllers.admin_controller.remove_blog_post_by_slug", faulty_remove_blog_post_by_slug)
 
-    response = client.delete("/admin/delete-blog-posts", json={"slugs": ["error-post"]})
+    response = auth_client.delete("/admin/delete-blog-posts", json={"slugs": ["error-post"]})
 
     assert response.status_code == 500
     json_data = response.get_json()

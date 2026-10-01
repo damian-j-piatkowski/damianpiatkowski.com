@@ -1,17 +1,21 @@
 """Admin routes for the web application.
 
 This module defines routes for the admin panel managing unpublished and published blog posts,
-uploading posts from Google Drive, and deleting published posts.
+uploading posts from Google Drive, deleting published posts, and administrator authentication.
 
 Routes:
-    - /admin/delete_blog_posts: Handles deleting published blog posts.
-    - /admin/published_posts: Displays published blog posts.
-    - /admin/unpublished_posts: Displays unpublished blog posts.
-    - /admin/upload_post: Handles uploading blog posts from Google Drive.
+    - /admin/login: Admin login page and credential submission.
+    - /admin/logout: Clear the authenticated admin session.
+    - /admin/delete-blog-posts: Handles deleting published blog posts.
+    - /admin/published-posts: Displays published blog posts.
+    - /admin/unpublished-posts: Displays unpublished blog posts.
+    - /admin/upload-blog-posts: Handles uploading blog posts from Google Drive.
 """
 
 from flask import Blueprint, jsonify, request
 
+from app.auth.decorators import admin_required
+from app.controllers import auth_controller
 from app.controllers.admin_controller import (
     delete_blog_posts,
     find_unpublished_drive_articles,
@@ -22,7 +26,30 @@ from app.controllers.admin_controller import (
 admin_bp = Blueprint('admin', __name__)
 
 
+@admin_bp.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    """Render the admin login page or process credential submission."""
+    next_url = request.values.get("next")
+    if request.method == "GET":
+        return auth_controller.show_login_page(next_url=next_url)
+
+    username = request.form.get("username", "")
+    password = request.form.get("password", "")
+    return auth_controller.login_admin(
+        username=username,
+        password=password,
+        next_url=next_url,
+    )
+
+
+@admin_bp.route("/admin/logout", methods=["GET", "POST"])
+def admin_logout():
+    """Clear the authenticated admin session."""
+    return auth_controller.logout_admin()
+
+
 @admin_bp.route("/admin/delete-blog-posts", methods=["DELETE"])
+@admin_required
 def admin_delete_blog_posts():
     """Process deletion of selected blog posts and return a structured JSON response.
 
@@ -75,6 +102,7 @@ def admin_delete_blog_posts():
 
 
 @admin_bp.route('/admin/published-posts', methods=['GET'])
+@admin_required
 def admin_published_posts():
     """Return a list of published blog posts for the admin interface.
 
@@ -103,6 +131,7 @@ def admin_published_posts():
 
 
 @admin_bp.route('/admin/unpublished-posts', methods=['GET'])
+@admin_required
 def admin_unpublished_posts():
     """Render the Unpublished Blog Posts admin page.
 
@@ -133,6 +162,7 @@ def admin_unpublished_posts():
 
 
 @admin_bp.route("/admin/upload-blog-posts", methods=["POST"])
+@admin_required
 def admin_upload_blog_posts():
     """Process unpublished blog posts from Google Drive and return a structured JSON response.
 

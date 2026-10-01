@@ -11,4 +11,6 @@ alwaysApply: true
 - Controller tests should call controllers directly rather than unnecessarily using the Flask test client.
 - Reuse existing fixtures rather than creating parallel fixture infrastructure.
 - Add tests for new behaviour and regression cases introduced by a change.
+- Each test function should have a docstring starting with "Verifies that..." describing the behaviour the test verifies.
 - Run the relevant test suite after implementation.
+- Do not use the system/global Python interpreter for repository operations when `.venv` exists.

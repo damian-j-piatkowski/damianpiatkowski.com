@@ -12,7 +12,7 @@ Test Functions:
 
 Fixtures:
     - app: Flask app context.
-    - client: Flask test client for making requests.
+    - auth_client: Flask test auth_client for making requests.
     - session: SQLAlchemy session for DB state.
     - create_blog_post: Factory for creating published blog post records.
     - mocker: Used to patch controller behavior in error scenarios.
@@ -22,20 +22,20 @@ import pytest
 
 
 @pytest.mark.admin_published_posts
-def test_published_posts_handles_internal_error(app, client, mocker):
+def test_published_posts_handles_internal_error(app, auth_client, mocker):
     """Verifies that the route returns a 500 error when an unexpected exception occurs in the controller."""
     with app.app_context():
         mocker.patch(
             "app.controllers.admin_controller.get_all_blog_post_identifiers",
             side_effect=Exception("Unexpected DB error")
         )
-        response = client.get("/admin/published-posts")
+        response = auth_client.get("/admin/published-posts")
         assert response.status_code == 500
         assert response.get_json() == {"error": "Unexpected DB error"}
 
 
 @pytest.mark.admin_published_posts
-def test_published_posts_returns_correct_structure(client, session, create_blog_post):
+def test_published_posts_returns_correct_structure(auth_client, session, create_blog_post):
     """Verifies that a single published blog post is returned in the correct structure."""
     create_blog_post(
         title="Test Post",
@@ -45,7 +45,7 @@ def test_published_posts_returns_correct_structure(client, session, create_blog_
     )
     session.commit()
 
-    response = client.get("/admin/published-posts")
+    response = auth_client.get("/admin/published-posts")
     assert response.status_code == 200
     posts = response.get_json()
 
@@ -57,21 +57,21 @@ def test_published_posts_returns_correct_structure(client, session, create_blog_
 
 
 @pytest.mark.admin_published_posts
-def test_published_posts_returns_empty_list_when_no_posts(client, session):
+def test_published_posts_returns_empty_list_when_no_posts(auth_client, session):
     """Verifies that the route returns an empty list when there are no blog posts in the database."""
-    response = client.get("/admin/published-posts")
+    response = auth_client.get("/admin/published-posts")
     assert response.status_code == 200
     assert response.get_json() == []
 
 
 @pytest.mark.admin_published_posts
 @pytest.mark.parametrize("post_count", [2, 10, 30])
-def test_published_posts_returns_multiple_posts(client, session, seed_blog_posts, post_count):
+def test_published_posts_returns_multiple_posts(auth_client, session, seed_blog_posts, post_count):
     """Verifies that the route returns the correct number of posts and expected structure across multiple counts."""
     created_posts = seed_blog_posts(post_count)
     session.commit()
 
-    response = client.get("/admin/published-posts")
+    response = auth_client.get("/admin/published-posts")
     assert response.status_code == 200
 
     posts = response.get_json()

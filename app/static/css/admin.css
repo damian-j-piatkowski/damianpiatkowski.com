@@ -1,0 +1,139 @@
+.admin-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+    color: var(--admin-dark-text);
+}
+
+.admin-page h1,
+.admin-page h2 {
+    color: var(--admin-dark-text);
+}
+
+.admin-page .muted {
+    color: var(--admin-muted-text);
+}
+
+.admin-form-group {
+    margin-bottom: 1rem;
+}
+
+.admin-form-group label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    color: var(--admin-dark-text);
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--admin-dark-text);
+}
+
+.admin-btn {
+    display: inline-block;
+    border: none;
+    border-radius: 4px;
+    padding: 0.55rem 1rem;
+    background: var(--accent-primary);
+    color: var(--admin-dark-text);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-btn:hover {
+    background: var(--accent-primary-hover);
+}
+
+.admin-btn-danger {
+    background: var(--admin-danger);
+    color: #fff;
+}
+
+.admin-btn-danger:hover {
+    filter: brightness(0.95);
+    color: #fff;
+}
+
+.admin-alert {
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+.admin-alert-warning {
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: var(--admin-dark-text);
+}
+
+.admin-alert-error {
+    background: #fef2f2;
+    border: 1px solid var(--admin-danger);
+    color: var(--admin-dark-text);
+}
+
+.admin-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.admin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--color-light-bg);
+    border-radius: 4px;
+    padding: 0.3rem 0.55rem;
+}
+
+.admin-chip button {
+    border: none;
+    background: transparent;
+    color: var(--admin-danger);
+    cursor: pointer;
+}
+
+.admin-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.admin-login-page {
+    max-width: 420px;
+    margin: 4rem auto;
+    padding: 0 1rem;
+}
+
+.admin-login-page h1 {
+    margin-bottom: 0.35rem;
+}
+
+.flash-messages {
+    list-style: none;
+    padding: 0;
+}
+
+.flash-messages li {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+}
+
+.flash-messages .error {
+    background: #fef2f2;
+    border: 1px solid var(--admin-danger);
+}
+
+.flash-messages .success {
+    background: var(--accent-primary);
+}

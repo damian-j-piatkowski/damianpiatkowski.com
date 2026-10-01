@@ -132,3 +132,66 @@ class GoogleDriveAPIError(GoogleDriveError):
         self.api_method = api_method
         self.error_code = error_code
         super().__init__(message)
+
+
+class DictionaryValidationError(Exception):
+    """Raised when dictionary input fails application-level validation."""
+
+    def __init__(self, message: str, field: str | None = None):
+        self.message = message
+        self.field = field
+        super().__init__(message)
+
+
+class DictionaryWordNotFoundError(Exception):
+    """Raised when a dictionary word cannot be found."""
+
+    def __init__(self, message: str, word_id: int | None = None):
+        self.message = message
+        self.word_id = word_id
+        super().__init__(message)
+
+
+class DictionaryWordDuplicateError(Exception):
+    """Raised when a duplicate Vietnamese dictionary word is detected."""
+
+    def __init__(self, message: str, viet_word: str):
+        self.message = message
+        self.viet_word = viet_word
+        super().__init__(message)
+
+
+class DictionarySourceNotFoundError(Exception):
+    """Raised when a dictionary source cannot be found."""
+
+    def __init__(self, message: str, source_id: int | None = None):
+        self.message = message
+        self.source_id = source_id
+        super().__init__(message)
+
+
+class HanVietRootNotFoundError(Exception):
+    """Raised when a Hán Việt root cannot be found."""
+
+    def __init__(self, message: str, root_id: int | None = None):
+        self.message = message
+        self.root_id = root_id
+        super().__init__(message)
+
+
+class HanVietRootInUseError(Exception):
+    """Raised when a Hán Việt root cannot be deleted because associations remain."""
+
+    def __init__(self, message: str, root_id: int, association_count: int):
+        self.message = message
+        self.root_id = root_id
+        self.association_count = association_count
+        super().__init__(message)
+
+
+class AuthenticationError(Exception):
+    """Raised when admin authentication fails."""
+
+    def __init__(self, message: str = "Invalid username or password"):
+        self.message = message
+        super().__init__(message)

@@ -12,6 +12,32 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ---
 
+## [1.4.0] - 2026-09-30
+
+### Added
+
+- **Vietnamese-English dictionary**
+  - Public `/dictionary` search with typeahead autocomplete (200ms debounce).
+  - Admin create/edit workspaces for words, grammatical types, contextual examples, sources, and Hán Việt roots.
+  - Duplicate-word check (400ms debounce) with redirect to the existing entry.
+  - Hán Việt root detection, association, unlink, and association-safe deletion.
+
+- **Admin authentication**
+  - Session-based admin login at `/admin/login` (`session["is_admin"]`).
+  - `@admin_required` protection for all `/admin/*` routes, including existing blog admin endpoints.
+  - `flask create-admin` CLI command to bootstrap the administrator account.
+
+- **Dictionary data model**
+  - Tables for dictionary words, examples, sources, Hán Việt roots, association bridges, and users.
+  - Migration repair for `word_type_association` on databases already stamped at the prior revision.
+
+### Security
+
+- Authenticated admin session required for dictionary mutations and blog admin operations.
+- Passwords stored as Werkzeug password hashes.
+
+---
+
 ## [1.3.0] - 2025-10-31
 
 ### Added

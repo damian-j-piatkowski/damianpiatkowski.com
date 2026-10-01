@@ -40,4 +40,9 @@
     --footer-text: #F9F9F9;     /* off-white, readable */
     --footer-link: #D0F0C0;     /* brand accent green */
     --footer-link-hover: #a0d08c; /* darker green for hover */
-    }
+
+    /* Admin Workspace Semantic Colors */
+    --admin-dark-text: #1e293b;
+    --admin-muted-text: #94a3b8;
+    --admin-danger: #ef4444;
+}

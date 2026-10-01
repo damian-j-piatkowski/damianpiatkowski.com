@@ -42,6 +42,7 @@ def test_dictionary_word_transient_initialization_defaults() -> None:
     assert word_entry.english_translation == "to report; a report"
     assert word_entry.examples == []
     assert word_entry.han_viet_roots == []
+    assert word_entry.word_types == []
     assert word_entry.created_at is None
     assert word_entry.updated_at is None
 

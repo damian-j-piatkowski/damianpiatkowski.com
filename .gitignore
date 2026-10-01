@@ -178,3 +178,4 @@ token.json
 # Local blog hero images
 app/static/blog-images/
 
+/temporary/
