@@ -16,9 +16,13 @@
     </div>
 
     <div class="admin-hub-actions">
-        <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_create_workspace') }}" id="admin-add-new-word">
+        <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_create_workspace', tab='word') }}" id="admin-add-new-word">
             <h2><i class="bi bi-plus-circle"></i> Add New Word</h2>
             <p>Open the creation workspace for a new dictionary entry.</p>
+        </a>
+        <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_create_workspace', tab='source') }}" id="admin-add-new-source">
+            <h2><i class="bi bi-journal-plus"></i> Create Source</h2>
+            <p>Add a citation source for contextual examples.</p>
         </a>
         <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_dashboard') }}" id="admin-dictionary-dashboard">
             <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>

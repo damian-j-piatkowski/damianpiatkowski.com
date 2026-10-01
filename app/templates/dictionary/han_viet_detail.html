@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ root.chinese_character }} {{ root.root }} | Hán Việt Explorer{% endblock %}
+{% block meta_description %}{{ root.root }} ({{ root.chinese_character }}) — {{ root.root_meaning }}. Compound words sharing this Hán Việt root.{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("han-viet", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="han-viet-page">
+    <p class="han-viet-back">
+        <a href="{{ url_for('dictionary.han_viet_explorer') }}">← All roots</a>
+        <a href="{{ url_for('dictionary.render_dictionary_page') }}">Dictionary search</a>
+    </p>
+
+    <header class="han-viet-cluster-hero">
+        <p class="char">{{ root.chinese_character }}</p>
+        <h1>{{ root.root }}</h1>
+        <p class="meaning">{{ root.root_meaning }}</p>
+    </header>
+
+    <h2 class="han-viet-section-title">Compound words</h2>
+    {% if compounds %}
+    <div class="han-viet-compound-grid">
+        {% for word in compounds %}
+        <a class="han-viet-compound-card"
+           href="{{ url_for('dictionary.render_word_detail', word_id=word.id) }}">
+            <span class="term">{{ word.viet_word }}</span>
+            <span class="gloss">{{ word.english_translation }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No dictionary words are linked to this root yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

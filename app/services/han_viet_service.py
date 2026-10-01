@@ -1,6 +1,6 @@
 """Service layer for Hán Việt root detection, association, and deletion safety."""
 
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from sqlalchemy.orm import Session
 
@@ -8,6 +8,7 @@ from app.domain.han_viet_root import HanVietRoot
 from app.exceptions import (
     DictionaryValidationError,
     HanVietRootInUseError,
+    HanVietRootNotFoundError,
 )
 from app.models.repositories.han_viet_repository import HanVietRepository
 from app.models.repositories.word_repository import WordRepository
@@ -116,3 +117,29 @@ class HanVietService:
                 association_count=association_count,
             )
         self.roots.delete(root_id)
+
+    def get_explorer_index(self, q: str = "", limit: int = 200) -> List[Dict[str, Any]]:
+        """Return Hán Việt roots with compound counts for the public explorer index."""
+        return self.roots.get_all_roots_summary(title_query=q, limit=limit)
+
+    def get_root_cluster(self, root_syllable: str) -> Dict[str, Any]:
+        """Return a root and its associated compound words for the explorer detail page.
+
+        Raises:
+            HanVietRootNotFoundError: When the root syllable is unknown.
+        """
+        result = self.roots.get_root_with_compounds(root_syllable)
+        if result is None:
+            raise HanVietRootNotFoundError(
+                f"Hán Việt root '{root_syllable}' was not found.",
+            )
+        root, compounds = result
+        return {
+            "root": {
+                "id": root.id,
+                "root": root.root,
+                "chinese_character": root.chinese_character,
+                "root_meaning": root.root_meaning,
+            },
+            "compounds": compounds,
+        }

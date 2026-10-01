@@ -42,9 +42,10 @@
             item.className = "dictionary-result-item";
 
             const textWrap = document.createElement("div");
-            const term = document.createElement("div");
+            const term = document.createElement("a");
             term.className = "dictionary-result-term";
             term.textContent = entry.viet_word;
+            term.href = `/dictionary/${entry.id}`;
             const translation = document.createElement("div");
             translation.className = "dictionary-result-translation";
             translation.textContent = entry.english_translation;

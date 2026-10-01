@@ -18,7 +18,10 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 - **Vietnamese-English dictionary**
   - Public `/dictionary` search with typeahead autocomplete (200ms debounce).
+  - Public word detail pages at `/dictionary/<id>` with syllable-ordered Hán Việt etymology badges linking to the root explorer.
+  - Public Hán Việt explorer at `/han-viet` and root cluster pages at `/han-viet/<root>`.
   - Admin create/edit workspaces for words, grammatical types, contextual examples, sources, and Hán Việt roots.
+  - Admin create workspace tabbed into Create dictionary entry and Create source entry.
   - Duplicate-word check (400ms debounce) with redirect to the existing entry.
   - Hán Việt root detection, association, unlink, and association-safe deletion.
 
@@ -29,7 +32,7 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 - **Admin workspace**
   - Privacy-style tile landing at `/admin` (Blog WIP + Dictionary hub).
-  - Dictionary hub with Add New Word and Dashboard entry points, plus distinct Log out styling.
+  - Dictionary hub with Add New Word, Create Source, and Dashboard entry points, plus distinct Log out styling.
   - Four-tab Dictionary Dashboard (`/admin/dictionary/dashboard`): General KPIs, Sources catalog, Hán Việt analytics, and Data Health audits.
   - Word Velocity & Activity Chart.js line/area chart with 30d / 6m / 12m range toggles and async `/admin/api/stats/word-velocity` JSON.
 
@@ -40,10 +43,14 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - **Testing**
   - Per-function integration tests for `DictionaryDashboardService` under `tests/integration/services/dictionary_dashboard_service/`.
   - Per-function unit tests for `dictionary_validation` under `tests/unit/services/dictionary_validation/`.
+  - Per-function service test directories for `word_service`, `source_service`, `han_viet_service`, `auth_service`, `email_service`, `article_sync_service`, and `image_validation_service`.
+  - Public route coverage for word detail etymology badges and Hán Việt explorer pages.
 
 ### Changed
 
 - Public dictionary intro copy and search placeholder (`Type a Vietnamese word or phrase`).
+- Dictionary search results link to public word detail pages.
+- Admin create workspace: source creation moved to a dedicated Create source entry tab.
 - Admin create/edit workspaces link back to the dictionary hub instead of the public search page.
 - Successful admin login defaults to `/admin` instead of the public dictionary page.
 

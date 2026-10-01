@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Create Dictionary Entry | Damian Piatkowski{% endblock %}
-{% block meta_description %}Create a new Vietnamese-English dictionary entry.{% endblock %}
+{% block title %}{% if active_tab == 'source' %}Create Source{% else %}Create Dictionary Entry{% endif %} | Damian Piatkowski{% endblock %}
+{% block meta_description %}{% if active_tab == 'source' %}Create a new dictionary citation source.{% else %}Create a new Vietnamese-English dictionary entry.{% endif %}{% endblock %}
 {% set include_social_meta = false %}
 
 {% block links %}
@@ -10,17 +10,51 @@
 
 {% block content %}
 <section class="admin-page" id="dictionary-create-workspace"
+         data-mode="create"
+         data-active-tab="{{ active_tab }}"
          data-word-types='{{ word_types|tojson }}'
          data-source-types='{{ source_types|tojson }}'
          data-recent-sources='{{ recent_sources|tojson }}'>
-    <h1>Create dictionary entry</h1>
-    <p class="muted">Define the word, types, examples, sources, and Hán Việt roots in one workspace.</p>
+    <h1>{% if active_tab == 'source' %}Create source entry{% else %}Create dictionary entry{% endif %}</h1>
+    <p class="muted">
+        {% if active_tab == 'source' %}
+        Add a citation source that can be attached to example sentences.
+        {% else %}
+        Define the word, types, examples, and Hán Việt roots in one workspace.
+        {% endif %}
+    </p>
 
+    <nav class="admin-tabs" aria-label="Create workspace tabs">
+        <a class="admin-tab-btn{% if active_tab == 'word' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_create_workspace', tab='word') }}">Create dictionary entry</a>
+        <a class="admin-tab-btn{% if active_tab == 'source' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_create_workspace', tab='source') }}">Create source entry</a>
+    </nav>
+
+    <div id="form-error" class="admin-alert admin-alert-error" hidden></div>
+    <div id="form-success" class="admin-alert admin-alert-warning" hidden></div>
+
+    {% if active_tab == 'source' %}
+    <div class="admin-section" id="create-source-panel">
+        <div class="admin-form-group">
+            <label for="new-source-type">Source type</label>
+            <select id="new-source-type"></select>
+        </div>
+        <div class="admin-form-group">
+            <label for="new-source-title">Title</label>
+            <input id="new-source-title" type="text" required>
+        </div>
+        <div class="admin-form-group">
+            <label for="new-source-url">URL (optional)</label>
+            <input id="new-source-url" type="url">
+        </div>
+        <button type="button" class="admin-btn" id="create-source">Create source</button>
+    </div>
+    {% else %}
     <div id="duplicate-banner" class="admin-alert admin-alert-warning" hidden>
         <p id="duplicate-message"></p>
         <a id="duplicate-edit-link" class="admin-btn" href="#">Open existing entry</a>
     </div>
-    <div id="form-error" class="admin-alert admin-alert-error" hidden></div>
 
     <div class="admin-form-group">
         <label for="viet-word">Vietnamese word</label>
@@ -55,24 +89,12 @@
             <label for="example-source">Source</label>
             <select id="example-source"></select>
         </div>
+        <p class="muted">
+            Need a new citation?
+            <a href="{{ url_for('dictionary.render_create_workspace', tab='source') }}">Create a source entry</a>
+            first, then return here.
+        </p>
         <button type="button" class="admin-btn" id="add-example">Add example</button>
-    </div>
-
-    <div class="admin-section">
-        <h2>New source</h2>
-        <div class="admin-form-group">
-            <label for="new-source-type">Source type</label>
-            <select id="new-source-type"></select>
-        </div>
-        <div class="admin-form-group">
-            <label for="new-source-title">Title</label>
-            <input id="new-source-title" type="text">
-        </div>
-        <div class="admin-form-group">
-            <label for="new-source-url">URL (optional)</label>
-            <input id="new-source-url" type="url">
-        </div>
-        <button type="button" class="admin-btn" id="create-source">Create source</button>
     </div>
 
     <div class="admin-section">
@@ -84,8 +106,16 @@
 
     <div class="admin-section">
         <button type="button" class="admin-btn" id="save-entry">Save entry</button>
+    </div>
+    {% endif %}
+
+    <div class="admin-section">
         <a class="admin-btn" href="{{ url_for('admin.admin_dictionary_hub') }}">Back to dictionary hub</a>
     </div>
 </section>
+{% if active_tab == 'source' %}
+<script src="{{ url_for('static', filename='js/dictionaryAdminSource.js') }}"></script>
+{% else %}
 <script src="{{ url_for('static', filename='js/dictionaryAdmin.js') }}"></script>
+{% endif %}
 {% endblock %}

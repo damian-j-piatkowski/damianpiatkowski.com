@@ -1,6 +1,6 @@
 """Repository for Hán Việt roots and word-root associations."""
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import delete, func, insert, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.domain.han_viet_root import HanVietRoot
 from app.exceptions import HanVietRootNotFoundError
+from app.models.tables.dictionary_word import dictionary_words
 from app.models.tables.han_viet_root import han_viet_roots
 from app.models.tables.word_han_viet_association import word_han_viet_association
 
@@ -220,3 +221,103 @@ class HanVietRepository:
             return [self._hydrate(row) for row in rows]
         except SQLAlchemyError as exc:
             raise RuntimeError(f"Failed to list orphan roots: {exc}") from exc
+
+    def get_root_with_compounds(
+            self,
+            root_syllable: str,
+    ) -> Optional[Tuple[HanVietRoot, List[Dict[str, Any]]]]:
+        """Load a root and all dictionary words associated with it.
+
+        Returns:
+            (root, compounds) where each compound dict has id, viet_word,
+            english_translation; or None when the root does not exist.
+        """
+        normalized = (root_syllable or "").strip().lower()
+        if not normalized:
+            return None
+        try:
+            root = self.find_by_root(normalized)
+            if root is None:
+                return None
+
+            rows = self.session.execute(
+                select(
+                    dictionary_words.c.id,
+                    dictionary_words.c.viet_word,
+                    dictionary_words.c.english_translation,
+                )
+                .select_from(word_han_viet_association)
+                .join(
+                    dictionary_words,
+                    dictionary_words.c.id == word_han_viet_association.c.word_id,
+                )
+                .where(word_han_viet_association.c.root_id == root.id)
+                .order_by(dictionary_words.c.viet_word.asc())
+            ).fetchall()
+
+            compounds = [
+                {
+                    "id": row.id,
+                    "viet_word": row.viet_word,
+                    "english_translation": row.english_translation,
+                }
+                for row in rows
+            ]
+            return root, compounds
+        except SQLAlchemyError as exc:
+            raise RuntimeError(
+                f"Failed to load compounds for root '{normalized}': {exc}"
+            ) from exc
+
+    def get_all_roots_summary(
+            self,
+            title_query: str = "",
+            limit: int = 200,
+    ) -> List[Dict[str, Any]]:
+        """Return roots with compound-word counts for the public explorer index.
+
+        Ordered by compound_count descending, then root ascending.
+        Optional title_query filters by root text prefix/substring (LIKE).
+        """
+        try:
+            compound_count = func.count(
+                func.distinct(word_han_viet_association.c.word_id)
+            ).label("compound_count")
+
+            stmt = (
+                select(
+                    han_viet_roots.c.id,
+                    han_viet_roots.c.root,
+                    han_viet_roots.c.chinese_character,
+                    han_viet_roots.c.root_meaning,
+                    compound_count,
+                )
+                .outerjoin(
+                    word_han_viet_association,
+                    word_han_viet_association.c.root_id == han_viet_roots.c.id,
+                )
+                .group_by(han_viet_roots.c.id)
+            )
+
+            query = (title_query or "").strip()
+            if query:
+                stmt = stmt.where(han_viet_roots.c.root.like(f"%{query}%"))
+
+            stmt = stmt.order_by(
+                compound_count.desc(),
+                han_viet_roots.c.root.asc(),
+            ).limit(max(1, min(limit, 500)))
+
+            rows = self.session.execute(stmt).fetchall()
+            return [
+                {
+                    "id": row.id,
+                    "root": row.root,
+                    "chinese_character": row.chinese_character,
+                    "root_meaning": row.root_meaning,
+                    "compound_count": int(row.compound_count or 0),
+                }
+                for row in rows
+            ]
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to load roots summary: {exc}") from exc

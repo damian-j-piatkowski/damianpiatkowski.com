@@ -104,7 +104,9 @@
     const checkRootsBtn = document.getElementById("check-roots");
 
     fillSelect(wordTypeSelect, availableWordTypes);
-    fillSelect(newSourceTypeSelect, availableSourceTypes);
+    if (newSourceTypeSelect) {
+        fillSelect(newSourceTypeSelect, availableSourceTypes);
+    }
 
     function refreshSourceSelect() {
         fillSelect(
@@ -252,29 +254,32 @@
         renderPendingExamples();
     });
 
-    document.getElementById("create-source").addEventListener("click", async () => {
-        const sourceType = newSourceTypeSelect.value;
-        const title = document.getElementById("new-source-title").value.trim();
-        const url = document.getElementById("new-source-url").value.trim();
-        const { response, payload } = await api("/admin/dictionary/sources", {
-            method: "POST",
-            body: JSON.stringify({
-                source_type: sourceType,
-                title,
-                url: url || null,
-            }),
+    const createSourceBtn = document.getElementById("create-source");
+    if (createSourceBtn && newSourceTypeSelect) {
+        createSourceBtn.addEventListener("click", async () => {
+            const sourceType = newSourceTypeSelect.value;
+            const title = document.getElementById("new-source-title").value.trim();
+            const url = document.getElementById("new-source-url").value.trim();
+            const { response, payload } = await api("/admin/dictionary/sources", {
+                method: "POST",
+                body: JSON.stringify({
+                    source_type: sourceType,
+                    title,
+                    url: url || null,
+                }),
+            });
+            if (!response.ok) {
+                showError(payload.message || "Unable to create source.");
+                return;
+            }
+            recentSources = [payload.source, ...recentSources];
+            refreshSourceSelect();
+            exampleSourceSelect.value = String(payload.source.id);
+            document.getElementById("new-source-title").value = "";
+            document.getElementById("new-source-url").value = "";
+            showError("");
         });
-        if (!response.ok) {
-            showError(payload.message || "Unable to create source.");
-            return;
-        }
-        recentSources = [payload.source, ...recentSources];
-        refreshSourceSelect();
-        exampleSourceSelect.value = String(payload.source.id);
-        document.getElementById("new-source-title").value = "";
-        document.getElementById("new-source-url").value = "";
-        showError("");
-    });
+    }
 
     async function runDuplicateCheck(value) {
         if (!duplicateBanner) {

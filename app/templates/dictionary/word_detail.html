@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ word.viet_word }} | Vietnamese Dictionary | Damian Piatkowski{% endblock %}
+{% block meta_description %}{{ word.viet_word }} — {{ word.english_translation }}{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("dictionary", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="dictionary-detail">
+    <p class="dictionary-detail-nav">
+        <a href="{{ url_for('dictionary.render_dictionary_page') }}">← Dictionary search</a>
+        <a href="{{ url_for('dictionary.han_viet_explorer') }}">Hán Việt explorer</a>
+        {% if is_admin %}
+        <a href="{{ url_for('dictionary.render_edit_workspace', word_id=word.id) }}">Edit</a>
+        {% endif %}
+    </p>
+
+    <header class="dictionary-detail-header">
+        <h1>{{ word.viet_word }}</h1>
+        <p class="dictionary-detail-gloss">{{ word.english_translation }}</p>
+        {% if word.word_types %}
+        <ul class="dictionary-type-list">
+            {% for word_type in word.word_types %}
+            <li>{{ word_type }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </header>
+
+    {% if ordered_etymology %}
+    <section class="dictionary-etymology" aria-labelledby="etymology-heading">
+        <h2 id="etymology-heading">Etymology / Breakdown</h2>
+        <div class="dictionary-etymology-badges">
+            {% for item in ordered_etymology %}
+            {% if not loop.first %}
+            <span class="dictionary-etymology-plus" aria-hidden="true">+</span>
+            {% endif %}
+            <a class="dictionary-etymology-badge"
+               href="{{ url_for('dictionary.han_viet_root_detail', root_syllable=item.root) }}">
+                <span class="syllable">{{ item.root|capitalize }}</span>
+                <span class="detail">[{{ item.chinese_character }} — <em>{{ item.root_meaning }}</em>]</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="dictionary-examples" aria-labelledby="examples-heading">
+        <h2 id="examples-heading">Examples</h2>
+        {% if word.examples %}
+        <ul class="dictionary-example-list">
+            {% for example in word.examples %}
+            <li>
+                <p class="sentence">{{ example.sentence }}</p>
+                <p class="translation">{{ example.english_translation }}</p>
+                {% if example.source %}
+                <p class="source muted">Source: {{ example.source.title }}</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No contextual examples yet.</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

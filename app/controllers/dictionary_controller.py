@@ -3,7 +3,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
 from flask import Response as FlaskResponse
-from flask import jsonify, render_template
+from flask import abort, jsonify, render_template
 
 from app import db
 from app.domain.dictionary_example import DictionaryExample
@@ -97,11 +97,31 @@ def render_dictionary_page() -> Tuple[str, int]:
     return html, 200
 
 
-def render_create_workspace() -> Tuple[str, int]:
-    """Render the admin dictionary creation workspace."""
+def render_word_detail_page(word_id: int) -> Tuple[str, int]:
+    """Render the public dictionary word detail page with etymology badges."""
+    service = WordService(db.session)
+    try:
+        payload = service.get_public_entry(word_id)
+    except DictionaryWordNotFoundError:
+        abort(404)
+
+    word = payload["word"]
+    html = render_template(
+        "dictionary/word_detail.html",
+        word=word,
+        ordered_etymology=payload["ordered_etymology"],
+        is_admin=is_admin_authenticated(),
+    )
+    return html, 200
+
+
+def render_create_workspace(tab: str = "word") -> Tuple[str, int]:
+    """Render the admin dictionary creation workspace (word or source tab)."""
+    active_tab = tab if tab in {"word", "source"} else "word"
     source_service = SourceService(db.session)
     html = render_template(
         "admin/dictionary_create.html",
+        active_tab=active_tab,
         word_types=[member.value for member in WordType],
         source_types=[member.value for member in SourceType],
         recent_sources=[_serialize_source(s) for s in source_service.list_recent()],

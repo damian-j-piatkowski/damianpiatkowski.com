@@ -1,6 +1,6 @@
 """Service layer for dictionary word workflows."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,34 @@ from app.services.dictionary_validation import (
     validate_viet_word,
     validate_word_types,
 )
+from app.services.han_viet_service import split_syllables
+
+
+def order_etymology_components(word: DictionaryWord) -> List[Dict[str, str]]:
+    """Order Hán Việt roots by syllable position in the Vietnamese word.
+
+    Walks whitespace-separated syllables of viet_word and matches each to an
+    associated root by exact (lowercased) root text. Syllables without a linked
+    root are skipped.
+    """
+    roots_by_syllable = {
+        (root.root or "").strip().lower(): root
+        for root in (word.han_viet_roots or [])
+        if root.root
+    }
+    ordered: List[Dict[str, str]] = []
+    for syllable in split_syllables(word.viet_word):
+        root = roots_by_syllable.get(syllable)
+        if root is None:
+            continue
+        ordered.append(
+            {
+                "root": root.root,
+                "chinese_character": root.chinese_character,
+                "root_meaning": root.root_meaning,
+            }
+        )
+    return ordered
 
 
 class WordService:
@@ -42,6 +70,14 @@ class WordService:
     def get_entry(self, word_id: int) -> DictionaryWord:
         """Load a full dictionary entry with relationships."""
         return self.words.get_by_id(word_id, with_relations=True)
+
+    def get_public_entry(self, word_id: int) -> Dict[str, Any]:
+        """Load a public word detail payload with syllable-ordered etymology."""
+        word = self.get_entry(word_id)
+        return {
+            "word": word,
+            "ordered_etymology": order_etymology_components(word),
+        }
 
     def create_entry(
             self,

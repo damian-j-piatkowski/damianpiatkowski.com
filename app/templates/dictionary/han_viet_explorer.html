@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Hán Việt Explorer | Damian Piatkowski{% endblock %}
+{% block meta_description %}Browse Sino-Vietnamese roots and the compound words that share them.{% endblock %}
+
+{% block links %}
+    {{ css_link_bundle("han-viet", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="han-viet-page">
+    <div class="han-viet-intro">
+        <h1>Hán Việt Explorer</h1>
+        <p>Pick a Sino-Vietnamese root to see every compound word in the dictionary that shares it.</p>
+    </div>
+
+    <form class="han-viet-search" method="get" action="{{ url_for('dictionary.han_viet_explorer') }}">
+        <label class="visually-hidden" for="han-viet-q">Search roots</label>
+        <input id="han-viet-q" type="search" name="q" value="{{ query }}"
+               placeholder="Search a root (e.g. chính)" autocomplete="off">
+        <button type="submit" class="han-viet-btn">Search</button>
+    </form>
+
+    <p class="han-viet-back">
+        <a href="{{ url_for('dictionary.render_dictionary_page') }}">← Dictionary search</a>
+    </p>
+
+    {% if roots %}
+    <div class="han-viet-root-grid">
+        {% for root in roots %}
+        <a class="han-viet-root-card"
+           href="{{ url_for('dictionary.han_viet_root_detail', root_syllable=root.root) }}">
+            <span class="char">{{ root.chinese_character }}</span>
+            <span class="syllable">{{ root.root }}</span>
+            <span class="meaning">{{ root.root_meaning }}</span>
+            <span class="count">{{ root.compound_count }} word{% if root.compound_count != 1 %}s{% endif %}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No Hán Việt roots match this search.</p>
+    {% endif %}
+</section>
+{% endblock %}

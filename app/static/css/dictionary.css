@@ -92,3 +92,135 @@
 .dictionary-admin-actions {
     margin-top: 1.5rem;
 }
+
+.dictionary-result-term {
+    text-decoration: none;
+}
+
+a.dictionary-result-term:hover {
+    color: var(--color-link);
+    text-decoration: underline;
+}
+
+.dictionary-detail {
+    max-width: 760px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+}
+
+.dictionary-detail-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dictionary-detail-nav a {
+    color: var(--color-link);
+}
+
+.dictionary-detail-header h1 {
+    margin-bottom: 0.4rem;
+    color: var(--color-dark-text);
+}
+
+.dictionary-detail-gloss {
+    color: var(--color-muted-text);
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+}
+
+.dictionary-type-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+}
+
+.dictionary-type-list li {
+    background: var(--color-light-bg);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.dictionary-etymology,
+.dictionary-examples {
+    margin-top: 2rem;
+}
+
+.dictionary-etymology h2,
+.dictionary-examples h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.dictionary-etymology-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dictionary-etymology-badge {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    background: #fff;
+    border-left: 4px solid var(--accent-primary);
+    border-radius: 6px;
+    padding: 0.55rem 0.75rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    color: inherit;
+}
+
+.dictionary-etymology-badge:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    color: inherit;
+}
+
+.dictionary-etymology-badge .syllable {
+    font-weight: 700;
+    color: var(--color-link);
+}
+
+.dictionary-etymology-badge .detail {
+    color: var(--color-muted-text);
+    font-size: 0.95rem;
+}
+
+.dictionary-etymology-plus {
+    font-weight: 700;
+    color: var(--color-muted-text);
+}
+
+.dictionary-example-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dictionary-example-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dictionary-example-list .sentence {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.dictionary-example-list .translation,
+.dictionary-example-list .source {
+    color: var(--color-muted-text);
+    margin-bottom: 0.25rem;
+}
+
+.dictionary-detail .muted {
+    color: var(--color-muted-text);
+}
+

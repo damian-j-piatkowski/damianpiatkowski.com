@@ -3,7 +3,7 @@
 from flask import Blueprint, request
 
 from app.auth.decorators import admin_required
-from app.controllers import dictionary_controller
+from app.controllers import dictionary_controller, han_viet_controller
 
 dictionary_bp = Blueprint("dictionary", __name__)
 
@@ -22,11 +22,31 @@ def search_dictionary():
     return dictionary_controller.search_dictionary(query=query, limit=limit or 20)
 
 
+@dictionary_bp.route("/dictionary/<int:word_id>", methods=["GET"])
+def render_word_detail(word_id: int):
+    """Render the public dictionary word detail page."""
+    return dictionary_controller.render_word_detail_page(word_id)
+
+
+@dictionary_bp.route("/han-viet", methods=["GET"])
+def han_viet_explorer():
+    """Render the public Hán Việt root explorer index."""
+    return han_viet_controller.render_explorer_index(q=request.args.get("q", ""))
+
+
+@dictionary_bp.route("/han-viet/<path:root_syllable>", methods=["GET"])
+def han_viet_root_detail(root_syllable: str):
+    """Render the public cluster view for a Hán Việt root."""
+    return han_viet_controller.render_root_detail(root_syllable)
+
+
 @dictionary_bp.route("/admin/dictionary/new", methods=["GET"])
 @admin_required
 def render_create_workspace():
     """Render the dictionary entry creation workspace."""
-    return dictionary_controller.render_create_workspace()
+    return dictionary_controller.render_create_workspace(
+        tab=request.args.get("tab", "word"),
+    )
 
 
 @dictionary_bp.route("/admin/dictionary/dashboard", methods=["GET"])
