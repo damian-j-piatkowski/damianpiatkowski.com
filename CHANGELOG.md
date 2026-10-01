@@ -37,6 +37,10 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - Tables for dictionary words, examples, sources, Hán Việt roots, association bridges, and users.
   - Migration repair for `word_type_association` on databases already stamped at the prior revision.
 
+- **Testing**
+  - Per-function integration tests for `DictionaryDashboardService` under `tests/integration/services/dictionary_dashboard_service/`.
+  - Per-function unit tests for `dictionary_validation` under `tests/unit/services/dictionary_validation/`.
+
 ### Changed
 
 - Public dictionary intro copy and search placeholder (`Type a Vietnamese word or phrase`).

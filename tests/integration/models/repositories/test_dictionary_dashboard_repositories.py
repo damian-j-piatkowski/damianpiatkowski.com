@@ -11,7 +11,6 @@ from app.models.repositories.word_repository import WordRepository
 from app.models.tables.dictionary_word import dictionary_words
 from app.models.tables.word_han_viet_association import word_han_viet_association
 from app.models.tables.word_type_association import word_type_association
-from app.services.dictionary_dashboard_service import DictionaryDashboardService
 
 
 @pytest.mark.dictionary
@@ -143,15 +142,3 @@ def test_han_viet_analytics_aggregates(session, make_word, make_root):
     orphans = {root.root for root in repo.list_orphan_roots()}
     assert "tập" in orphans
     assert "học" not in orphans
-
-
-@pytest.mark.dictionary
-def test_dashboard_service_word_velocity_shape(session, make_word):
-    make_word(viet_word="chạy", english_translation="to run")
-    session.flush()
-    service = DictionaryDashboardService(session)
-    for range_key in ("30d", "6m", "12m"):
-        payload = service.get_word_velocity(range_key)
-        assert "labels" in payload and "counts" in payload
-        assert len(payload["labels"]) == len(payload["counts"])
-        assert len(payload["labels"]) > 0

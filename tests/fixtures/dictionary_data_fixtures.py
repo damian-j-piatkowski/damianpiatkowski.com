@@ -10,9 +10,11 @@ Supported Scenarios:
     - Bulk bootstrap configurations for quick, end-to-end service testing.
 """
 
+from datetime import datetime
 from typing import Callable, Optional
 
 import pytest
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.domain.dictionary_example import DictionaryExample
@@ -295,6 +297,132 @@ def seed_dictionary(
             "sources": [src_kieu, src_dict],
             "roots": [rt_hoc, rt_tap, rt_nhan, rt_vien],
             "examples": [ex_1, ex_2]
+        }
+
+    return _seed
+
+
+@pytest.fixture(scope="function")
+def set_word_created_at(session: Session) -> Callable[[int, datetime], None]:
+    """Update a dictionary word's created_at timestamp for velocity tests."""
+
+    def _set_word_created_at(word_id: int, when: datetime) -> None:
+        session.execute(
+            update(dictionary_words)
+            .where(dictionary_words.c.id == word_id)
+            .values(created_at=when)
+        )
+        session.flush()
+
+    return _set_word_created_at
+
+
+@pytest.fixture(scope="function")
+def seed_dashboard_general(
+        make_word,
+        make_source,
+        make_root,
+        make_example,
+        bind_word_type,
+        bind_word_han_viet,
+) -> Callable[[], dict]:
+    """Seed mixed coverage for General KPIs and Data Health queues."""
+
+    def _seed() -> dict:
+        source = make_source(source_type="book", title="Coverage Leader", url=None)
+        unused = make_source(source_type="article", title="Quiet Article", url=None)
+
+        root = make_root(root="học", chinese_character="學", root_meaning="to study")
+        covered = make_word(viet_word="học", english_translation="to learn")
+        bare = make_word(viet_word="bàn", english_translation="table")
+        compound = make_word(viet_word="nhà cửa", english_translation="housing")
+
+        bind_word_han_viet(covered.id, root.id)
+        bind_word_type(covered.id, "verb")
+        example = make_example(
+            word_id=covered.id,
+            source_id=source.id,
+            sentence="Tôi học mỗi ngày.",
+            english_translation="I study every day.",
+        )
+
+        return {
+            "covered_word": covered,
+            "bare_word": bare,
+            "compound_word": compound,
+            "source": source,
+            "unused_source": unused,
+            "root": root,
+            "example": example,
+        }
+
+    return _seed
+
+
+@pytest.fixture(scope="function")
+def seed_dashboard_sources(
+        make_word,
+        make_source,
+        make_example,
+) -> Callable[[], dict]:
+    """Seed sources with uneven citations for catalog sort/filter/pagination."""
+
+    def _seed() -> dict:
+        word_a = make_word(viet_word="alpha", english_translation="a")
+        word_b = make_word(viet_word="beta", english_translation="b")
+
+        heavy = make_source(source_type="book", title="Zeta Heavy Book", url=None)
+        medium = make_source(source_type="article", title="Alpha News Desk", url=None)
+        empty = make_source(source_type="other", title="Empty Other Source", url=None)
+
+        make_example(
+            word_id=word_a.id,
+            source_id=heavy.id,
+            sentence="Alpha one.",
+            english_translation="Alpha one.",
+        )
+        make_example(
+            word_id=word_b.id,
+            source_id=heavy.id,
+            sentence="Beta two.",
+            english_translation="Beta two.",
+        )
+        make_example(
+            word_id=word_a.id,
+            source_id=medium.id,
+            sentence="Alpha news.",
+            english_translation="Alpha news.",
+        )
+
+        return {
+            "words": [word_a, word_b],
+            "heavy": heavy,
+            "medium": medium,
+            "empty": empty,
+        }
+
+    return _seed
+
+
+@pytest.fixture(scope="function")
+def seed_dashboard_han_viet(
+        make_word,
+        make_root,
+        bind_word_han_viet,
+) -> Callable[[], dict]:
+    """Seed reused and orphan Hán Việt roots for analytics assertions."""
+
+    def _seed() -> dict:
+        reused = make_root(root="học", chinese_character="學", root_meaning="to study")
+        orphan = make_root(root="tập", chinese_character="習", root_meaning="to practice")
+        w1 = make_word(viet_word="học hỏi", english_translation="to learn from")
+        w2 = make_word(viet_word="học hành", english_translation="to study")
+        bind_word_han_viet(w1.id, reused.id)
+        bind_word_han_viet(w2.id, reused.id)
+        return {
+            "reused_root": reused,
+            "orphan_root": orphan,
+            "words": [w1, w2],
         }
 
     return _seed
