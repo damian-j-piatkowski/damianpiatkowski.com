@@ -1,14 +1,16 @@
 """Repository for dictionary word persistence and lookups."""
 
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from app.domain.dictionary_word import DictionaryWord
 from app.exceptions import DictionaryWordDuplicateError, DictionaryWordNotFoundError
+from app.models.tables.dictionary_example import dictionary_examples
 from app.models.tables.dictionary_word import dictionary_words
+from app.models.tables.word_han_viet_association import word_han_viet_association
 from app.models.tables.word_type_association import word_type_association
 
 
@@ -238,3 +240,186 @@ class WordRepository:
             raise RuntimeError(
                 f"Failed to replace word types for word id={word_id}: {exc}"
             ) from exc
+
+    def count_words(self) -> int:
+        """Return total dictionary word count."""
+        try:
+            return int(
+                self.session.execute(select(func.count()).select_from(dictionary_words)).scalar()
+                or 0
+            )
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to count dictionary words: {exc}") from exc
+
+    def count_words_with_han_viet(self) -> int:
+        """Count words that have at least one Hán Việt association."""
+        try:
+            return int(
+                self.session.execute(
+                    select(func.count(func.distinct(word_han_viet_association.c.word_id)))
+                ).scalar()
+                or 0
+            )
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to count words with Hán Việt: {exc}") from exc
+
+    def count_words_with_examples(self) -> int:
+        """Count words that have at least one contextual example."""
+        try:
+            return int(
+                self.session.execute(
+                    select(func.count(func.distinct(dictionary_examples.c.word_id)))
+                ).scalar()
+                or 0
+            )
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to count words with examples: {exc}") from exc
+
+    def word_type_counts(self) -> Dict[str, int]:
+        """Return grammatical type frequencies from word_type_association."""
+        try:
+            rows = self.session.execute(
+                select(
+                    word_type_association.c.word_type,
+                    func.count().label("total"),
+                ).group_by(word_type_association.c.word_type)
+                .order_by(func.count().desc())
+            ).fetchall()
+            return {row.word_type: int(row.total) for row in rows}
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to load word type counts: {exc}") from exc
+
+    def list_recently_updated(self, limit: int = 10) -> List[DictionaryWord]:
+        """Return recently updated dictionary words."""
+        try:
+            rows = self.session.execute(
+                select(dictionary_words)
+                .order_by(dictionary_words.c.updated_at.desc())
+                .limit(limit)
+            ).fetchall()
+            return [
+                DictionaryWord(
+                    word_id=row.id,
+                    viet_word=row.viet_word,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
+                )
+                for row in rows
+            ]
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to list recently updated words: {exc}") from exc
+
+    def list_words_missing_examples(self, limit: int = 50) -> List[DictionaryWord]:
+        """Return words with no contextual examples."""
+        try:
+            example_words = select(dictionary_examples.c.word_id).distinct()
+            rows = self.session.execute(
+                select(dictionary_words)
+                .where(dictionary_words.c.id.not_in(example_words))
+                .order_by(dictionary_words.c.viet_word.asc())
+                .limit(limit)
+            ).fetchall()
+            return [
+                DictionaryWord(
+                    word_id=row.id,
+                    viet_word=row.viet_word,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
+                )
+                for row in rows
+            ]
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to list words missing examples: {exc}") from exc
+
+    def list_words_missing_types(self, limit: int = 50) -> List[DictionaryWord]:
+        """Return words with no grammatical type associations."""
+        try:
+            typed_words = select(word_type_association.c.word_id).distinct()
+            rows = self.session.execute(
+                select(dictionary_words)
+                .where(dictionary_words.c.id.not_in(typed_words))
+                .order_by(dictionary_words.c.viet_word.asc())
+                .limit(limit)
+            ).fetchall()
+            return [
+                DictionaryWord(
+                    word_id=row.id,
+                    viet_word=row.viet_word,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
+                )
+                for row in rows
+            ]
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to list words missing types: {exc}") from exc
+
+    def list_multi_syllable_without_han_viet(self, limit: int = 50) -> List[DictionaryWord]:
+        """Return spaced compound words with no Hán Việt associations."""
+        try:
+            associated = select(word_han_viet_association.c.word_id).distinct()
+            rows = self.session.execute(
+                select(dictionary_words)
+                .where(
+                    dictionary_words.c.viet_word.like("% %"),
+                    dictionary_words.c.id.not_in(associated),
+                )
+                .order_by(dictionary_words.c.viet_word.asc())
+                .limit(limit)
+            ).fetchall()
+            return [
+                DictionaryWord(
+                    word_id=row.id,
+                    viet_word=row.viet_word,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
+                )
+                for row in rows
+            ]
+        except SQLAlchemyError as exc:
+            raise RuntimeError(
+                f"Failed to list multi-syllable words without Hán Việt: {exc}"
+            ) from exc
+
+    def count_words_created_by_bucket(self, range_key: str) -> List[Tuple[str, int]]:
+        """Return word-creation counts bucketed for velocity charts.
+
+        range_key:
+            - 30d: daily buckets for the last 30 days
+            - 6m: weekly buckets for the last 6 months
+            - 12m: monthly buckets for the last 12 months
+        """
+        from datetime import datetime, timedelta, timezone
+
+        try:
+            now = datetime.now(timezone.utc)
+            if range_key == "30d":
+                bucket_expr = func.date(dictionary_words.c.created_at)
+                cutoff = now - timedelta(days=30)
+            elif range_key == "6m":
+                bucket_expr = func.yearweek(dictionary_words.c.created_at, 3)
+                cutoff = now - timedelta(days=183)
+            elif range_key == "12m":
+                bucket_expr = func.date_format(dictionary_words.c.created_at, "%Y-%m")
+                cutoff = now - timedelta(days=365)
+            else:
+                raise ValueError(f"Unsupported velocity range '{range_key}'")
+
+            stmt = (
+                select(
+                    bucket_expr.label("bucket"),
+                    func.count().label("total"),
+                )
+                .where(dictionary_words.c.created_at >= cutoff)
+                .group_by(bucket_expr)
+                .order_by(bucket_expr.asc())
+            )
+            rows = self.session.execute(stmt).fetchall()
+            return [(str(row.bucket), int(row.total)) for row in rows]
+        except ValueError:
+            raise
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to load word velocity buckets: {exc}") from exc

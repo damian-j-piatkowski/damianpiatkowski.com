@@ -20,6 +20,11 @@ from app.exceptions import (
     HanVietRootNotFoundError,
 )
 from app.services.auth_service import is_admin_authenticated
+from app.services.dictionary_dashboard_service import (
+    DEFAULT_SOURCES_PER_PAGE,
+    DictionaryDashboardService,
+    VALID_VELOCITY_RANGES,
+)
 from app.services.han_viet_service import HanVietService
 from app.services.source_service import SourceService
 from app.services.word_service import WordService
@@ -298,6 +303,93 @@ def create_source(
         db.session.rollback()
         raise
     return jsonify({"success": True, "source": _serialize_source(source)}), 201
+
+
+def delete_source(source_id: int) -> Tuple[FlaskResponse, int]:
+    """Delete a dictionary source; associated examples cascade."""
+    service = SourceService(db.session)
+    try:
+        service.delete(source_id)
+        db.session.commit()
+    except DictionarySourceNotFoundError as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "message": exc.message}), 404
+    except Exception:
+        db.session.rollback()
+        raise
+    return jsonify({"success": True}), 200
+
+
+def render_dashboard(
+        tab: str = "general",
+        page: int = 1,
+        sort: str = "created_at_desc",
+        source_type: str = "",
+        title_query: str = "",
+) -> Tuple[str, int]:
+    """Render the four-tab dictionary admin dashboard."""
+    allowed_tabs = {"general", "sources", "han-viet", "data-health"}
+    active_tab = tab if tab in allowed_tabs else "general"
+    service = DictionaryDashboardService(db.session)
+
+    general = service.get_general_metrics() if active_tab == "general" else None
+    sources = (
+        service.get_sources_catalog(
+            page=page,
+            per_page=DEFAULT_SOURCES_PER_PAGE,
+            sort=sort,
+            source_type=source_type or None,
+            title_query=title_query or None,
+        )
+        if active_tab == "sources"
+        else None
+    )
+    han_viet = service.get_han_viet_analytics() if active_tab == "han-viet" else None
+    data_health = service.get_data_health() if active_tab == "data-health" else None
+
+    # Pre-compute bar maxima for template rendering
+    etymology_max = 0
+    word_types_max = 0
+    if general:
+        etymology_max = max((item["count"] for item in general["etymology"]), default=0)
+        word_types_max = max((item["count"] for item in general["word_types"]), default=0)
+
+    html = render_template(
+        "admin/dictionary_dashboard.html",
+        active_tab=active_tab,
+        general=general,
+        sources=sources,
+        han_viet=han_viet,
+        data_health=data_health,
+        etymology_max=etymology_max,
+        word_types_max=word_types_max,
+        source_types=[member.value for member in SourceType],
+        sort_options=[
+            ("created_at_desc", "Newest"),
+            ("created_at_asc", "Oldest"),
+            ("title_asc", "Title A–Z"),
+            ("title_desc", "Title Z–A"),
+            ("citations_desc", "Most citations"),
+            ("citations_asc", "Fewest citations"),
+        ],
+    )
+    return html, 200
+
+
+def word_velocity_stats(range_key: str = "30d") -> Tuple[FlaskResponse, int]:
+    """Return word-creation velocity series for Chart.js range toggles."""
+    service = DictionaryDashboardService(db.session)
+    key = (range_key or "30d").strip().lower()
+    if key not in VALID_VELOCITY_RANGES:
+        return jsonify({
+            "success": False,
+            "message": "Invalid range. Use 30d, 6m, or 12m.",
+        }), 400
+    try:
+        payload = service.get_word_velocity(key)
+    except ValueError as exc:
+        return jsonify({"success": False, "message": str(exc)}), 400
+    return jsonify(payload), 200
 
 
 def check_han_viet_roots(compound_word: str) -> Tuple[FlaskResponse, int]:

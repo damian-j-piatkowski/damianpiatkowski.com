@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Blog Admin | Damian Piatkowski{% endblock %}
+{% block meta_description %}Blog administration placeholder.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-workspace">
+    <div class="admin-workspace-intro">
+        <h1>Blog</h1>
+        <p class="admin-wip-message" id="blog-wip-message">Work in progress</p>
+    </div>
+    <div class="admin-workspace-footer">
+        <a class="admin-btn" href="{{ url_for('admin.admin_home') }}">Back to admin</a>
+        <a class="admin-btn-logout" href="{{ url_for('admin.admin_logout') }}">Log out</a>
+    </div>
+</section>
+{% endblock %}

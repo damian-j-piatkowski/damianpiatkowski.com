@@ -4,6 +4,21 @@
     padding: 0 1rem 3rem;
 }
 
+.dictionary-intro {
+    margin-bottom: 1.75rem;
+}
+
+.dictionary-intro p {
+    color: var(--color-dark-text);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+}
+
+.dictionary-intro p:last-child {
+    margin-bottom: 0;
+    color: var(--color-muted-text);
+}
+
 .dictionary-page h1 {
     color: var(--color-dark-text);
     margin-bottom: 0.5rem;

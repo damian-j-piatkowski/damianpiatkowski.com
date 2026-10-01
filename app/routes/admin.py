@@ -48,6 +48,27 @@ def admin_logout():
     return auth_controller.logout_admin()
 
 
+@admin_bp.route("/admin", methods=["GET"])
+@admin_required
+def admin_home():
+    """Render the admin tile landing page."""
+    return auth_controller.render_admin_home()
+
+
+@admin_bp.route("/admin/blog", methods=["GET"])
+@admin_required
+def admin_blog_wip():
+    """Render the blog administration placeholder."""
+    return auth_controller.render_blog_wip()
+
+
+@admin_bp.route("/admin/dictionary", methods=["GET"])
+@admin_required
+def admin_dictionary_hub():
+    """Render the dictionary administration hub."""
+    return auth_controller.render_dictionary_hub()
+
+
 @admin_bp.route("/admin/delete-blog-posts", methods=["DELETE"])
 @admin_required
 def admin_delete_blog_posts():

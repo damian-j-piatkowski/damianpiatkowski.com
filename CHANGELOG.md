@@ -27,14 +27,27 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - `@admin_required` protection for all `/admin/*` routes, including existing blog admin endpoints.
   - `flask create-admin` CLI command to bootstrap the administrator account.
 
+- **Admin workspace**
+  - Privacy-style tile landing at `/admin` (Blog WIP + Dictionary hub).
+  - Dictionary hub with Add New Word and Dashboard entry points, plus distinct Log out styling.
+  - Four-tab Dictionary Dashboard (`/admin/dictionary/dashboard`): General KPIs, Sources catalog, Hán Việt analytics, and Data Health audits.
+  - Word Velocity & Activity Chart.js line/area chart with 30d / 6m / 12m range toggles and async `/admin/api/stats/word-velocity` JSON.
+
 - **Dictionary data model**
   - Tables for dictionary words, examples, sources, Hán Việt roots, association bridges, and users.
   - Migration repair for `word_type_association` on databases already stamped at the prior revision.
+
+### Changed
+
+- Public dictionary intro copy and search placeholder (`Type a Vietnamese word or phrase`).
+- Admin create/edit workspaces link back to the dictionary hub instead of the public search page.
+- Successful admin login defaults to `/admin` instead of the public dictionary page.
 
 ### Security
 
 - Authenticated admin session required for dictionary mutations and blog admin operations.
 - Passwords stored as Werkzeug password hashes.
+- Hardened admin `next_url` redirects to reject open redirects (protocol-relative and absolute URLs).
 
 ---
 

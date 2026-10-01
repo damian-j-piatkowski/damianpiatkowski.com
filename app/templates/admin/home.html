@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Admin | Damian Piatkowski{% endblock %}
+{% block meta_description %}Administrator workspace for site and dictionary management.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-workspace">
+    <div class="admin-workspace-intro">
+        <h1>Admin workspace</h1>
+        <p>Choose an area to manage. Dictionary tools are available now; blog administration is still being prepared.</p>
+    </div>
+
+    <div class="admin-tiles">
+        <a class="admin-tile" href="{{ url_for('admin.admin_blog_wip') }}" id="admin-tile-blog">
+            <h2><i class="bi bi-journal-richtext"></i> Blog</h2>
+            <p>Publish and manage blog posts from Google Drive.</p>
+        </a>
+        <a class="admin-tile" href="{{ url_for('admin.admin_dictionary_hub') }}" id="admin-tile-dictionary">
+            <h2><i class="bi bi-book"></i> Dictionary</h2>
+            <p>Create entries, review coverage, and explore dictionary analytics.</p>
+        </a>
+    </div>
+
+    <div class="admin-workspace-footer">
+        <a class="admin-btn-logout" href="{{ url_for('admin.admin_logout') }}" id="admin-logout-link">Log out</a>
+    </div>
+</section>
+{% endblock %}

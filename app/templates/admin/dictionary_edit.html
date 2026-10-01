@@ -83,7 +83,7 @@
     <div class="admin-section">
         <button type="button" class="admin-btn" id="save-entry">Save changes</button>
         <button type="button" class="admin-btn admin-btn-danger" id="delete-entry">Delete entry</button>
-        <a class="admin-btn" href="{{ url_for('dictionary.render_dictionary_page') }}">Back to dictionary</a>
+        <a class="admin-btn" href="{{ url_for('admin.admin_dictionary_hub') }}">Back to dictionary hub</a>
     </div>
 </section>
 <script src="{{ url_for('static', filename='js/dictionaryAdmin.js') }}"></script>

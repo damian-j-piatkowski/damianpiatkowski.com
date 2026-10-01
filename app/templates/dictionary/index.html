@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Vietnamese Dictionary | Damian Piatkowski{% endblock %}
-{% block meta_description %}Search the Vietnamese-English dictionary for words, translations, and related usage examples.{% endblock %}
+{% block meta_description %}A living Vietnamese–English dictionary grown from real language encounters.{% endblock %}
 
 {% block links %}
     {{ css_link_bundle("dictionary", ENV=ENV, VERSION=VERSION) }}
@@ -9,32 +9,30 @@
 
 {% block content %}
 <section class="dictionary-page" data-is-admin="{{ 'true' if is_admin else 'false' }}">
-    <h1>Dictionary</h1>
-    <p class="subtitle">Type a Vietnamese word or phrase to find matching entries.</p>
+    <div class="dictionary-intro">
+        <p>
+            This is a living Vietnamese–English dictionary, growing organically as I learn Vietnamese.
+            New vocabulary is added regularly throughout my ongoing language-learning journey,
+            based on words and phrases I actually encounter and want to understand, remember, and use.
+        </p>
+        <p>
+            The example sentences come from real-life encounters with Vietnamese — things I hear, read,
+            or come across naturally in everyday life — rather than invented textbook examples.
+        </p>
+    </div>
 
-    <label class="visually-hidden" for="dictionary-search">Search dictionary</label>
+    <label class="visually-hidden" for="dictionary-search">Type a Vietnamese word or phrase</label>
     <input
         id="dictionary-search"
         class="dictionary-search-input"
         type="search"
         autocomplete="off"
-        placeholder="Search Vietnamese words..."
+        placeholder="Type a Vietnamese word or phrase"
         aria-controls="dictionary-results"
     >
 
     <p id="dictionary-status" class="dictionary-status" hidden></p>
     <ul id="dictionary-results" class="dictionary-results" aria-live="polite"></ul>
-
-    {% if is_admin %}
-        <div class="dictionary-admin-actions">
-            <a class="dictionary-edit-link" href="{{ url_for('dictionary.render_create_workspace') }}" id="dictionary-create-link">
-                Add new word
-            </a>
-            <a class="dictionary-edit-link" href="{{ url_for('admin.admin_logout') }}" id="admin-logout-link">
-                Log out
-            </a>
-        </div>
-    {% endif %}
 </section>
 <script src="{{ url_for('static', filename='js/dictionarySearch.js') }}"></script>
 {% endblock %}

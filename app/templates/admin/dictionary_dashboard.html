@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Dictionary Dashboard | Damian Piatkowski{% endblock %}
+{% block meta_description %}Dictionary coverage, sources, Hán Việt analytics, and data health.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-workspace">
+    <div class="admin-workspace-intro">
+        <h1>Dictionary Dashboard</h1>
+        <p>Coverage metrics, source catalog, Hán Việt analytics, and data-health audits.</p>
+    </div>
+
+    <nav class="admin-tabs" aria-label="Dashboard tabs">
+        <a class="admin-tab-btn{% if active_tab == 'general' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_dashboard', tab='general') }}">General</a>
+        <a class="admin-tab-btn{% if active_tab == 'sources' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_dashboard', tab='sources') }}">Sources</a>
+        <a class="admin-tab-btn{% if active_tab == 'han-viet' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_dashboard', tab='han-viet') }}">Hán Việt</a>
+        <a class="admin-tab-btn{% if active_tab == 'data-health' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_dashboard', tab='data-health') }}">Data Health</a>
+    </nav>
+
+    <div class="admin-dashboard">
+        {% if active_tab == 'general' and general %}
+        <div class="admin-tab-panel is-active" id="tab-general">
+            <div class="admin-kpi-grid">
+                <div class="admin-kpi-card">
+                    <div class="label">Total Words</div>
+                    <div class="value" id="kpi-total-words">{{ general.kpis.total_words }}</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="label">Total Sources</div>
+                    <div class="value" id="kpi-total-sources">{{ general.kpis.total_sources }}</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="label">Hán Việt Coverage</div>
+                    <div class="value" id="kpi-hv-coverage">{{ general.kpis.han_viet_coverage }}%</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="label">Citation Coverage</div>
+                    <div class="value" id="kpi-citation-coverage">{{ general.kpis.citation_coverage }}%</div>
+                </div>
+            </div>
+
+            <div class="admin-summary-card admin-velocity-card">
+                <h2>Word Velocity &amp; Activity</h2>
+                <div class="admin-range-toggles" role="group" aria-label="Velocity range">
+                    <button type="button" class="admin-btn is-active" data-range="30d">Last 30 Days</button>
+                    <button type="button" class="admin-btn" data-range="6m">Last 6 Months</button>
+                    <button type="button" class="admin-btn" data-range="12m">Last 12 Months</button>
+                </div>
+                <div class="admin-chart-wrap">
+                    <canvas id="word-velocity-chart" aria-label="Word creation velocity chart"></canvas>
+                </div>
+            </div>
+
+            <div class="admin-summary-grid">
+                <div class="admin-summary-card">
+                    <h2>Etymology</h2>
+                    {% for item in general.etymology %}
+                    <div class="admin-bar-row">
+                        <span>{{ item.label }}</span>
+                        <strong>{{ item.count }}</strong>
+                        <div class="admin-bar-track">
+                            <div class="admin-bar-fill" style="width: {% if etymology_max %}{{ (item.count / etymology_max * 100)|round(1) }}{% else %}0{% endif %}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="admin-summary-card">
+                    <h2>Grammatical Types</h2>
+                    {% if general.word_types %}
+                        {% for item in general.word_types %}
+                        <div class="admin-bar-row">
+                            <span>{{ item.label }}</span>
+                            <strong>{{ item.count }}</strong>
+                            <div class="admin-bar-track">
+                                <div class="admin-bar-fill" style="width: {% if word_types_max %}{{ (item.count / word_types_max * 100)|round(1) }}{% else %}0{% endif %}%;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="muted">No grammatical types recorded yet.</p>
+                    {% endif %}
+                </div>
+
+                <div class="admin-summary-card">
+                    <h2>Top Sources</h2>
+                    <ul class="admin-list">
+                        {% for source in general.top_sources %}
+                        <li>
+                            <strong>{{ source.title }}</strong>
+                            <span class="muted"> — {{ source.citation_count }} citations</span>
+                        </li>
+                        {% else %}
+                        <li class="muted">No sources yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="admin-summary-card">
+                    <h2>Recent Activity</h2>
+                    <ul class="admin-list">
+                        {% for word in general.recent_activity %}
+                        <li>
+                            <a href="{{ url_for('dictionary.render_edit_workspace', word_id=word.id) }}">{{ word.viet_word }}</a>
+                            <span class="muted"> — {{ word.updated_at }}</span>
+                        </li>
+                        {% else %}
+                        <li class="muted">No recent updates.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if active_tab == 'sources' and sources %}
+        <div class="admin-tab-panel is-active" id="tab-sources">
+            <form class="admin-filters" method="get" action="{{ url_for('dictionary.render_dashboard') }}">
+                <input type="hidden" name="tab" value="sources">
+                <input type="search" name="q" value="{{ sources.title_query }}" placeholder="Search title">
+                <select name="type" aria-label="Source type">
+                    <option value="">All types</option>
+                    {% for st in source_types %}
+                    <option value="{{ st }}"{% if sources.source_type == st %} selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
+                </select>
+                <select name="sort" aria-label="Sort sources">
+                    {% for value, label in sort_options %}
+                    <option value="{{ value }}"{% if sources.sort == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="admin-btn">Apply</button>
+            </form>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="sources-catalog-table">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Citations</th>
+                        <th>Unique Words</th>
+                        <th>Hán Việt Ratio</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for source in sources.rows %}
+                    <tr data-source-id="{{ source.id }}">
+                        <td>{{ source.title }}</td>
+                        <td>{{ source.source_type }}</td>
+                        <td>{{ source.citation_count }}</td>
+                        <td>{{ source.unique_words_covered }}</td>
+                        <td>{{ source.han_viet_ratio }}%</td>
+                        <td>
+                            <button type="button" class="admin-btn admin-btn-danger js-delete-source" data-source-id="{{ source.id }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="muted">No sources match these filters.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if sources.total_pages > 1 %}
+            <div class="admin-filters" style="margin-top: 1rem;">
+                {% if sources.page > 1 %}
+                <a class="admin-btn" href="{{ url_for('dictionary.render_dashboard', tab='sources', page=sources.page - 1, sort=sources.sort, type=sources.source_type, q=sources.title_query) }}">Previous</a>
+                {% endif %}
+                <span class="muted">Page {{ sources.page }} of {{ sources.total_pages }}</span>
+                {% if sources.page < sources.total_pages %}
+                <a class="admin-btn" href="{{ url_for('dictionary.render_dashboard', tab='sources', page=sources.page + 1, sort=sources.sort, type=sources.source_type, q=sources.title_query) }}">Next</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if active_tab == 'han-viet' and han_viet %}
+        <div class="admin-tab-panel is-active" id="tab-han-viet">
+            <div class="admin-kpi-grid">
+                <div class="admin-kpi-card">
+                    <div class="label">Total Roots</div>
+                    <div class="value" id="kpi-total-roots">{{ han_viet.total_roots }}</div>
+                </div>
+                <div class="admin-kpi-card">
+                    <div class="label">Distinct Chinese Characters</div>
+                    <div class="value" id="kpi-distinct-chars">{{ han_viet.distinct_chinese_characters }}</div>
+                </div>
+            </div>
+
+            <div class="admin-summary-grid">
+                <div class="admin-summary-card">
+                    <h2>Top Reused Roots</h2>
+                    <ul class="admin-list">
+                        {% for root in han_viet.top_reused_roots %}
+                        <li>
+                            <strong>{{ root.root }}</strong> ({{ root.chinese_character }})
+                            <span class="muted"> — {{ root.usage_count }} words</span>
+                        </li>
+                        {% else %}
+                        <li class="muted">No roots yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="admin-summary-card">
+                    <h2>Orphan Roots</h2>
+                    <ul class="admin-list">
+                        {% for root in han_viet.orphan_roots %}
+                        <li>{{ root.root }} ({{ root.chinese_character }})</li>
+                        {% else %}
+                        <li class="muted">No orphan roots.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if active_tab == 'data-health' and data_health %}
+        <div class="admin-tab-panel is-active" id="tab-data-health">
+            <div class="admin-summary-grid">
+                <div class="admin-summary-card">
+                    <h2>Words Missing Examples</h2>
+                    <ul class="admin-list">
+                        {% for word in data_health.missing_examples %}
+                        <li>
+                            <a href="{{ url_for('dictionary.render_edit_workspace', word_id=word.id) }}">{{ word.viet_word }}</a>
+                        </li>
+                        {% else %}
+                        <li class="muted">All words have examples.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="admin-summary-card">
+                    <h2>Words Missing Types</h2>
+                    <ul class="admin-list">
+                        {% for word in data_health.missing_types %}
+                        <li>
+                            <a href="{{ url_for('dictionary.render_edit_workspace', word_id=word.id) }}">{{ word.viet_word }}</a>
+                        </li>
+                        {% else %}
+                        <li class="muted">All words have types.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="admin-summary-card">
+                    <h2>Multi-syllable Without Hán Việt</h2>
+                    <ul class="admin-list">
+                        {% for word in data_health.multi_syllable_without_han_viet %}
+                        <li>
+                            <a href="{{ url_for('dictionary.render_edit_workspace', word_id=word.id) }}">{{ word.viet_word }}</a>
+                        </li>
+                        {% else %}
+                        <li class="muted">No unlinked compound candidates.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="admin-workspace-footer">
+        <a class="admin-btn" href="{{ url_for('admin.admin_dictionary_hub') }}">Back to dictionary hub</a>
+        <a class="admin-btn-logout" href="{{ url_for('admin.admin_logout') }}">Log out</a>
+    </div>
+</section>
+
+{% if active_tab == 'general' %}
+<script src="{{ url_for('static', filename='vendor/chartjs/chart.umd.min.js') }}"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/dictionaryDashboard.js') }}"></script>
+{% endblock %}

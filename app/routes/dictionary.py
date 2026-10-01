@@ -29,6 +29,28 @@ def render_create_workspace():
     return dictionary_controller.render_create_workspace()
 
 
+@dictionary_bp.route("/admin/dictionary/dashboard", methods=["GET"])
+@admin_required
+def render_dashboard():
+    """Render the dictionary analytics dashboard."""
+    return dictionary_controller.render_dashboard(
+        tab=request.args.get("tab", "general"),
+        page=request.args.get("page", 1, type=int) or 1,
+        sort=request.args.get("sort", "created_at_desc"),
+        source_type=request.args.get("type", ""),
+        title_query=request.args.get("q", ""),
+    )
+
+
+@dictionary_bp.route("/admin/api/stats/word-velocity", methods=["GET"])
+@admin_required
+def word_velocity_stats():
+    """Return word-creation velocity JSON for the dashboard chart."""
+    return dictionary_controller.word_velocity_stats(
+        range_key=request.args.get("range", "30d"),
+    )
+
+
 @dictionary_bp.route("/admin/dictionary/<int:word_id>/edit", methods=["GET"])
 @admin_required
 def render_edit_workspace(word_id: int):
@@ -121,6 +143,13 @@ def create_source():
         title=data.get("title", ""),
         url=data.get("url"),
     )
+
+
+@dictionary_bp.route("/admin/dictionary/sources/<int:source_id>", methods=["DELETE"])
+@admin_required
+def delete_source(source_id: int):
+    """Delete a dictionary source and cascade its examples."""
+    return dictionary_controller.delete_source(source_id)
 
 
 @dictionary_bp.route("/admin/dictionary/han-viet/check", methods=["GET"])
