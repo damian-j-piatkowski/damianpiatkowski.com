@@ -8,6 +8,7 @@ This project is public not just as a portfolio piece, but also to serve as a lea
 
 **For database setup and management details, refer to [Database Management Guide](docs/database-guide.md).**
 **For detailed information on project diagrams, refer to [Draw.io Diagramming Guide](docs/drawio-guide.md).**
+**For System Health cron setup, refer to [System Health](docs/system-health.md).**
 
 ---
 

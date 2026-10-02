@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}System Health | Damian Piatkowski{% endblock %}
+{% block meta_description %}Live node metrics and historical system health trends.{% endblock %}
+{% set include_social_meta = false %}
+
+{% block links %}
+    {{ css_link_bundle("admin", ENV=ENV, VERSION=VERSION) }}
+{% endblock %}
+
+{% block content %}
+<section class="admin-workspace">
+    <div class="admin-workspace-intro">
+        <h1>System Health</h1>
+        <p>Live node metrics and historical CPU/RAM trends for this host.</p>
+    </div>
+
+    <nav class="admin-tabs" aria-label="System health tabs">
+        <a class="admin-tab-btn{% if active_tab == 'live' %} is-active{% endif %}"
+           href="{{ url_for('admin.system_health_page', tab='live') }}">Live</a>
+        <a class="admin-tab-btn{% if active_tab == 'trends' %} is-active{% endif %}"
+           href="{{ url_for('admin.system_health_page', tab='trends') }}">Trends</a>
+    </nav>
+
+    <div class="admin-dashboard">
+        {% if active_tab == 'live' %}
+        <div class="admin-tab-panel is-active" id="tab-live" data-system-health-live>
+            <div class="system-health-banner" id="system-health-banner">
+                <span class="system-health-env-badge" id="system-health-env">—</span>
+                <span id="system-health-os">Loading OS…</span>
+                <span id="system-health-uptime">Uptime: —</span>
+            </div>
+
+            <div class="admin-kpi-grid system-health-kpi-grid">
+                <div class="admin-kpi-card system-health-metric" data-metric="cpu">
+                    <div class="label">CPU</div>
+                    <div class="value" id="kpi-cpu">—</div>
+                    <div class="system-health-bar-track">
+                        <div class="system-health-bar-fill" id="bar-cpu" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="admin-kpi-card system-health-metric" data-metric="ram">
+                    <div class="label">RAM</div>
+                    <div class="value" id="kpi-ram">—</div>
+                    <div class="system-health-bar-track">
+                        <div class="system-health-bar-fill" id="bar-ram" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="admin-kpi-card system-health-metric" data-metric="swap">
+                    <div class="label">Swap</div>
+                    <div class="value" id="kpi-swap">—</div>
+                    <div class="system-health-bar-track">
+                        <div class="system-health-bar-fill" id="bar-swap" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="admin-kpi-card system-health-metric" data-metric="disk">
+                    <div class="label">Disk</div>
+                    <div class="value" id="kpi-disk">—</div>
+                    <div class="system-health-bar-track">
+                        <div class="system-health-bar-fill" id="bar-disk" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <p class="system-health-poll-note">Metrics refresh every 10 seconds.</p>
+        </div>
+        {% endif %}
+
+        {% if active_tab == 'trends' %}
+        <div class="admin-tab-panel is-active" id="tab-trends" data-system-health-trends>
+            <div class="admin-summary-card admin-velocity-card">
+                <h2>CPU &amp; RAM trends</h2>
+                <div class="admin-range-toggles" role="group" aria-label="Health history range">
+                    <button type="button" class="admin-btn is-active" data-range="24h">24 hours</button>
+                    <button type="button" class="admin-btn" data-range="7d">7 days</button>
+                    <button type="button" class="admin-btn" data-range="30d">30 days</button>
+                    <button type="button" class="admin-btn" data-range="90d">90 days</button>
+                    <button type="button" class="admin-btn" data-range="180d">180 days</button>
+                </div>
+                <div class="admin-chart-wrap">
+                    <canvas id="system-health-chart" aria-label="CPU and RAM historical chart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="admin-workspace-footer">
+        <a class="admin-btn" href="{{ url_for('admin.admin_home') }}">Back to workspace</a>
+    </div>
+</section>
+
+{% if active_tab == 'trends' %}
+<script src="{{ url_for('static', filename='vendor/chartjs/chart.umd.min.js') }}"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/systemHealth.js') }}"></script>
+{% endblock %}

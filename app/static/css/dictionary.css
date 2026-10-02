@@ -5,18 +5,26 @@
 }
 
 .dictionary-intro {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+    color: var(--color-dark-text);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     margin-bottom: 1.75rem;
+    text-align: center;
 }
 
 .dictionary-intro p {
     color: var(--color-dark-text);
     line-height: 1.65;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
+    max-width: 640px;
 }
 
 .dictionary-intro p:last-child {
     margin-bottom: 0;
-    color: var(--color-muted-text);
+    color: var(--color-dark-text);
+    opacity: 0.92;
 }
 
 .dictionary-page h1 {

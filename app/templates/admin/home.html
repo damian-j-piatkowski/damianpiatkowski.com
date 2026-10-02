@@ -12,7 +12,7 @@
 <section class="admin-workspace">
     <div class="admin-workspace-intro">
         <h1>Admin workspace</h1>
-        <p>Choose an area to manage. Dictionary tools are available now; blog administration is still being prepared.</p>
+        <p>Choose an area to access. Dictionary tools and system health are available now; blog administration is still being prepared.</p>
     </div>
 
     <div class="admin-tiles">
@@ -23,6 +23,10 @@
         <a class="admin-tile" href="{{ url_for('admin.admin_dictionary_hub') }}" id="admin-tile-dictionary">
             <h2><i class="bi bi-book"></i> Dictionary</h2>
             <p>Create entries, review coverage, and explore dictionary analytics.</p>
+        </a>
+        <a class="admin-tile" href="{{ url_for('admin.system_health_page') }}" id="admin-tile-system-health">
+            <h2><i class="bi bi-heart-pulse"></i> System Health</h2>
+            <p>Live node metrics and historical CPU/RAM trends.</p>
         </a>
     </div>
 

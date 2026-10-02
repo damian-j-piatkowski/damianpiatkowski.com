@@ -421,6 +421,69 @@
     color: var(--color-link);
 }
 
+.system-health-banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    color: var(--admin-dark-text);
+}
+
+.system-health-env-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    background: var(--color-light-bg);
+}
+
+.system-health-env-badge.is-mock {
+    background: var(--accent-primary);
+}
+
+.system-health-env-badge.is-prod {
+    background: var(--accent-primary-hover);
+    color: #fff;
+}
+
+.system-health-bar-track {
+    height: 0.55rem;
+    background: var(--color-light-bg);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+
+.system-health-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.35s ease;
+    background: var(--accent-primary-hover);
+}
+
+.system-health-bar-fill.is-ok {
+    background: var(--accent-primary-hover);
+}
+
+.system-health-bar-fill.is-warn {
+    background: #c9a227;
+}
+
+.system-health-bar-fill.is-critical {
+    background: #c0392b;
+}
+
+.system-health-poll-note {
+    color: var(--admin-muted-text);
+    font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
     .admin-workspace-intro {
         padding: 1.75rem;

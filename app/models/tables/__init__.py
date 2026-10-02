@@ -21,6 +21,7 @@ from app.models.tables.dictionary_example import dictionary_examples
 from app.models.tables.dictionary_source import dictionary_sources
 from app.models.tables.dictionary_word import dictionary_words
 from app.models.tables.han_viet_root import han_viet_roots
+from app.models.tables.system_health_log import system_health_logs
 from app.models.tables.user import users
 from app.models.tables.word_han_viet_association import word_han_viet_association
 from app.models.tables.word_type_association import word_type_association
@@ -31,6 +32,7 @@ __all__ = [
     "dictionary_sources",
     "dictionary_words",
     "han_viet_roots",
+    "system_health_logs",
     "users",
     "word_han_viet_association",
     "word_type_association",

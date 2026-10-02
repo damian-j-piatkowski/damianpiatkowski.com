@@ -31,10 +31,17 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - `flask create-admin` CLI command to bootstrap the administrator account.
 
 - **Admin workspace**
-  - Privacy-style tile landing at `/admin` (Blog WIP + Dictionary hub).
+  - Privacy-style tile landing at `/admin` (Blog WIP + Dictionary hub + System Health).
   - Dictionary hub with Add New Word, Create Source, and Dashboard entry points, plus distinct Log out styling.
   - Four-tab Dictionary Dashboard (`/admin/dictionary/dashboard`): General KPIs, Sources catalog, Hán Việt analytics, and Data Health audits.
   - Word Velocity & Activity Chart.js line/area chart with 30d / 6m / 12m range toggles and async `/admin/api/stats/word-velocity` JSON.
+
+- **System Health**
+  - Admin System Health module at `/admin/system-health` with Live metrics (10s poll) and Chart.js Trends (`24h` / `7d` / `30d` / `90d` / `180d`).
+  - JSON endpoints `/admin/api/system-health/stats` and `/admin/api/system-health/history`.
+  - `system_health_logs` table, 15-minute `flask health process-snapshot` CLI with threshold alert email and 180-day prune.
+  - `psutil` dependency for production node metrics; development/testing use mock metrics.
+  - Ops notes in `docs/system-health.md` for cron setup.
 
 - **Dictionary data model**
   - Tables for dictionary words, examples, sources, Hán Việt roots, association bridges, and users.
@@ -44,11 +51,14 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - Per-function integration tests for `DictionaryDashboardService` under `tests/integration/services/dictionary_dashboard_service/`.
   - Per-function unit tests for `dictionary_validation` under `tests/unit/services/dictionary_validation/`.
   - Per-function service test directories for `word_service`, `source_service`, `han_viet_service`, `auth_service`, `email_service`, `article_sync_service`, and `image_validation_service`.
+  - Unit/integration/route coverage for System Health service, repository, and admin APIs.
   - Public route coverage for word detail etymology badges and Hán Việt explorer pages.
 
 ### Changed
 
 - Public dictionary intro copy and search placeholder (`Type a Vietnamese word or phrase`).
+- Public dictionary intro restyled to match the admin workspace hero (gradient, padding, radius, shadow).
+- Admin landing copy updated for System Health availability; System Health tile added beside Blog and Dictionary.
 - Dictionary search results link to public word detail pages.
 - Admin create workspace: source creation moved to a dedicated Create source entry tab.
 - Admin create/edit workspaces link back to the dictionary hub instead of the public search page.

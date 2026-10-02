@@ -97,4 +97,7 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
         db.session.commit()
         click.echo(f"Admin user '{username}' created.")
 
+    from app.cli.health import health_cli
+    flask_app.cli.add_command(health_cli)
+
     return flask_app

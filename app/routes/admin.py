@@ -16,6 +16,7 @@ from flask import Blueprint, jsonify, request
 
 from app.auth.decorators import admin_required
 from app.controllers import auth_controller
+from app.controllers import system_health_controller
 from app.controllers.admin_controller import (
     delete_blog_posts,
     find_unpublished_drive_articles,
@@ -67,6 +68,29 @@ def admin_blog_wip():
 def admin_dictionary_hub():
     """Render the dictionary administration hub."""
     return auth_controller.render_dictionary_hub()
+
+
+@admin_bp.route("/admin/system-health", methods=["GET"])
+@admin_required
+def system_health_page():
+    """Render the System Health admin page."""
+    tab = request.args.get("tab", "live")
+    return system_health_controller.render_system_health_page(tab=tab)
+
+
+@admin_bp.route("/admin/api/system-health/stats", methods=["GET"])
+@admin_required
+def system_health_stats():
+    """Return live node metrics as JSON."""
+    return system_health_controller.system_health_stats()
+
+
+@admin_bp.route("/admin/api/system-health/history", methods=["GET"])
+@admin_required
+def system_health_history():
+    """Return historical health series as JSON."""
+    range_key = request.args.get("range", "24h")
+    return system_health_controller.system_health_history(range_key=range_key)
 
 
 @admin_bp.route("/admin/delete-blog-posts", methods=["DELETE"])
