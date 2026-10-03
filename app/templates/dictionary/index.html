@@ -10,14 +10,14 @@
 {% block content %}
 <section class="dictionary-page" data-is-admin="{{ 'true' if is_admin else 'false' }}">
     <div class="dictionary-intro">
+        <div class="dictionary-intro-flag" aria-hidden="true" title="Vietnam">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="48" height="32" role="img" focusable="false">
+                <rect width="30" height="20" fill="#da251d"/>
+                <polygon fill="#ffff00" points="15,4 16.76,9.47 22.5,9.47 17.87,12.76 19.63,18.24 15,14.95 10.37,18.24 12.13,12.76 7.5,9.47 13.24,9.47"/>
+            </svg>
+        </div>
         <p>
-            This is a living Vietnamese–English dictionary, growing organically as I learn Vietnamese.
-            New vocabulary is added regularly throughout my ongoing language-learning journey,
-            based on words and phrases I actually encounter and want to understand, remember, and use.
-        </p>
-        <p>
-            The example sentences come from real-life encounters with Vietnamese — things I hear, read,
-            or come across naturally in everyday life — rather than invented textbook examples.
+            This is a living Vietnamese–English dictionary, growing organically alongside my language journey with words and phrases encountered in daily life—featuring only real-world example sentences.
         </p>
     </div>
 
@@ -30,6 +30,29 @@
         placeholder="Type a Vietnamese word or phrase"
         aria-controls="dictionary-results"
     >
+
+    {% if recent_words %}
+    <div class="dictionary-recent" id="dictionary-recent-ribbon">
+        <h2 class="dictionary-recent-heading">Recently added</h2>
+        <ul class="dictionary-recent-list">
+            {% for word in recent_words %}
+            <li class="dictionary-recent-item">
+                <a class="dictionary-recent-link" href="{{ url_for('dictionary.render_word_detail', word_id=word.id) }}">
+                    <span class="dictionary-recent-primary">
+                        <span class="dictionary-recent-term">{{ word.viet_word }}</span>
+                        {% if word.english_translation %}
+                        <span class="dictionary-recent-translation">{{ word.english_translation }}</span>
+                        {% endif %}
+                    </span>
+                    {% if word.examples %}
+                    <span class="dictionary-recent-example">{{ word.examples[0].sentence }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
     <p id="dictionary-status" class="dictionary-status" hidden></p>
     <ul id="dictionary-results" class="dictionary-results" aria-live="polite"></ul>

@@ -44,40 +44,44 @@ class SystemHealthService:
         if range_key == "24h":
             cutoff = now - timedelta(hours=24)
             rows = self.repository.list_since(cutoff)
-            return {
+            payload = {
                 "labels": [self._format_label(row["timestamp"]) for row in rows],
                 "cpu": [row["cpu_percent"] for row in rows],
                 "ram": [row["ram_percent"] for row in rows],
                 "swap": [row["swap_percent"] for row in rows],
                 "disk": [row["disk_percent"] for row in rows],
             }
+        else:
+            if range_key == "7d":
+                cutoff = now - timedelta(days=7)
+                bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d %H:00")
+            elif range_key == "30d":
+                cutoff = now - timedelta(days=30)
+                bucket_expr = func.date_format(
+                    func.from_unixtime(
+                        func.floor(func.unix_timestamp(system_health_logs.c.timestamp) / (6 * 3600))
+                        * (6 * 3600)
+                    ),
+                    "%Y-%m-%d %H:00",
+                )
+            elif range_key == "90d":
+                cutoff = now - timedelta(days=90)
+                bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d")
+            else:  # 180d
+                cutoff = now - timedelta(days=180)
+                bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d")
+            rows = self.repository.list_bucketed(cutoff, bucket_expr)
+            payload = {
+                "labels": [row["bucket"] for row in rows],
+                "cpu": [round(row["cpu_percent"], 2) for row in rows],
+                "ram": [round(row["ram_percent"], 2) for row in rows],
+                "swap": [round(row["swap_percent"], 2) for row in rows],
+                "disk": [round(row["disk_percent"], 2) for row in rows],
+            }
 
-        if range_key == "7d":
-            cutoff = now - timedelta(days=7)
-            bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d %H:00")
-        elif range_key == "30d":
-            cutoff = now - timedelta(days=30)
-            bucket_expr = func.date_format(
-                func.from_unixtime(
-                    func.floor(func.unix_timestamp(system_health_logs.c.timestamp) / (6 * 3600))
-                    * (6 * 3600)
-                ),
-                "%Y-%m-%d %H:00",
-            )
-        elif range_key == "90d":
-            cutoff = now - timedelta(days=90)
-            bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d")
-        else:  # 180d
-            cutoff = now - timedelta(days=180)
-            bucket_expr = func.date_format(system_health_logs.c.timestamp, "%Y-%m-%d")
-        rows = self.repository.list_bucketed(cutoff, bucket_expr)
-        return {
-            "labels": [row["bucket"] for row in rows],
-            "cpu": [round(row["cpu_percent"], 2) for row in rows],
-            "ram": [round(row["ram_percent"], 2) for row in rows],
-            "swap": [round(row["swap_percent"], 2) for row in rows],
-            "disk": [round(row["disk_percent"], 2) for row in rows],
-        }
+        if self._uses_mock_metrics() and not payload["labels"]:
+            return self._mock_historical_metrics(range_key, now)
+        return payload
 
     def process_15min_snapshot(self) -> Dict[str, Any]:
         """Capture metrics, persist (except development), alert on thresholds, prune."""
@@ -157,6 +161,33 @@ class SystemHealthService:
             "os_info": "Mock Linux 6.1.0 (dev)",
             "environment": "DEV MOCK",
         }
+
+    @staticmethod
+    def _mock_historical_metrics(range_key: str, now: datetime) -> Dict[str, List]:
+        """Synthetic Chart.js series for empty development/testing history."""
+        configs = {
+            "24h": (96, timedelta(minutes=15), "%Y-%m-%d %H:%M"),
+            "7d": (168, timedelta(hours=1), "%Y-%m-%d %H:00"),
+            "30d": (120, timedelta(hours=6), "%Y-%m-%d %H:00"),
+            "90d": (90, timedelta(days=1), "%Y-%m-%d"),
+            "180d": (180, timedelta(days=1), "%Y-%m-%d"),
+        }
+        count, step, label_fmt = configs[range_key]
+        labels: List[str] = []
+        cpu: List[float] = []
+        ram: List[float] = []
+        swap: List[float] = []
+        disk: List[float] = []
+        start = now - (step * (count - 1))
+        for index in range(count):
+            point = start + (step * index)
+            labels.append(point.strftime(label_fmt))
+            wave = (index % 12) - 6
+            cpu.append(round(max(4.0, min(88.0, 18.0 + wave * 2.5 + (index % 5))), 2))
+            ram.append(round(max(20.0, min(82.0, 45.0 + wave * 1.8 + ((index // 3) % 4))), 2))
+            swap.append(round(max(0.0, min(40.0, 6.0 + (index % 7))), 2))
+            disk.append(round(max(30.0, min(70.0, 42.0 + (index % 9) * 0.4)), 2))
+        return {"labels": labels, "cpu": cpu, "ram": ram, "swap": swap, "disk": disk}
 
     @staticmethod
     def _psutil_metrics() -> Dict[str, Any]:

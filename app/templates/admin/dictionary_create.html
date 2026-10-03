@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}{% if active_tab == 'source' %}Create Source{% else %}Create Dictionary Entry{% endif %} | Damian Piatkowski{% endblock %}
-{% block meta_description %}{% if active_tab == 'source' %}Create a new dictionary citation source.{% else %}Create a new Vietnamese-English dictionary entry.{% endif %}{% endblock %}
+{% block title %}
+    {% if active_tab == 'source' %}Create Source
+    {% elif active_tab == 'han-viet' %}Create Hán Việt Root
+    {% else %}Create Dictionary Entry
+    {% endif %} | Damian Piatkowski
+{% endblock %}
+{% block meta_description %}
+    {% if active_tab == 'source' %}Create a new dictionary citation source.
+    {% elif active_tab == 'han-viet' %}Create a standalone Hán Việt root for later association.
+    {% else %}Create a new Vietnamese-English dictionary entry.
+    {% endif %}
+{% endblock %}
 {% set include_social_meta = false %}
 
 {% block links %}
@@ -15,10 +25,17 @@
          data-word-types='{{ word_types|tojson }}'
          data-source-types='{{ source_types|tojson }}'
          data-recent-sources='{{ recent_sources|tojson }}'>
-    <h1>{% if active_tab == 'source' %}Create source entry{% else %}Create dictionary entry{% endif %}</h1>
+    <h1>
+        {% if active_tab == 'source' %}Create source entry
+        {% elif active_tab == 'han-viet' %}Create Hán Việt root
+        {% else %}Create dictionary entry
+        {% endif %}
+    </h1>
     <p class="muted">
         {% if active_tab == 'source' %}
         Add a citation source that can be attached to example sentences.
+        {% elif active_tab == 'han-viet' %}
+        Add a root so compound words can look it up when creating or editing entries.
         {% else %}
         Define the word, types, examples, and Hán Việt roots in one workspace.
         {% endif %}
@@ -29,6 +46,8 @@
            href="{{ url_for('dictionary.render_create_workspace', tab='word') }}">Create dictionary entry</a>
         <a class="admin-tab-btn{% if active_tab == 'source' %} is-active{% endif %}"
            href="{{ url_for('dictionary.render_create_workspace', tab='source') }}">Create source entry</a>
+        <a class="admin-tab-btn{% if active_tab == 'han-viet' %} is-active{% endif %}"
+           href="{{ url_for('dictionary.render_create_workspace', tab='han-viet') }}">Create Hán Việt root</a>
     </nav>
 
     <div id="form-error" class="admin-alert admin-alert-error" hidden></div>
@@ -49,6 +68,22 @@
             <input id="new-source-url" type="url">
         </div>
         <button type="button" class="admin-btn" id="create-source">Create source</button>
+    </div>
+    {% elif active_tab == 'han-viet' %}
+    <div class="admin-section" id="create-han-viet-panel">
+        <div class="admin-form-group">
+            <label for="han-viet-root">Root (syllable)</label>
+            <input id="han-viet-root" type="text" required autocomplete="off">
+        </div>
+        <div class="admin-form-group">
+            <label for="han-viet-chinese">Chinese character</label>
+            <input id="han-viet-chinese" type="text" required>
+        </div>
+        <div class="admin-form-group">
+            <label for="han-viet-meaning">English meaning</label>
+            <input id="han-viet-meaning" type="text" required>
+        </div>
+        <button type="button" class="admin-btn" id="create-han-viet-root">Create Hán Việt root</button>
     </div>
     {% else %}
     <div id="duplicate-banner" class="admin-alert admin-alert-warning" hidden>
@@ -86,8 +121,13 @@
             <textarea id="example-translation" rows="2"></textarea>
         </div>
         <div class="admin-form-group">
-            <label for="example-source">Source</label>
-            <select id="example-source"></select>
+            <label for="example-source-search">Source</label>
+            <div class="admin-source-combobox">
+                <input id="example-source-search" type="search" placeholder="Search sources…" autocomplete="off" aria-controls="example-source-results">
+                <input id="example-source" type="hidden" value="">
+                <p class="admin-source-selected muted" id="example-source-selected" hidden></p>
+                <ul id="example-source-results" class="admin-source-results" role="listbox"></ul>
+            </div>
         </div>
         <p class="muted">
             Need a new citation?
@@ -99,7 +139,11 @@
 
     <div class="admin-section">
         <h2>Hán Việt roots</h2>
-        <p class="muted">Optional. Check compound words for existing roots after saving, or associate during edit.</p>
+        <p class="muted">
+            Optional. Check compound words for existing roots after saving, associate during edit,
+            or <a href="{{ url_for('dictionary.render_create_workspace', tab='han-viet') }}">create a Hán Việt root</a>
+            ahead of time.
+        </p>
         <button type="button" class="admin-btn" id="check-roots" disabled>Check for existing roots</button>
         <div id="han-viet-results"></div>
     </div>
@@ -110,11 +154,13 @@
     {% endif %}
 
     <div class="admin-section">
-        <a class="admin-btn" href="{{ url_for('admin.admin_dictionary_hub') }}">Back to dictionary hub</a>
+        <a class="admin-btn-back" href="{{ url_for('admin.admin_dictionary_hub') }}"><i class="bi bi-book"></i>Back to Dictionary Hub</a>
     </div>
 </section>
 {% if active_tab == 'source' %}
 <script src="{{ url_for('static', filename='js/dictionaryAdminSource.js') }}"></script>
+{% elif active_tab == 'han-viet' %}
+<script src="{{ url_for('static', filename='js/dictionaryAdminHanViet.js') }}"></script>
 {% else %}
 <script src="{{ url_for('static', filename='js/dictionaryAdmin.js') }}"></script>
 {% endif %}

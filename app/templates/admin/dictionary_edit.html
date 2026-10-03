@@ -18,7 +18,7 @@
     <p class="muted">Update translation, examples, sources, and Hán Việt associations.</p>
 
     <div id="form-error" class="admin-alert admin-alert-error" hidden></div>
-    <div id="form-success" class="admin-alert" hidden style="background: var(--accent-primary);"></div>
+    <div id="form-success" class="admin-alert admin-alert-success" hidden></div>
 
     <div class="admin-form-group">
         <label for="viet-word">Vietnamese word</label>
@@ -50,8 +50,13 @@
             <textarea id="example-translation" rows="2"></textarea>
         </div>
         <div class="admin-form-group">
-            <label for="example-source">Source</label>
-            <select id="example-source"></select>
+            <label for="example-source-search">Source</label>
+            <div class="admin-source-combobox">
+                <input id="example-source-search" type="search" placeholder="Search sources…" autocomplete="off" aria-controls="example-source-results">
+                <input id="example-source" type="hidden" value="">
+                <p class="admin-source-selected muted" id="example-source-selected" hidden></p>
+                <ul id="example-source-results" class="admin-source-results" role="listbox"></ul>
+            </div>
         </div>
         <button type="button" class="admin-btn" id="add-example">Add example</button>
     </div>
@@ -83,7 +88,7 @@
     <div class="admin-section">
         <button type="button" class="admin-btn" id="save-entry">Save changes</button>
         <button type="button" class="admin-btn admin-btn-danger" id="delete-entry">Delete entry</button>
-        <a class="admin-btn" href="{{ url_for('admin.admin_dictionary_hub') }}">Back to dictionary hub</a>
+        <a class="admin-btn-back" href="{{ url_for('admin.admin_dictionary_hub') }}"><i class="bi bi-book"></i>Back to Dictionary Hub</a>
     </div>
 </section>
 <script src="{{ url_for('static', filename='js/dictionaryAdmin.js') }}"></script>

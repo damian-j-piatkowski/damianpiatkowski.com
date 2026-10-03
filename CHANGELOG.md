@@ -21,27 +21,31 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - Public word detail pages at `/dictionary/<id>` with syllable-ordered Hán Việt etymology badges linking to the root explorer.
   - Public Hán Việt explorer at `/han-viet` and root cluster pages at `/han-viet/<root>`.
   - Admin create/edit workspaces for words, grammatical types, contextual examples, sources, and Hán Việt roots.
-  - Admin create workspace tabbed into Create dictionary entry and Create source entry.
+  - Admin create workspace tabbed into Create dictionary entry, Create source entry, and Create Hán Việt root.
   - Duplicate-word check (400ms debounce) with redirect to the existing entry.
-  - Hán Việt root detection, association, unlink, and association-safe deletion.
+  - Hán Việt root detection, association, unlink, association-safe deletion, and standalone root creation.
+  - Searchable source picker on example forms (recent defaults + live `sources?q=` search).
+  - Public dictionary Recently added list under search: brand-colored terms, translation, and clipped example preview.
 
 - **Admin authentication**
   - Session-based admin login at `/admin/login` (`session["is_admin"]`).
   - `@admin_required` protection for all `/admin/*` routes, including existing blog admin endpoints.
   - `flask create-admin` CLI command to bootstrap the administrator account.
 
-- **Admin workspace**
+- **Admin Hub**
   - Privacy-style tile landing at `/admin` (Blog WIP + Dictionary hub + System Health).
-  - Dictionary hub with Add New Word, Create Source, and Dashboard entry points, plus distinct Log out styling.
+  - Dictionary hub with Add New Word, Create Source, Create Hán Việt Root, and Dashboard entry points, plus distinct Log out styling.
   - Four-tab Dictionary Dashboard (`/admin/dictionary/dashboard`): General KPIs, Sources catalog, Hán Việt analytics, and Data Health audits.
   - Word Velocity & Activity Chart.js line/area chart with 30d / 6m / 12m range toggles and async `/admin/api/stats/word-velocity` JSON.
+  - Consistent slate-outline Back to Admin Hub / Back to Dictionary Hub navigation with tile icons.
 
 - **System Health**
   - Admin System Health module at `/admin/system-health` with Live metrics (10s poll) and Chart.js Trends (`24h` / `7d` / `30d` / `90d` / `180d`).
   - JSON endpoints `/admin/api/system-health/stats` and `/admin/api/system-health/history`.
   - `system_health_logs` table, 15-minute `flask health process-snapshot` CLI with threshold alert email and 180-day prune.
-  - `psutil` dependency for production node metrics; development/testing use mock metrics.
+  - `psutil` dependency for production node metrics; development/testing use mock live metrics and synthetic trend series when history is empty.
   - Ops notes in `docs/system-health.md` for cron setup.
+  - `flask create-admin` extracted into `app/cli/admin.py` beside the health CLI group.
 
 - **Dictionary data model**
   - Tables for dictionary words, examples, sources, Hán Việt roots, association bridges, and users.
@@ -56,13 +60,15 @@ The format follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 
 ### Changed
 
-- Public dictionary intro copy and search placeholder (`Type a Vietnamese word or phrase`).
-- Public dictionary intro restyled to match the admin workspace hero (gradient, padding, radius, shadow).
-- Admin landing copy updated for System Health availability; System Health tile added beside Blog and Dictionary.
+- Public dictionary intro consolidated to one paragraph with an SVG Vietnam flag; search placeholder unchanged (`Type a Vietnamese word or phrase`).
+- Public dictionary intro restyled to match the admin hub hero (gradient, padding, radius, shadow).
+- Admin landing renamed to Admin Hub; copy updated for System Health availability; System Health tile added beside Blog and Dictionary.
 - Dictionary search results link to public word detail pages.
-- Admin create workspace: source creation moved to a dedicated Create source entry tab.
-- Admin create/edit workspaces link back to the dictionary hub instead of the public search page.
+- Admin create workspace: source creation moved to a dedicated Create source entry tab; Hán Việt root creation available as a third tab.
+- After creating a word, the admin UI returns to the Dictionary hub instead of the edit workspace.
+- Admin create/edit/dashboard/system-health back links use shared Back button styling and capitalized Hub labels.
 - Successful admin login defaults to `/admin` instead of the public dictionary page.
+- Fixed `requirements.txt` encoding (UTF-8) and package ordering after the System Health dependency addition.
 
 ### Security
 

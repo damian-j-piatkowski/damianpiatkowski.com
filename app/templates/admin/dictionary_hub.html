@@ -24,6 +24,10 @@
             <h2><i class="bi bi-journal-plus"></i> Create Source</h2>
             <p>Add a citation source for contextual examples.</p>
         </a>
+        <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_create_workspace', tab='han-viet') }}" id="admin-add-han-viet-root">
+            <h2><i class="bi bi-translate"></i> Create Hán Việt Root</h2>
+            <p>Add a root syllable for later lookup when creating words.</p>
+        </a>
         <a class="admin-tile admin-hub-action" href="{{ url_for('dictionary.render_dashboard') }}" id="admin-dictionary-dashboard">
             <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
             <p>Review coverage, sources, Hán Việt analytics, and data health.</p>
@@ -31,7 +35,7 @@
     </div>
 
     <div class="admin-workspace-footer">
-        <a class="admin-btn" href="{{ url_for('admin.admin_home') }}">Back to admin</a>
+        <a class="admin-btn-back" href="{{ url_for('admin.admin_home') }}"><i class="bi bi-grid-1x2"></i>Back to Admin Hub</a>
         <a class="admin-btn-logout" href="{{ url_for('admin.admin_logout') }}" id="admin-logout-link">Log out</a>
     </div>
 </section>

@@ -80,24 +80,9 @@ def create_app(config_class: Type[BaseConfig]) -> Flask:
             "is_admin": is_admin_authenticated(),
         }
 
-    @flask_app.cli.command("create-admin")
-    def create_admin_command():
-        """Create an administrator account for the dictionary admin panel."""
-        import click
-        from app.models.repositories.user_repository import UserRepository
-        from app.services.auth_service import hash_password
-
-        username = click.prompt("Username")
-        password = click.prompt("Password", hide_input=True, confirmation_prompt=True)
-        repository = UserRepository(db.session)
-        if repository.find_by_username(username):
-            click.echo(f"User '{username}' already exists.")
-            return
-        repository.create_user(username=username, password_hash=hash_password(password))
-        db.session.commit()
-        click.echo(f"Admin user '{username}' created.")
-
+    from app.cli.admin import create_admin_command
     from app.cli.health import health_cli
+    flask_app.cli.add_command(create_admin_command)
     flask_app.cli.add_command(health_cli)
 
     return flask_app

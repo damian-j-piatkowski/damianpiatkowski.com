@@ -180,6 +180,18 @@ def check_han_viet_roots():
     return dictionary_controller.check_han_viet_roots(compound_word)
 
 
+@dictionary_bp.route("/admin/dictionary/han-viet", methods=["POST"])
+@admin_required
+def create_standalone_han_viet_root():
+    """Create a Hán Việt root without associating it to a word."""
+    data = request.get_json(silent=True) or {}
+    return dictionary_controller.create_standalone_han_viet_root(
+        root=data.get("root", ""),
+        chinese_character=data.get("chinese_character", ""),
+        root_meaning=data.get("root_meaning", ""),
+    )
+
+
 @dictionary_bp.route(
     "/admin/dictionary/words/<int:word_id>/han-viet/<int:root_id>",
     methods=["POST"],

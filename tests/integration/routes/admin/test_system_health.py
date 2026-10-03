@@ -36,6 +36,7 @@ def test_system_health_page_renders_for_admin(auth_client):
     assert b"System Health" in response.data
     assert b"data-system-health-live" in response.data
     assert b"kpi-cpu" in response.data
+    assert b"Back to Admin Hub" in response.data
 
 
 @pytest.mark.dictionary

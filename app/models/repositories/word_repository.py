@@ -310,6 +310,58 @@ class WordRepository:
         except SQLAlchemyError as exc:
             raise RuntimeError(f"Failed to list recently updated words: {exc}") from exc
 
+    def list_recently_created(self, limit: int = 5) -> List[DictionaryWord]:
+        """Return the most recently created dictionary words with a preview example."""
+        from app.domain.dictionary_example import DictionaryExample
+
+        try:
+            rows = self.session.execute(
+                select(dictionary_words)
+                .order_by(dictionary_words.c.created_at.desc())
+                .limit(limit)
+            ).fetchall()
+            words = [
+                DictionaryWord(
+                    word_id=row.id,
+                    viet_word=row.viet_word,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                    updated_at=row.updated_at,
+                )
+                for row in rows
+            ]
+            if not words:
+                return words
+
+            word_ids = [word.id for word in words if word.id is not None]
+            example_rows = self.session.execute(
+                select(dictionary_examples)
+                .where(dictionary_examples.c.word_id.in_(word_ids))
+                .order_by(
+                    dictionary_examples.c.word_id.asc(),
+                    dictionary_examples.c.id.asc(),
+                )
+            ).fetchall()
+            first_example_by_word: Dict[int, DictionaryExample] = {}
+            for row in example_rows:
+                if row.word_id in first_example_by_word:
+                    continue
+                first_example_by_word[row.word_id] = DictionaryExample(
+                    example_id=row.id,
+                    word_id=row.word_id,
+                    source_id=row.source_id,
+                    sentence=row.sentence,
+                    english_translation=row.english_translation,
+                    created_at=row.created_at,
+                )
+            for word in words:
+                preview = first_example_by_word.get(word.id)
+                if preview is not None:
+                    word.examples = [preview]
+            return words
+        except SQLAlchemyError as exc:
+            raise RuntimeError(f"Failed to list recently created words: {exc}") from exc
+
     def list_words_missing_examples(self, limit: int = 50) -> List[DictionaryWord]:
         """Return words with no contextual examples."""
         try:

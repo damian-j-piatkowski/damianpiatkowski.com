@@ -90,9 +90,12 @@ def _serialize_word_detail(word: DictionaryWord) -> Dict[str, Any]:
 
 def render_dictionary_page() -> Tuple[str, int]:
     """Render the public dictionary search page."""
+    service = WordService(db.session)
+    recent_words = service.list_recently_created(limit=5)
     html = render_template(
         "dictionary/index.html",
         is_admin=is_admin_authenticated(),
+        recent_words=recent_words,
     )
     return html, 200
 
@@ -116,8 +119,8 @@ def render_word_detail_page(word_id: int) -> Tuple[str, int]:
 
 
 def render_create_workspace(tab: str = "word") -> Tuple[str, int]:
-    """Render the admin dictionary creation workspace (word or source tab)."""
-    active_tab = tab if tab in {"word", "source"} else "word"
+    """Render the admin dictionary creation workspace (word, source, or Hán Việt tab)."""
+    active_tab = tab if tab in {"word", "source", "han-viet"} else "word"
     source_service = SourceService(db.session)
     html = render_template(
         "admin/dictionary_create.html",
@@ -417,6 +420,29 @@ def check_han_viet_roots(compound_word: str) -> Tuple[FlaskResponse, int]:
     service = HanVietService(db.session)
     result = service.check_existing_roots(compound_word)
     return jsonify(result), 200
+
+
+def create_standalone_han_viet_root(
+        root: str,
+        chinese_character: str,
+        root_meaning: str,
+) -> Tuple[FlaskResponse, int]:
+    """Create a Hán Việt root without associating it to a word."""
+    service = HanVietService(db.session)
+    try:
+        created = service.create_root(
+            root=root,
+            chinese_character=chinese_character,
+            root_meaning=root_meaning,
+        )
+        db.session.commit()
+    except DictionaryValidationError as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "message": exc.message, "field": exc.field}), 400
+    except Exception:
+        db.session.rollback()
+        raise
+    return jsonify({"success": True, "root": _serialize_root(created)}), 201
 
 
 def associate_han_viet_root(word_id: int, root_id: int) -> Tuple[FlaskResponse, int]:

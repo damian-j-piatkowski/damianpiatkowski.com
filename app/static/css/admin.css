@@ -51,6 +51,26 @@
     background: var(--accent-primary-hover);
 }
 
+.admin-btn-back {
+    display: inline-block;
+    border: 1px solid #64748b;
+    border-radius: 4px;
+    padding: 0.55rem 1rem;
+    background: #fff;
+    color: var(--admin-dark-text);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-btn-back:hover {
+    background: #e2e8f0;
+    color: var(--admin-dark-text);
+}
+
+.admin-btn-back i {
+    margin-right: 0.35rem;
+}
+
 .admin-btn-danger {
     background: var(--admin-danger);
     color: #fff;
@@ -71,6 +91,13 @@
     background: #fff7ed;
     border: 1px solid #fdba74;
     color: var(--admin-dark-text);
+}
+
+.admin-alert-success {
+    background: #ecfdf5;
+    border: 1px solid var(--accent-primary-hover);
+    color: var(--admin-dark-text);
+    font-weight: 600;
 }
 
 .admin-alert-error {
@@ -398,12 +425,59 @@
 }
 
 .admin-range-toggles button.is-active {
-    background: var(--accent-primary);
+    background: var(--accent-primary-hover);
+    border: 1px solid var(--admin-dark-text);
+    box-shadow: 0 0 0 2px rgba(160, 208, 140, 0.45);
+    font-weight: 700;
 }
 
 .admin-chart-wrap {
     position: relative;
     height: 280px;
+}
+
+.admin-source-combobox {
+    position: relative;
+}
+
+.admin-source-results {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.admin-source-results:empty {
+    display: none;
+}
+
+.admin-source-results li {
+    margin: 0;
+    padding: 0;
+}
+
+.admin-source-results button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 0.55rem 0.75rem;
+    cursor: pointer;
+    color: var(--admin-dark-text);
+}
+
+.admin-source-results button:hover,
+.admin-source-results button.is-selected {
+    background: var(--accent-primary);
+}
+
+.admin-source-selected {
+    margin: 0.4rem 0 0;
 }
 
 .admin-list {

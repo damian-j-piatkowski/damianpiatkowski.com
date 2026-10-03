@@ -42,6 +42,9 @@
         }
         el.hidden = !message;
         el.textContent = message || "";
+        if (message) {
+            el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
     }
 
     function fillSelect(selectEl, values, getLabel, getValue) {
@@ -94,6 +97,9 @@
     const wordTypeSelect = document.getElementById("word-type-select");
     const selectedTypesEl = document.getElementById("selected-word-types");
     const exampleSourceSelect = document.getElementById("example-source");
+    const exampleSourceSearch = document.getElementById("example-source-search");
+    const exampleSourceResults = document.getElementById("example-source-results");
+    const exampleSourceSelected = document.getElementById("example-source-selected");
     const newSourceTypeSelect = document.getElementById("new-source-type");
     const examplesList = document.getElementById("examples-list");
     const hanVietResults = document.getElementById("han-viet-results");
@@ -108,13 +114,70 @@
         fillSelect(newSourceTypeSelect, availableSourceTypes);
     }
 
+    function setSelectedSource(source) {
+        if (!exampleSourceSelect) {
+            return;
+        }
+        if (!source) {
+            exampleSourceSelect.value = "";
+            if (exampleSourceSelected) {
+                exampleSourceSelected.hidden = true;
+                exampleSourceSelected.textContent = "";
+            }
+            return;
+        }
+        exampleSourceSelect.value = String(source.id);
+        if (exampleSourceSelected) {
+            exampleSourceSelected.hidden = false;
+            exampleSourceSelected.textContent = `Selected: ${source.title}`;
+        }
+        if (exampleSourceSearch) {
+            exampleSourceSearch.value = source.title;
+        }
+    }
+
+    function renderSourceResults(sources) {
+        if (!exampleSourceResults) {
+            return;
+        }
+        exampleSourceResults.innerHTML = "";
+        sources.forEach((source) => {
+            const item = document.createElement("li");
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = source.title;
+            if (String(source.id) === exampleSourceSelect.value) {
+                button.classList.add("is-selected");
+            }
+            button.addEventListener("click", () => {
+                setSelectedSource(source);
+                exampleSourceResults.innerHTML = "";
+            });
+            item.appendChild(button);
+            exampleSourceResults.appendChild(item);
+        });
+    }
+
     function refreshSourceSelect() {
-        fillSelect(
-            exampleSourceSelect,
-            recentSources,
-            (source) => source.title,
-            (source) => String(source.id)
+        renderSourceResults(recentSources);
+        if (!exampleSourceSelect.value && recentSources.length) {
+            setSelectedSource(recentSources[0]);
+        }
+    }
+
+    async function searchSources(query) {
+        const trimmed = (query || "").trim();
+        if (!trimmed) {
+            renderSourceResults(recentSources);
+            return;
+        }
+        const { response, payload } = await api(
+            `/admin/dictionary/sources?q=${encodeURIComponent(trimmed)}`
         );
+        if (!response.ok) {
+            return;
+        }
+        renderSourceResults(payload.sources || []);
     }
 
     function refreshTypeChips() {
@@ -274,7 +337,7 @@
             }
             recentSources = [payload.source, ...recentSources];
             refreshSourceSelect();
-            exampleSourceSelect.value = String(payload.source.id);
+            setSelectedSource(payload.source);
             document.getElementById("new-source-title").value = "";
             document.getElementById("new-source-url").value = "";
             showError("");
@@ -311,15 +374,43 @@
     }
 
     async function renderHanVietCheck(compound) {
+        const trimmed = (compound || "").trim();
+        hanVietResults.innerHTML = "";
+        if (!trimmed) {
+            const empty = document.createElement("p");
+            empty.className = "muted";
+            empty.textContent = "Enter a Vietnamese word to check.";
+            hanVietResults.appendChild(empty);
+            return;
+        }
+
         const { response, payload } = await api(
-            `/admin/dictionary/han-viet/check?word=${encodeURIComponent(compound)}`
+            `/admin/dictionary/han-viet/check?word=${encodeURIComponent(trimmed)}`
         );
         if (!response.ok) {
             showError("Unable to check Hán Việt roots.");
             return;
         }
-        hanVietResults.innerHTML = "";
-        (payload.found || []).forEach((rootItem) => {
+
+        const found = payload.found || [];
+        const missing = payload.missing || [];
+        const syllables = payload.syllables || [];
+
+        const summary = document.createElement("p");
+        summary.className = "muted";
+        summary.textContent =
+            `Checked ${syllables.length} syllable(s): ${found.length} found, ${missing.length} missing.`;
+        hanVietResults.appendChild(summary);
+
+        if (!found.length && !missing.length) {
+            const none = document.createElement("p");
+            none.className = "muted";
+            none.textContent = `No Hán Việt roots matched “${trimmed}”.`;
+            hanVietResults.appendChild(none);
+            return;
+        }
+
+        found.forEach((rootItem) => {
             const row = document.createElement("div");
             row.className = "admin-chip-row";
             const label = document.createElement("span");
@@ -349,7 +440,7 @@
             hanVietResults.appendChild(row);
         });
 
-        (payload.missing || []).forEach((missingRoot) => {
+        missing.forEach((missingRoot) => {
             const row = document.createElement("div");
             row.className = "admin-section";
             const title = document.createElement("p");
@@ -432,7 +523,7 @@
                     return;
                 }
             }
-            window.location.href = `/admin/dictionary/${wordId}/edit`;
+            window.location.href = "/admin/dictionary";
             return;
         }
 
@@ -444,7 +535,7 @@
             showError(payload.message || "Unable to save changes.");
             return;
         }
-        showSuccess("Entry updated.");
+        showSuccess("Changes saved successfully.");
     });
 
     const deleteBtn = document.getElementById("delete-entry");
@@ -474,6 +565,17 @@
     }
 
     refreshSourceSelect();
+    if (exampleSourceSearch) {
+        const debouncedSourceSearch = debounce(searchSources, 280);
+        exampleSourceSearch.addEventListener("focus", () => {
+            if (!exampleSourceSearch.value.trim()) {
+                renderSourceResults(recentSources);
+            }
+        });
+        exampleSourceSearch.addEventListener("input", (event) => {
+            debouncedSourceSearch(event.target.value);
+        });
+    }
 
     if (mode === "edit") {
         const word = JSON.parse(root.dataset.word || "{}");

@@ -60,6 +60,39 @@ class HanVietService:
         self.roots.get_by_id(root_id)
         self.roots.associate(word_id, root_id)
 
+    def create_root(
+            self,
+            root: str,
+            chinese_character: str,
+            root_meaning: str,
+    ) -> HanVietRoot:
+        """Create a standalone Hán Việt root without associating it to a word."""
+        normalized_root = (root or "").strip().lower()
+        normalized_character = (chinese_character or "").strip()
+        normalized_meaning = (root_meaning or "").strip()
+        if not normalized_root:
+            raise DictionaryValidationError("Hán Việt root text is required.", field="root")
+        if not normalized_character:
+            raise DictionaryValidationError(
+                "Chinese character is required.",
+                field="chinese_character",
+            )
+        if not normalized_meaning:
+            raise DictionaryValidationError(
+                "Root meaning is required.",
+                field="root_meaning",
+            )
+
+        existing = self.roots.find_by_root(normalized_root)
+        if existing is not None:
+            return existing
+
+        return self.roots.create(
+            root=normalized_root,
+            chinese_character=normalized_character,
+            root_meaning=normalized_meaning,
+        )
+
     def create_and_associate(
             self,
             word_id: int,

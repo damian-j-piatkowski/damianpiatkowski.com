@@ -59,17 +59,21 @@ def test_admin_hub_pages_require_auth(client):
 def test_admin_hub_pages_render_for_admin(auth_client):
     home = auth_client.get("/admin")
     assert home.status_code == 200
+    assert b"Admin Hub" in home.data
     assert b"admin-tile-dictionary" in home.data
     assert b"admin-tile-blog" in home.data
 
     blog = auth_client.get("/admin/blog")
     assert blog.status_code == 200
     assert b"Work in progress" in blog.data
+    assert b"Back to Admin Hub" in blog.data
 
     hub = auth_client.get("/admin/dictionary")
     assert hub.status_code == 200
     assert b"admin-add-new-word" in hub.data
+    assert b"admin-add-han-viet-root" in hub.data
     assert b"admin-dictionary-dashboard" in hub.data
+    assert b"Back to Admin Hub" in hub.data
     assert b"admin-logout-link" in hub.data
 
 
@@ -157,9 +161,27 @@ def test_word_velocity_api(auth_client, client, session, make_word):
 
 
 @pytest.mark.dictionary
-def test_public_dictionary_copy(client):
+def test_public_dictionary_copy(client, session, make_word, make_source, make_example):
+    word = make_word(viet_word="mới", english_translation="new")
+    source = make_source(source_type="book", title="Ribbon Source")
+    make_example(
+        word_id=word.id,
+        source_id=source.id,
+        sentence="Tôi học từ mới mỗi ngày.",
+        english_translation="I learn new words every day.",
+    )
+    session.flush()
+
     response = client.get("/dictionary")
     assert response.status_code == 200
-    assert b"living Vietnamese" in response.data
+    assert b"This is a living Vietnamese" in response.data
+    assert b"dictionary-intro-flag" in response.data
+    assert b"<svg" in response.data
+    assert b"Recently added" in response.data
+    assert b"dictionary-recent-list" in response.data
+    assert b"dictionary-recent-term" in response.data
+    assert b"dictionary-recent-example" in response.data
+    assert "mới".encode("utf-8") in response.data
+    assert "Tôi học từ mới mỗi ngày.".encode("utf-8") in response.data
     assert b"Type a Vietnamese word or phrase" in response.data
     assert b"Add new word" not in response.data

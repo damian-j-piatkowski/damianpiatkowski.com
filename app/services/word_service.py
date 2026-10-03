@@ -60,6 +60,10 @@ class WordService:
             return []
         return self.words.search_by_prefix(prefix, limit=limit)
 
+    def list_recently_created(self, limit: int = 5) -> List[DictionaryWord]:
+        """Return the most recently created dictionary words for public ribbons."""
+        return self.words.list_recently_created(limit=limit)
+
     def check_duplicate(self, viet_word: str) -> Optional[DictionaryWord]:
         """Return an existing entry when the Vietnamese word already exists."""
         normalized = (viet_word or "").strip()

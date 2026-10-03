@@ -17,14 +17,116 @@
 .dictionary-intro p {
     color: var(--color-dark-text);
     line-height: 1.65;
-    margin: 0 auto 1rem;
+    margin: 0 auto;
     max-width: 640px;
 }
 
-.dictionary-intro p:last-child {
-    margin-bottom: 0;
+.dictionary-intro-flag {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    line-height: 0;
+}
+
+.dictionary-intro-flag svg {
+    display: block;
+    border-radius: 3px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.dictionary-recent {
+    margin: 1rem 0 1.25rem;
+    padding: 0.85rem 1rem;
+    background: #fff;
+    border-left: 4px solid var(--accent-primary);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.dictionary-recent-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
     color: var(--color-dark-text);
-    opacity: 0.92;
+}
+
+.dictionary-recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dictionary-recent-item {
+    position: relative;
+    margin: 0;
+    padding-left: 1.1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dictionary-recent-item::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    color: #d97706;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.dictionary-recent-item:last-child {
+    border-bottom: none;
+}
+
+.dictionary-recent-link {
+    display: block;
+    padding: 0.45rem 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dictionary-recent-link:visited {
+    color: inherit;
+}
+
+.dictionary-recent-primary {
+    display: block;
+    line-height: 1.35;
+}
+
+.dictionary-recent-term {
+    font-weight: 700;
+    color: #d97706;
+}
+
+.dictionary-recent-translation {
+    color: var(--color-dark-text);
+    font-weight: 400;
+    margin-left: 0.4rem;
+}
+
+.dictionary-recent-example {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--color-muted-text);
+    font-size: 0.88rem;
+    font-style: italic;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dictionary-recent-link:hover {
+    text-decoration: none;
+}
+
+.dictionary-recent-link:hover .dictionary-recent-term {
+    color: #f59e0b;
+    text-decoration: none;
+}
+
+.dictionary-recent-link:hover .dictionary-recent-example {
+    color: var(--color-muted-text);
 }
 
 .dictionary-page h1 {
